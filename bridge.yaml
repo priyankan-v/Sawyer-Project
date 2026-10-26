@@ -1,0 +1,226 @@
+# Editable configuration for the installed Sawyer bridge.
+# Launch with config:=/home/pi/0.1.0/bridge_extended.yaml all_interfaces:=false
+# Add commands:=true head_commands:=true to expose arm/head command routes.
+# enabled: true creates transport; it does not generate commands or action goals.
+# Robot enable/reset/software-stop routes are opt-in (enabled: false).
+# Discovery (all_interfaces:=true) may enable Intera command entries even if false here.
+# Images are forwarded only when the robot is producing frames.
+topics:
+- topic: /robot/joint_states
+  type: sensor_msgs/msg/JointState
+  queue_size: 5
+  direction: 1to2
+  enabled: true
+  qos:
+    history: keep_last
+    depth: 5
+    reliability: best_effort
+- topic: /robot/state
+  type: intera_core_msgs/msg/RobotAssemblyState
+  queue_size: 1
+  direction: 1to2
+  enabled: true
+  qos:
+    history: keep_last
+    depth: 1
+    reliability: reliable
+- topic: /robot/limb/right/endpoint_state
+  type: intera_core_msgs/msg/EndpointState
+  queue_size: 5
+  direction: 1to2
+  enabled: true
+  qos:
+    history: keep_last
+    depth: 5
+    reliability: best_effort
+- topic: /robot/limb/right/collision_detection_state
+  type: intera_core_msgs/msg/CollisionDetectionState
+  queue_size: 1
+  direction: 1to2
+  enabled: true
+  qos:
+    history: keep_last
+    depth: 1
+    reliability: reliable
+- topic: /robot/joint_limits
+  type: intera_core_msgs/msg/JointLimits
+  queue_size: 1
+  direction: 1to2
+  enabled: true
+  qos:
+    history: keep_last
+    depth: 1
+    reliability: reliable
+    durability: transient_local
+- topic: /robot/limb/right/joint_command
+  type: intera_core_msgs/msg/JointCommand
+  queue_size: 1
+  direction: 2to1
+  enabled: false
+  qos:
+    history: keep_last
+    depth: 1
+    reliability: reliable
+    durability: volatile
+    lifespan:
+      secs: 0
+      nsecs: 200000000
+- topic: /robot/limb/right/joint_command_timeout
+  type: std_msgs/msg/Float64
+  queue_size: 1
+  direction: 2to1
+  enabled: false
+  qos:
+    history: keep_last
+    depth: 1
+    reliability: reliable
+- topic: /robot/limb/right/set_speed_ratio
+  type: std_msgs/msg/Float64
+  queue_size: 1
+  direction: 2to1
+  enabled: false
+  qos:
+    history: keep_last
+    depth: 1
+    reliability: reliable
+- topic: /robot/head/head_state
+  type: intera_core_msgs/msg/HeadState
+  queue_size: 1
+  direction: 1to2
+  enabled: true
+- topic: /robot/head/command_head_pan
+  type: intera_core_msgs/msg/HeadPanCommand
+  queue_size: 1
+  direction: 2to1
+  enabled: false
+  qos:
+    history: keep_last
+    depth: 1
+    reliability: reliable
+    durability: volatile
+    lifespan:
+      secs: 0
+      nsecs: 200000000
+- topic: /robot/set_super_enable
+  type: std_msgs/msg/Bool
+  queue_size: 1
+  direction: 2to1
+  enabled: false
+- topic: /io/internal_camera/head_camera/image_rect_color
+  type: sensor_msgs/msg/Image
+  queue_size: 1
+  direction: 1to2
+  enabled: true
+  qos:
+    history: keep_last
+    depth: 1
+    reliability: best_effort
+- topic: /io/internal_camera/right_hand_camera/image_rect
+  type: sensor_msgs/msg/Image
+  queue_size: 1
+  direction: 1to2
+  enabled: true
+  qos:
+    history: keep_last
+    depth: 1
+    reliability: best_effort
+- topic: /io/internal_camera/head_camera/camera_info
+  type: sensor_msgs/msg/CameraInfo
+  queue_size: 1
+  direction: 1to2
+  enabled: true
+  qos:
+    history: keep_last
+    depth: 1
+    reliability: best_effort
+- topic: /io/internal_camera/right_hand_camera/camera_info
+  type: sensor_msgs/msg/CameraInfo
+  queue_size: 1
+  direction: 1to2
+  enabled: true
+  qos:
+    history: keep_last
+    depth: 1
+    reliability: best_effort
+- topic: /robot/accelerometer/right_accelerometer/state
+  type: sensor_msgs/msg/Imu
+  queue_size: 1
+  direction: 1to2
+  enabled: true
+  qos:
+    history: keep_last
+    depth: 1
+    reliability: best_effort
+- topic: /robot/head_display
+  type: sensor_msgs/msg/Image
+  queue_size: 1
+  direction: 2to1
+  enabled: true
+  qos:
+    history: keep_last
+    depth: 1
+    reliability: reliable
+- topic: /io/end_effector/right_gripper/state
+  type: intera_core_msgs/msg/IODeviceStatus
+  queue_size: 1
+  direction: 1to2
+  enabled: true
+  qos:
+    history: keep_last
+    depth: 1
+    reliability: reliable
+    durability: transient_local
+- topic: /io/end_effector/right_gripper/command
+  type: intera_core_msgs/msg/IOComponentCommand
+  queue_size: 1
+  direction: 2to1
+  enabled: true
+  qos:
+    history: keep_last
+    depth: 1
+    reliability: reliable
+- topic: /robot/limb/right/interaction_control_command
+  type: intera_core_msgs/msg/InteractionControlCommand
+  queue_size: 1
+  direction: 2to1
+  enabled: true
+  qos:
+    history: keep_last
+    depth: 1
+    reliability: reliable
+- topic: /robot/limb/right/interaction_controller/state
+  type: intera_core_msgs/msg/InteractionControlState
+  queue_size: 1
+  direction: 1to2
+  enabled: true
+  qos:
+    history: keep_last
+    depth: 1
+    reliability: reliable
+- topic: /robot/set_super_reset
+  type: std_msgs/msg/Empty
+  queue_size: 1
+  direction: 2to1
+  enabled: false
+- topic: /robot/set_super_stop
+  type: std_msgs/msg/Empty
+  queue_size: 1
+  direction: 2to1
+  enabled: false
+services_1_to_2: []
+services_2_to_1:
+- service: /ExternalTools/right/PositionKinematicsNode/IKService
+  type: intera_core_msgs/SolvePositionIK
+  package: ''
+- service: /ExternalTools/right/PositionKinematicsNode/FKService
+  type: intera_core_msgs/SolvePositionFK
+  package: ''
+actions:
+- action: /motion/motion_command
+  type: intera_motion_msgs/action/MotionCommand
+  direction: 2to1
+  enabled: true
+- action: /calibration_command
+  type: intera_core_msgs/action/CalibrationCommand
+  direction: 2to1
+  enabled: true
