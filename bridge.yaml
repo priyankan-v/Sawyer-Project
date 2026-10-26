@@ -1,5 +1,5 @@
 # Editable configuration for the installed Sawyer bridge.
-# Launch with config:=/home/pi/0.1.0/bridge_extended.yaml all_interfaces:=false
+# From the project root, launch with config:="$PWD/bridge.yaml".
 # Add commands:=true head_commands:=true to expose arm/head command routes.
 # enabled: true creates transport; it does not generate commands or action goals.
 # Robot enable/reset/software-stop routes are opt-in (enabled: false).
@@ -179,6 +179,16 @@ topics:
     history: keep_last
     depth: 1
     reliability: reliable
+- topic: /io/robot/cuff/state
+  type: intera_core_msgs/msg/IODeviceStatus
+  queue_size: 1
+  direction: 1to2
+  enabled: true
+  qos:
+    history: keep_last
+    depth: 1
+    reliability: reliable
+    durability: transient_local
 - topic: /robot/limb/right/interaction_control_command
   type: intera_core_msgs/msg/InteractionControlCommand
   queue_size: 1
