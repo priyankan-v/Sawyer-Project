@@ -5,8 +5,8 @@ Cartesian reference using **quintic trajectories and a custom PID controller**.
 The application generates reference
 joint positions and velocities, compares them with measured feedback, and sends
 corrected joint velocity commands through the ROS 2–ROS 1 bridge.
-The project also provides standard Intera electric-gripper commands and cuff
-button bindings.
+The project also provides standard Intera electric-gripper commands, cuff button
+bindings, and a live head-display clock.
 
 ## Quick start
 
@@ -20,16 +20,18 @@ source scripts/env.sh
 ros2 launch ./launch/sawyer.launch.py
 ```
 
-Keep this running. The project launcher starts the bridge **and active gripper
-cuff-button bindings automatically**. No separate button command or enable flag
-is needed. Upper/dash closes the gripper; lower/circle opens it.
+Keep this running. The project launcher starts the bridge, active gripper
+cuff-button bindings, and the display manager automatically. No separate button
+command is needed. Upper/dash closes the gripper; lower/circle opens it.
+The head screen shows the project's `display.png` until you start the clock.
 
 It selects this project's `bridge.yaml`, enables arm/head command routes, and
 waits for the gripper to be calibrated and ready. Starting the launcher does not
-itself move or calibrate the gripper. Stop the launch with Ctrl+C to stop both
-processes. Stop any old standalone button controller before using this launcher.
+itself move or calibrate the gripper. Stop the launch with Ctrl+C to stop its
+helpers and restore Sawyer's original SDK screen. Stop any old standalone button
+controller or direct head-display publisher before using this launcher.
 
-Use this project launcher for automatic buttons. The package-level
+Use this project launcher for automatic buttons and display switching. The package-level
 `ros2 launch sawyer_bridge bridge.launch.py` command still starts the bridge
 alone. For diagnostics, disable automatic button bindings explicitly:
 
@@ -224,6 +226,80 @@ finally:
 The method services ROS callbacks internally. Call it from application code,
 not from a callback on the same single-threaded executor. An execution result
 contains both the reusable plan and measured tracking/settling timing.
+
+## Head display and live clock
+
+The project launcher manages the head display automatically:
+
+| Event | Screen |
+| --- | --- |
+| Start `ros2 launch ./launch/sawyer.launch.py` | Project `display.png` |
+| Start `python scripts/head_clock.py` | Live clock |
+| Stop the clock with Ctrl+C or `kill <clock-pid>` | Project `display.png` |
+| Clock is force-killed with `kill -9` | Project `display.png` after its 2.5-second lease expires |
+| Stop the bridge/launcher | Original Sawyer SDK screen |
+
+With the project launcher running, start the clock in another sourced terminal:
+
+```bash
+source scripts/env.sh
+python scripts/head_clock.py
+```
+
+It displays a 24-hour `HH:MM:SS` clock, date, and timezone on Sawyer's 1024×600
+head screen. The default timezone is **America/Chicago**, including automatic
+CDT/CST daylight-saving changes. It reads the Pi's wall clock rather than ROS
+simulation time and sends one `bgr8` image per second to the display manager.
+The manager is the single writer to `/robot/head_display`; that route is already
+enabled in `bridge.yaml`.
+
+Keep the clock process running for live updates; Ctrl+C returns to `display.png`.
+The clock exits when its bridge/display-manager session ends, so it cannot take
+over a later bridge session. Use one clock at a time. The clock sends no arm,
+gripper, or head-pan commands and starts only when requested.
+
+Choose a different IANA timezone or a limited running time:
+
+```bash
+python scripts/head_clock.py --timezone UTC
+python scripts/head_clock.py --duration 10
+```
+
+Generate a local PNG preview without connecting to ROS:
+
+```bash
+python scripts/head_clock.py --preview /tmp/sawyer_clock.png
+```
+
+Rendering uses NumPy and the Python standard library; Pillow, OpenCV, and
+`cv_bridge` are not required. The clock waits for the display manager. The
+package-only `ros2 launch sawyer_bridge bridge.launch.py` command does not start
+that manager; use the project launcher above. To add display management to an
+already running bridge without restarting it, run this in another terminal and
+keep it running:
+
+```bash
+source scripts/env.sh
+python scripts/display_manager.py
+```
+
+Replace `display.png` to change the startup image, then restart the display
+manager/launcher. It accepts noninterlaced 8-bit PNGs and fits other resolutions
+inside 1024×600. The original SDK image is bundled as
+[`assets/default_display.png`](assets/default_display.png), with its upstream
+license. Startup paths can also be overridden:
+
+```bash
+ros2 launch ./launch/sawyer.launch.py display_image:=/absolute/path/image.png
+# Disable automatic display management:
+ros2 launch ./launch/sawyer.launch.py display_manager:=false
+```
+
+Shutdown restoration uses a separate ROS 1 image connection, so it can still
+restore the SDK screen after the bridge process has exited. Keep the robot
+network connected during shutdown. A power loss or `kill -9` of the display
+manager itself prevents cleanup; stopping only the clock with `kill -9` is
+handled by its lease. Allow several seconds for bridge shutdown restoration.
 
 ## Gripper and cuff buttons
 
@@ -506,7 +582,7 @@ python scripts/move_neutral.py --help
 
 | File | Responsibility |
 | --- | --- |
-| [sawyer.launch.py](launch/sawyer.launch.py) | Start the bridge and automatic cuff-button controller together |
+| [sawyer.launch.py](launch/sawyer.launch.py) | Start bridge, cuff-button controller, and display manager together |
 | [move_neutral.py](scripts/move_neutral.py) | Neutral-pose lookup, joint planning, and CLI |
 | [move_ee.py](scripts/move_ee.py) | Relative Cartesian offset CLI |
 | [arm_motion.py](scripts/arm_motion.py) | Shared joint bounds, ROS feedback, PID execution, and stop lifecycle |
@@ -521,6 +597,12 @@ python scripts/move_neutral.py --help
 | [motion_utils.py](scripts/motion_utils.py) | Shared numeric validation |
 | [gripper_control.py](scripts/gripper_control.py) | Gripper commands and small cuff-button bindings |
 | [gripper_io.py](scripts/gripper_io.py) | IO signal encoding and button edge detection |
+| [head_clock.py](scripts/head_clock.py) | Live ROS head-display clock publisher |
+| [clock_display.py](scripts/clock_display.py) | Clock/date formatting, digital rendering, and offline PNG previews |
+| [display_manager.py](scripts/display_manager.py) | Manage startup image, clock ownership, and SDK-screen restoration |
+| [display_state.py](scripts/display_state.py) | Reusable display selection and clock lease policy |
+| [display_images.py](scripts/display_images.py) | PNG loading, screen fitting, and ROS image conversion |
+| [ros1_display.py](scripts/ros1_display.py) | Bridge liveness checks and independent ROS 1 shutdown image publishing |
 | [bridge.yaml](bridge.yaml) | Bridge routes and QoS |
 | [env.sh](scripts/env.sh) | Conda, ROS, and network environment |
 
@@ -562,6 +644,8 @@ print(sample.position, sample.velocity, sample.acceleration)
 | IK failure or discontinuity | The complete path could not be validated; reduce the offset or use a different reachable starting configuration |
 | Starting joint outside position limits | The error reports the joint, measured angle, and bounds; restore a valid stationary starting configuration before planning |
 | Cartesian tracking error / stale Cartesian pose | Check live tip feedback, selected tip, tracking limits, and PID tuning |
+| Clock says it is waiting for the display manager | Use the project launcher or run `python scripts/display_manager.py` alongside an existing bridge |
+| Project image does not appear | Check that `display.png` exists, the display manager is running, and the `/robot/head_display` route is enabled |
 
 Inspect feedback from a separate sourced terminal:
 

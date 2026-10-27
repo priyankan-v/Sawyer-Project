@@ -41,13 +41,13 @@ class LaunchTests(unittest.TestCase):
     def test_project_defaults_enable_bridge_commands_and_buttons(self):
         _, context = self.description()
         self.assertEqual(context.launch_configurations['config'], str(PROJECT / 'bridge.yaml'))
-        for name in ('commands', 'head_commands', 'all_interfaces', 'cuff_buttons'):
+        for name in ('commands', 'head_commands', 'all_interfaces', 'cuff_buttons', 'display_manager'):
             self.assertEqual(context.launch_configurations[name], 'true')
 
     def test_helper_is_active_persistent_and_can_be_disabled(self):
         description, context = self.description()
         helpers = [action for action in description.entities if isinstance(action, ExecuteProcess)]
-        self.assertEqual(len(helpers), 1)
+        self.assertEqual(len(helpers), 2)
         helper = helpers[0]
         command = [perform_substitutions(context, part) for part in helper.cmd]
         self.assertEqual(command[1], str(PROJECT / 'scripts/gripper_control.py'))
@@ -55,6 +55,20 @@ class LaunchTests(unittest.TestCase):
         self.assertTrue(helper.condition.evaluate(context))
         context.launch_configurations['cuff_buttons'] = 'false'
         self.assertFalse(helper.condition.evaluate(context))
+
+    def test_display_uses_project_and_stock_images_and_can_be_disabled(self):
+        description, context = self.description()
+        helper = next(action for action in description.entities if isinstance(action, ExecuteProcess)
+                      and 'display_manager.py' in perform_substitutions(context, action.cmd[1]))
+        command = [perform_substitutions(context, part) for part in helper.cmd]
+        self.assertEqual(command[2:], ['--image', str(PROJECT / 'display.png'),
+                                      '--default-image', str(PROJECT / 'assets/default_display.png')])
+        self.assertTrue(helper.condition.evaluate(context))
+        context.launch_configurations['display_manager'] = 'false'
+        self.assertFalse(helper.condition.evaluate(context))
+        # Display failures must not shut down an arm bridge that might be in use.
+        actions = self.module.display_exited(SimpleNamespace(returncode=1), SimpleNamespace(is_shutdown=False))
+        self.assertFalse(any(isinstance(action, EmitEvent) for action in actions))
 
     def test_installed_bridge_receives_selected_arguments(self):
         description, context = self.description()
