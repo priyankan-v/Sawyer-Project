@@ -33,6 +33,15 @@ topics:
     history: keep_last
     depth: 5
     reliability: best_effort
+- topic: /robot/limb/right/tip_states
+  type: intera_core_msgs/msg/EndpointStates
+  queue_size: 1
+  direction: 1to2
+  enabled: true
+  qos:
+    history: keep_last
+    depth: 1
+    reliability: best_effort
 - topic: /robot/limb/right/collision_detection_state
   type: intera_core_msgs/msg/CollisionDetectionState
   queue_size: 1

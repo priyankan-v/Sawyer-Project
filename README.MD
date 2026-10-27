@@ -1,7 +1,8 @@
 # Sawyer ROS 2 motion control
 
-Move Sawyer's right arm to its configured neutral pose using a **quintic joint
-trajectory and a custom PID controller**. The application generates reference
+Move Sawyer's right arm to neutral or translate its end effector along a straight
+Cartesian reference using **quintic trajectories and a custom PID controller**.
+The application generates reference
 joint positions and velocities, compares them with measured feedback, and sends
 corrected joint velocity commands through the ROS 2–ROS 1 bridge.
 The project also provides standard Intera electric-gripper commands and cuff
@@ -80,6 +81,149 @@ python scripts/move_neutral.py --speed 0.1 --max-accel 0.3 --execute
 `--speed` scales the velocity limits, and `--max-accel` caps acceleration in
 rad/s². Reducing either can increase the minimum duration. Requested times are
 never silently lengthened.
+
+## Relative Cartesian end-effector moves
+
+Keep the project bridge running and run one arm-motion application at a time.
+`move_ee.py` reads the current EE pose and applies relative offsets in
+**centimeters** along the robot's **base-frame axes**. Orientation stays fixed.
+For example, `z:+10` increases Z by 0.10 meters while retaining X/Y.
+
+Preview a 10 cm upward move without sending motion commands:
+
+```bash
+source scripts/env.sh
+python scripts/move_ee.py z:+10
+```
+
+Execute using the minimum feasible duration for the validated reference:
+
+```bash
+python scripts/move_ee.py z:+10 --execute
+```
+
+Or request a five-second reference:
+
+```bash
+python scripts/move_ee.py z:+10 --time 5 --execute
+```
+
+Combine offsets in one move:
+
+```bash
+python scripts/move_ee.py x:+5 y:-3 z:+10 --time 5 --execute
+```
+
+Each preview prints the selected tip/reference frame, start/target coordinates
+in meters, planned/minimum duration, number of IK knots, and sampled FK error.
+Preview calls read-only kinematics services but does not send joint commands.
+A zero offset executes no motion.
+
+### Cartesian planning and timing
+
+The Cartesian reference follows:
+
+```text
+u = t / T
+p(t) = start_position + offset * (10*u^3 - 15*u^4 + 6*u^5)
+orientation(t) = start_orientation
+```
+
+This reference is a straight line with zero velocity and acceleration at both
+ends. The planner seeds each IK request from the preceding joint solution and
+rejects unreachable, self-colliding, or discontinuous solutions. It fits C2
+piecewise quintic joint polynomials through the solutions, then checks FK at
+knots and quarter/midpoints. Sampling is refined if the interpolation does not
+meet the position/orientation tolerances. Polynomial joint-position extrema are
+also checked between knots.
+
+The desired Cartesian line is exact. Converting it to sampled joint references
+introduces approximation: FK checks are sampled tolerance checks, not a proof of
+continuous geometric accuracy or collision freedom. Default checked reference
+tolerances are 1 mm position and 0.01 rad orientation. There is no workspace
+obstacle-avoidance planner.
+
+Minimum duration uses derivatives of the **whole IK joint path**, including
+between-knot extrema, rather than only start/end joint displacement. For the
+normalized joint reference `q(u)`:
+
+```text
+T_velocity     = max_joint(max_u(abs(dq/du)) / joint_velocity_limit)
+T_acceleration = sqrt(max_joint(max_u(abs(d2q/du2)) / joint_acceleration_limit))
+T_min          = max(T_velocity, T_acceleration)
+```
+
+This is the minimum uniform time scale for the constructed, validated joint
+reference under independent joint limits. It is not a global time optimum over
+all possible Cartesian motion profiles, and excludes planning and physical
+settling. A shorter `--time` is rejected before commands are sent. `--speed` and
+`--max-accel` reduce the bounds as in the neutral-move command.
+
+IK/FK planning finishes before the PID loop starts; it makes no service calls
+inside that loop. The shared joint PID uses reference velocity feedforward plus
+position-error correction. Cartesian execution additionally stops on stale tip
+feedback, position error above 0.02 m, or orientation error above 0.1 rad. Arrival
+requires Cartesian error below 0.003 m and orientation error below 0.02 rad,
+together with the normal joint/speed/settling criteria. PID gains remain
+unvalidated on physical hardware; actual tracking can differ from the reference.
+
+### Tool identification and options
+
+By default, the node matches `/robot/limb/right/endpoint_state` against named
+`/robot/limb/right/tip_states`. On this robot the matching tip is `right_hand`.
+If matching is ambiguous, inspect the named tips and use `--tip NAME`.
+The SDK pose headers on this installation can omit `frame_id`; the adapter uses
+the SDK's `base` convention and verifies the starting pose against FK before
+planning. It does not silently transform coordinates between frames.
+
+The supplied bridge configuration explicitly includes the named tip-state route.
+If it is missing from an older running bridge, restart the project launcher.
+
+```bash
+python scripts/move_ee.py --help
+```
+
+The neutral command's time, limit, PID, and timeout options also apply. Additional
+CLI settings are:
+
+| Option | Default | Meaning |
+| --- | --- | --- |
+| `--tip NAME` | Match endpoint | Select an advertised IK tip |
+| `--step-mm VALUE` | `5` | Initial maximum Cartesian sample spacing |
+| `--path-tolerance METERS` | `0.001` | Sampled FK position tolerance |
+| `--max-cartesian-error METERS` | `0.02` | Runtime EE position-error abort bound |
+| `--max-samples COUNT` | `401` | IK knot limit after refinement; at least 11 |
+| `--ik-timeout SECONDS` | `2` | Per-request IK/FK timeout |
+| `--planning-timeout SECONDS` | `60` | Overall kinematics planning budget |
+
+### Reusable Python API
+
+The Cartesian geometry, joint interpolation, and planner modules are independent
+of ROS. The planner accepts IK/FK callables, so it can also be tested against a
+simulator. For the ROS-connected API, from the project root:
+
+```python
+import rclpy
+from scripts.cartesian_motion import CartesianMotionNode, CartesianMotionOptions
+
+rclpy.init()
+node = CartesianMotionNode()
+try:
+    result = node.move_relative(
+        dx_cm=0, dy_cm=0, dz_cm=10,
+        duration=5.0,                 # None selects the minimum feasible duration
+        execute=False,                # True sends the motion commands
+        options=CartesianMotionOptions(speed=0.25),
+    )
+    print(result.plan.trajectory.duration)
+finally:
+    node.destroy_node()
+    rclpy.shutdown()
+```
+
+The method services ROS callbacks internally. Call it from application code,
+not from a callback on the same single-threaded executor. An execution result
+contains both the reusable plan and measured tracking/settling timing.
 
 ## Gripper and cuff buttons
 
@@ -258,9 +402,9 @@ commands at a bound. Position bounds take priority if they conflict with slew
 limits. These constrain commands; tracking delay can still affect physical
 acceleration, jerk, and stopping distance.
 
-## Quintic trajectory and timing
+## Joint-space neutral trajectory and timing
 
-For each joint, with `delta = end - start` and `u = t/T`:
+For `move_neutral.py`, each joint uses `delta = end - start` and `u = t/T`:
 
 ```text
 q(t) = start + delta * (10*u^3 - 15*u^4 + 6*u^5)
@@ -363,7 +507,14 @@ python scripts/move_neutral.py --help
 | File | Responsibility |
 | --- | --- |
 | [sawyer.launch.py](launch/sawyer.launch.py) | Start the bridge and automatic cuff-button controller together |
-| [move_neutral.py](scripts/move_neutral.py) | ROS inputs, preflight, control loop, and stopping |
+| [move_neutral.py](scripts/move_neutral.py) | Neutral-pose lookup, joint planning, and CLI |
+| [move_ee.py](scripts/move_ee.py) | Relative Cartesian offset CLI |
+| [arm_motion.py](scripts/arm_motion.py) | Shared joint bounds, ROS feedback, PID execution, and stop lifecycle |
+| [cartesian_path.py](scripts/cartesian_path.py) | Straight Cartesian quintic reference and pose math |
+| [joint_path.py](scripts/joint_path.py) | C2 joint interpolation, polynomial extrema, and time scaling |
+| [cartesian_planner.py](scripts/cartesian_planner.py) | Seeded IK path construction and FK validation |
+| [ros_kinematics.py](scripts/ros_kinematics.py) | Named pose feedback and Intera IK/FK service adapters |
+| [cartesian_motion.py](scripts/cartesian_motion.py) | Reusable relative-move API and Cartesian execution monitoring |
 | [quintic_trajectory.py](scripts/quintic_trajectory.py) | Quintic references and duration bounds |
 | [pid_controller.py](scripts/pid_controller.py) | PID, feedforward, anti-windup, and command limits |
 | [joint_feedback.py](scripts/joint_feedback.py) | Mixed joint messages and per-field freshness |
@@ -407,6 +558,10 @@ print(sample.position, sample.velocity, sample.acceleration)
 | Cuff DURABILITY warning / no cuff state | Restart the bridge with the updated project `bridge.yaml` |
 | Buttons do not operate gripper | Use the project launcher; check its waiting messages, calibration, device readiness, and cuff route |
 | Only bridge starts, no automatic buttons | Use `ros2 launch ./launch/sawyer.launch.py` rather than the package-only bridge command |
+| Missing Cartesian pose / named tip | Check `endpoint_state` and `tip_states`; restart the launcher for updated routes |
+| IK failure or discontinuity | The complete path could not be validated; reduce the offset or use a different reachable starting configuration |
+| Starting joint outside position limits | The error reports the joint, measured angle, and bounds; restore a valid stationary starting configuration before planning |
+| Cartesian tracking error / stale Cartesian pose | Check live tip feedback, selected tip, tracking limits, and PID tuning |
 
 Inspect feedback from a separate sourced terminal:
 
@@ -439,3 +594,7 @@ calibration gating, completion, and button-edge behavior. These tests do not
 validate physical PID tuning, arm tracking, or gripper motion.
 Launch tests inspect automatic defaults, helper lifecycle, and readiness waiting
 without starting child processes or issuing startup motion/calibration commands.
+Cartesian tests cover straight geometry, orientation, IK continuity/failures,
+FK refinement, between-knot limits, time scaling, simulated PID execution,
+read-only previews, pose drift, and Cartesian arrival/abort conditions. Cartesian
+planning uses NumPy, which is provided by the project Conda environment.
