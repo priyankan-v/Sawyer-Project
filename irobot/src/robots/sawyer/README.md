@@ -179,6 +179,23 @@ feedback while idle. Concurrent operations are rejected. Another thread can
 call `stop()` to request arm cancellation. The application/global ROS context
 is not shut down by the driver.
 
+The repository's `main.py` now runs the Sawyer neutral-position example.
+Start the bridge first, then use either entry point:
+
+```bash
+python main.py                                             # Preview only
+python main.py --execute                                   # Move to neutral
+python -m irobot.src.robots.sawyer.examples.move_neutral    # Same preview
+python -m irobot.src.robots.sawyer.examples.move_neutral --execute
+```
+
+The neutral example uses the public `SawyerController.move_to_neutral()` API,
+prints the current/target joints and minimum feasible duration, and reacquires
+feedback before execution. Defaults are 10% velocity limits and a 0.3 rad/s²
+acceleration cap; `--speed`, `--max-accel`, and `--time` override them. A requested
+duration below the feasible minimum is rejected. Gripper feedback and commands
+are excluded from this arm-only example. The robot is not enabled automatically.
+
 Runnable examples:
 
 ```bash
@@ -226,6 +243,14 @@ requires calibrated, stationary, ready feedback maintained for the configured
 confirmation interval. Recalibration followed immediately by open/close/open
 passed after that fix. The test ended with the arm returned and gripper open,
 calibrated and stationary. The temporary bridge was stopped.
+
+The neutral example was also executed on the physical Sawyer using
+`python main.py --execute`, with 10% velocity limits and a 0.3 rad/s²
+acceleration cap. All 201 sampled joint-path configurations passed the robot's
+FK validity/collision check before execution. The 32.874-second reference
+completed tracking and settling in 33.086 seconds, with maximum measured joint
+error **0.000371 rad**. The arm was left at neutral and the temporary bridge
+was stopped; this example sent no gripper commands.
 
 The driver retains freshness/watchdog bounds of at most 0.2 seconds, joint and
 Cartesian tracking checks, published joint bounds, collision/readiness checks,

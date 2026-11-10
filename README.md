@@ -53,6 +53,8 @@ robot.connect()
 # See your robot's README for full usage and examples
 ```
 
+The development `main.py` runs the Sawyer neutral example: `python main.py` previews and `python main.py --execute` moves the arm. Start the Sawyer bridge first as described in its driver guide.
+
 Each robot exports its classes at the top level of the `irobot` package. See the [Supported Robots](#-supported-robots) table above for links to robot-specific documentation.
 
 ---
