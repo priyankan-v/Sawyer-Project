@@ -1,4 +1,4 @@
-"""Straight Cartesian references and fixed orientation, independent of ROS."""
+"""Straight Cartesian references with quintic timing, independent of ROS."""
 
 from dataclasses import dataclass
 import math
@@ -57,22 +57,45 @@ def pose_error(actual, desired):
 
 
 class CartesianLine:
-    """Exact straight-line reference with fixed orientation and quintic time scaling.
+    """Straight-line reference with shortest SLERP and quintic time scaling.
 
     ``sample(u)`` uses normalized time u=t/T. Velocity/acceleration of XYZ can be
     obtained by differentiating the shared scalar ``progress`` trajectory.
     """
 
-    def __init__(self, start, offset_cm):
+    def __init__(self, start, offset_cm, end_orientation=None):
         self.start = start
         self.offset_cm = vector(offset_cm, 3, 'offset_cm')
         self.delta = tuple(value / 100 for value in self.offset_cm)
         self.end = CartesianPose(tuple(a + d for a, d in zip(start.position, self.delta)),
-                                 start.orientation, start.frame)
+                                 start.orientation if end_orientation is None else end_orientation, start.frame)
         self.length = math.sqrt(sum(value * value for value in self.delta))
+        self.angle = pose_error(self.start, self.end)[1]
         self.progress = QuinticTrajectory([0], [1], 1.875, duration=1.0)
+
+    @classmethod
+    def between(cls, start, end):
+        if start.frame != end.frame:
+            raise ValueError('Cartesian pose frame mismatch')
+        return cls(start, tuple(100 * (b-a) for a, b in zip(start.position, end.position)), end.orientation)
 
     def sample(self, normalized_time):
         progress = self.progress.sample(normalized_time).position[0]
         return CartesianPose(tuple(a + d * progress for a, d in zip(self.start.position, self.delta)),
-                             self.start.orientation, self.start.frame)
+                             slerp(self.start.orientation, self.end.orientation, progress), self.start.frame)
+
+
+def slerp(start, end, fraction):
+    """Shortest rotation between unit quaternions, including antipodal inputs."""
+    dot = sum(a*b for a, b in zip(start, end))
+    if dot < 0:
+        end, dot = tuple(-value for value in end), -dot
+    dot = min(1.0, dot)
+    if dot > .9995:
+        values = tuple(a + fraction*(b-a) for a, b in zip(start, end))
+    else:
+        angle = math.acos(dot)
+        left, right = math.sin((1-fraction)*angle), math.sin(fraction*angle)
+        values = tuple((left*a + right*b)/math.sin(angle) for a, b in zip(start, end))
+    norm = math.sqrt(sum(value*value for value in values))
+    return tuple(value/norm for value in values)

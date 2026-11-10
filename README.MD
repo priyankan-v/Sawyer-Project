@@ -227,6 +227,178 @@ The method services ROS callbacks internally. Call it from application code,
 not from a callback on the same single-threaded executor. An execution result
 contains both the reusable plan and measured tracking/settling timing.
 
+## Teach and replay pick and place
+
+Two entry scripts share reusable planning, interaction, execution and plotting
+helpers. Keep the project bridge running. Disable its gripper cuff-button
+bindings for this workflow so only the teaching/replay script commands the gripper:
+
+```bash
+source scripts/env.sh
+ros2 launch ./launch/sawyer.launch.py cuff_buttons:=false
+```
+
+In another sourced terminal, record a task with three middle points (zero is also
+supported). The number excludes the pick and place poses:
+
+```bash
+source scripts/env.sh
+python scripts/record_pick_place.py --middle-points 3 --file data/pick_place/task.json
+```
+
+**Recording opens the gripper automatically at startup.** It requires an already
+calibrated gripper and sends gripper commands without needing `--execute`. It
+does not command arm motion. After the gripper opens successfully, **starting a
+new recording deletes the previous recording and generated outputs belonging to
+the selected `--file`**: its task JSON, planned plot/data, replay PNGs, CSVs, plot
+JSONs, and viewer logs. Cancellation after cleanup leaves no previous task at
+that path. Use a different `--file` to retain another taught task.
+
+Cleanup uses a task-specific artifact ownership manifest beside the recording,
+including outputs previously written with `--output-dir`. Source scripts,
+unrelated files and other tasks are preserved; directories are never recursively
+deleted. Older generic `replay_<timestamp>` outputs are removed only when the
+selected task is the only recording in that directory and their recorded
+waypoints match. Ambiguous legacy outputs are preserved.
+
+For each taught pose, hand-guide the arm, release
+the cuff, stop the arm, and press Enter. The prompts are:
+
+1. Record pick position, quaternion orientation and joint configuration.
+2. Position the object and press Enter to close the gripper.
+3. Record each numbered middle pose, one Enter per point.
+4. Record the place pose.
+5. Press Enter to open the gripper at place and finish teaching.
+
+Immediately after release completes, the script saves the teaching data and
+plans `pick → middle points → place → lift → neutral`, without moving the arm.
+It saves the complete plan to the requested JSON file and a planned 3D PNG beside
+it. If planning fails, that file retains the raw teaching data with
+`status: recorded`; replay refuses it. A successful file has `status: planned`
+and contains the actual IK knots, polynomial durations, joint limits, tool/frame,
+recorded poses, and sampled FK references. Re-recording replaces the named file.
+
+Preview a successful recording from the robot's current pose:
+
+```bash
+python scripts/replay_pick_place.py --file data/pick_place/task.json
+```
+
+Preview reads feedback and kinematics, validates the saved plan, and plans the
+current-to-pick approach. It sends no arm or gripper commands. To execute:
+
+```bash
+python scripts/replay_pick_place.py --file data/pick_place/task.json --execute
+```
+
+Replay opens the gripper and moves from the current position/orientation to the
+recorded pick pose using IK seeded from the preceding solution. A redundant arm
+can reach that pose with different elbow/wrist joint angles. If the approached
+pick joints differ from the saved plan, replay regenerates the transfer, lift,
+and neutral joint references from that posture while preserving the recorded
+Cartesian lines and orientations, capped limits, and minimum saved durations.
+The original recording is unchanged. All planning and validation finish before
+motion begins; an approach or transfer that cannot connect continuously is
+rejected with its stage identified. At pick, replay waits
+for Enter, giving you time to reset the object. After Enter it closes the
+gripper, executes the saved transfer segments, confirms place arrival, opens the
+gripper, and waits **two seconds after confirmed release**. It then lifts
+**0.20 m along base-frame +Z with fixed orientation**, and returns to the
+configured neutral joint pose using a smooth joint-space quintic.
+
+Transfer uses **one continuous PID/velocity-control stream** through every
+middle point to place. The controller retains its integral and acceleration-slew
+state; it is not stopped, reset, or switched to position hold at middle points.
+Each quintic still ends with zero reference velocity/acceleration, preserving
+the exact taught Cartesian lines. At each middle point, the endpoint reference
+is held only until arrival, low measured/commanded joint speeds, and two fresh
+feedback samples spanning at least 0.02 s confirm the waypoint. The next segment
+then starts in the same controller loop. This replaces the previous per-segment
+mode handoff and repeated 0.2 s waits. The live plot continues to identify each
+individual segment; terminal completion is printed after the stream stops.
+
+Approach remains separate for the Enter/grasp pause. Place still requires the
+full final settling and position-hold confirmation before release. After the
+two-second release delay, lift and neutral share another uninterrupted stream.
+At these stream boundaries, **0.2 seconds of settled, fresh feedback** is required
+before motion and after the position-hold handoff. `--settle-time` (default 5 s)
+remains the maximum extra settling allowance for each segment, rather than a
+fixed delay. Readiness, feedback freshness, joint/Cartesian tracking errors, and
+per-segment timeouts stay enforced throughout the connected motion.
+
+Arm and gripper callbacks share one persistent ROS executor throughout teaching,
+keyboard waits, gripper commands, and replay. Waiting at the Enter prompt keeps
+Cartesian, joint, and IO feedback updating. Before a new controller stream, replay also
+reacquires a current tip pose with a bounded wait, then verifies the planned
+start pose and stationary feedback. Genuine stale feedback during motion still
+stops the controller under the existing 0.2-second freshness limit.
+
+Transfer, lift, and approach use straight Cartesian position segments and
+shortest quaternion SLERP with quintic time scaling. Joint-space interpolation
+is checked against Cartesian references through sampled FK. Every waypoint is
+a rest point with zero reference velocity and acceleration. A `round_corners()`
+placeholder in `scripts/pick_place_plan.py` documents future bounded corner
+blending; it is deliberately not active yet.
+
+Timing uses the full published joint velocity and acceleration limits by
+default. It is the shortest uniform time scale for each constructed quintic
+joint reference, rather than a global optimum over arbitrary profiles. To
+reduce speeds for either recording/planning or replay, use:
+
+```bash
+python scripts/replay_pick_place.py --file data/pick_place/task.json --speed 0.1 --max-accel 0.3 --execute
+```
+
+Replay reconstructs the saved polynomials, checks continuity and extrema,
+rechecks FK/self-collision and Cartesian tolerances against the current robot,
+and verifies that the configured neutral pose has not changed. Lower current
+limits or requested speed caps lengthen segment durations; replay never
+increases the saved velocity/acceleration limits or shortens saved timings.
+The approach is newly planned each run; the remaining joint references are
+regenerated only when needed to connect its endpoint to the saved path.
+These checks are sampled and do
+not provide workspace obstacle avoidance. Ensure the taught straight segments,
+initial approach, and neutral return have clearance. Physical tracking still
+depends on PID tuning and the bridge, as described above.
+
+Each preview/replay writes uniquely named `<task>_replay_<UTC timestamp>.png` and
+`.plot.json` files beside the plan (or under `--output-dir`). Executed replay
+also writes a CSV of timestamped **measured EE XYZ/quaternion, joint positions
+and joint velocities**, Cartesian references, joint references, and
+`tracking`/`settling`/`waiting` events. The PNG overlays
+recorded waypoint markers, planned FK paths, and measured EE paths with equally
+scaled X/Y/Z axes in meters. Neutral return uses a joint-space reference, so its
+Cartesian reference fields in CSV are blank; its planned FK path appears in the
+PNG. Partial measurements are exported after a failed/interrupted replay.
+
+By default, executed replay opens a **live, rotatable 3D desktop window** before
+motion starts. Dashed lines show the plan; solid lines show measured feedback,
+and the red marker shows the latest measured EE position. Left-drag rotates the
+view, right-drag zooms, and the toolbar can save the current view. Rotation and
+zoom are preserved as new measurements arrive. The same window remains open
+after successful or interrupted execution, with the full saved measurement
+trace loaded for inspection. Preview opens an interactive window after planning.
+
+The GUI and plotting run in separate processes. The arm loop only offers samples
+to a bounded queue; a slow or closed window never blocks joint commands. Live
+display may skip points when overloaded, but the saved JSON/CSV retains every
+collected row. PNG export runs after control stops. The helper automatically
+selects the ROS Python or system `/usr/bin/python3` with Matplotlib; the latter
+provides Matplotlib/Tk on this installation without changing the ROS environment.
+
+To reopen a saved run as a rotatable 3D view, from either Python environment:
+
+```bash
+python scripts/pick_place_plot.py data/pick_place/task_replay_<timestamp>.plot.json --show
+```
+
+Use `--no-live-plot` to show only the final interactive view, or
+`--no-live-plot --no-show-plot` to save files without opening windows. Use
+`--no-show-plot` alone to close the live window when replay ends. Without a
+desktop display, files are saved for later viewing. Viewer startup problems are
+reported in the run's `.viewer.log` file and do not disable motion checks.
+`--help` lists planning, timing, PID, timeout and output options.
+
 ## Head display and live clock
 
 The project launcher manages the head display automatically:

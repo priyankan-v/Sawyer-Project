@@ -227,7 +227,7 @@ class ArmMotionNode(Node):
         self.limits.check_position(minimum, 'Reference position minimum', tolerance=1e-8)
         self.limits.check_position(maximum, 'Reference position maximum', tolerance=1e-8)
 
-    def track(self, trajectory, controller, options, *, label="Motion", on_step=None, at_goal=None):
+    def track(self, trajectory, controller, options, *, label="Motion", on_step=None, at_goal=None, announce=True):
         period = 1.0 / options.rate
         timeout = options.timeout if options.timeout is not None else trajectory.duration + options.settle_time
         if timeout < trajectory.duration:
@@ -278,8 +278,9 @@ class ArmMotionNode(Node):
         finally:
             self.stop()
         # Stop streaming before potentially blocking on terminal output.
-        print(f"{label} reached. Reference: {trajectory.duration:.3f} s; "
-              f"tracking + settling: {elapsed:.3f} s")
+        if announce:
+            print(f"{label} reached. Reference: {trajectory.duration:.3f} s; "
+                  f"tracking + settling: {elapsed:.3f} s")
         return MotionResult(trajectory.duration, elapsed, tuple(self.joints))
 
 def positive(value):
@@ -317,9 +318,12 @@ def validate_motion_options(options):
     if not 50 <= options.rate <= 250:
         raise ValueError('--rate must be between 50 and 250 Hz')
 
-def add_motion_arguments(parser):
-    parser.add_argument("--execute", action="store_true", help="Stream commands; default is preview")
-    parser.add_argument("--time", type=positive, help="Reference motion duration in seconds; default: minimum feasible")
+def add_motion_arguments(parser, *, include_time=True, execute_default=False):
+    parser.add_argument("--execute", action="store_true", default=execute_default,
+                        help=("Gripper commands are active by default during recording" if execute_default else
+                              "Stream commands; default is preview"))
+    if include_time:
+        parser.add_argument("--time", type=positive, help="Reference motion duration in seconds; default: minimum feasible")
     parser.add_argument("--speed", type=positive, default=1.0, help="Scale robot velocity limits in (0,1] (default: 1)")
     parser.add_argument("--max-accel", type=positive, help="Optional cap on robot acceleration limits (rad/s^2)")
     parser.add_argument("--rate", type=positive, default=100.0, help="PID publishing frequency, 50..250 Hz (default: 100)")
