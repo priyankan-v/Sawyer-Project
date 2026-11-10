@@ -1,0 +1,31 @@
+{
+  "name": "sawyer_bridge",
+  "version": "0.1.0",
+  "build": "robostack_humble_py312_1",
+  "artifact": "linux-64/sawyer_bridge-0.1.0-robostack_humble_py312_1.conda",
+  "sha256": "feffd001b4b146a5d5f1d2a6b879dddefc0e2c79986b2b7bded2c4b4a96d396a",
+  "depends": [
+    "__glibc >=2.35",
+    "__linux",
+    "console_bridge 1.0.*",
+    "libboost 1.88.*",
+    "libgcc >=14",
+    "libstdcxx >=14",
+    "numpy >=2,<3",
+    "python >=3.12,<3.13.0a0",
+    "pyyaml",
+    "ros-humble-action-msgs 1.2.2 np2py312h2ed9cc7_18",
+    "ros-humble-geometry-msgs 4.9.1 np2py312h2ed9cc7_18",
+    "ros-humble-launch-ros 0.19.13 np2py312h2ed9cc7_18",
+    "ros-humble-rclcpp-action 16.0.19 np2py312h2ed9cc7_18",
+    "ros-humble-ros-base 0.10.0 np2py312h2ed9cc7_18",
+    "ros-humble-rosidl-default-runtime 1.2.1 np2py312h2ed9cc7_18",
+    "ros-humble-sensor-msgs 4.9.1 np2py312h2ed9cc7_18",
+    "ros-humble-std-msgs 4.9.1 np2py312h2ed9cc7_18",
+    "ros2-distro-mutex 0.9.* humble_*"
+  ],
+  "sugarcoat_specs": [
+    "ros-humble-automatika-ros-sugar=0.7.0=np2py312h3b5449b_18",
+    "msgpack-numpy"
+  ]
+}

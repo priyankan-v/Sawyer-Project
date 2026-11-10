@@ -93,3 +93,6 @@ cache/
 
 # Claude
 .claude/
+
+# Local Sawyer dependency installation
+.sawyer-runtime/

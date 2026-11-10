@@ -12,6 +12,7 @@ Drivers work standalone (plain Python) or as ROS2 components via [ros_sugar](htt
 | Robot | Description | Driver Docs |
 |-------|-------------|-------------|
 | [Crazyflie 2.x](https://www.bitcraze.io/products/crazyflie-2-1/) | Nano quadrotor by Bitcraze | [irobot/src/robots/crazyflie/README.md](irobot/src/robots/crazyflie/README.md) |
+| Sawyer | Right arm and Intera electric gripper through the ROS 1/ROS 2 bridge | [irobot/src/robots/sawyer/README.md](irobot/src/robots/sawyer/README.md) |
 
 ---
 
@@ -20,6 +21,7 @@ Drivers work standalone (plain Python) or as ROS2 components via [ros_sugar](htt
 - Python 3.11 or higher
 - The hardware SDK for your robot (see the robot's README for installation)
 - **ROS2 + ros_sugar** — only required if you are using ROS2-based components (optional)
+- **Sawyer:** the pinned ROS 2/Conda/bridge runtime is required even for plain Python; its driver guide includes installation.
 
 ---
 

@@ -20,6 +20,10 @@ packages = [{ include = "irobot" }]
 [tool.poetry.dependencies]
 python = "^3.11"
 cflib = ">=0.1"
+numpy = {version = ">=2,<3", optional = true}
+
+[tool.poetry.extras]
+sawyer = ["numpy"]
 
 
 [tool.poetry.group.test.dependencies]
