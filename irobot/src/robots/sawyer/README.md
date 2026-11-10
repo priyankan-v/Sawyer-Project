@@ -196,6 +196,26 @@ acceleration cap; `--speed`, `--max-accel`, and `--time` override them. A reques
 duration below the feasible minimum is rejected. Gripper feedback and commands
 are excluded from this arm-only example. The robot is not enabled automatically.
 
+For a standalone application that imports the developed driver directly,
+without importing any examples, use the root `sawyer_saved_pose.py` script:
+
+```bash
+python sawyer_saved_pose.py save                # Capture the live arm posture; no motion
+python sawyer_saved_pose.py restore             # Preview and check the saved target
+python sawyer_saved_pose.py restore --execute   # Current → neutral → saved posture
+```
+
+Start the bridge first. The default capture file is
+`.sawyer-runtime/saved_pose.json` (excluded from Git). Supply a different path
+after `save` or `restore` to keep multiple postures; saving refuses to overwrite
+an existing capture. The JSON stores the seven named arm joint angles in
+radians and a capture timestamp, with no gripper state. Restore validates the
+saved angles against live joint limits before sending commands, moves to
+neutral, then plans and executes the saved target from fresh neutral feedback.
+The preview checks both targets but does not simulate the second leg from
+neutral. Motion defaults to 10% velocity limits and a 0.3 rad/s² acceleration
+cap, adjustable with `restore --speed` and `--max-accel`.
+
 Runnable examples:
 
 ```bash
@@ -251,6 +271,15 @@ FK validity/collision check before execution. The 32.874-second reference
 completed tracking and settling in 33.086 seconds, with maximum measured joint
 error **0.000371 rad**. The arm was left at neutral and the temporary bridge
 was stopped; this example sent no gripper commands.
+
+The standalone saved-posture application was tested on the same date: it
+captured the live arm joints, previewed both targets, moved to neutral and
+returned to the capture. Both paths passed 201 sampled FK validity/collision
+checks before execution. References were 24.783 seconds to neutral and
+24.784 seconds back to the saved posture at 10% velocity limits and a
+0.3 rad/s² acceleration cap. Maximum final joint error was **0.000220 rad**.
+The saved posture was restored, the temporary bridge was stopped, and the
+capture JSON was kept locally outside version control.
 
 The driver retains freshness/watchdog bounds of at most 0.2 seconds, joint and
 Cartesian tracking checks, published joint bounds, collision/readiness checks,
