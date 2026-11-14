@@ -1,4 +1,7 @@
-"""Neutral example routing and preview/execute behavior without ROS initialization."""
+"""
+Neutral example routing and preview/execute behavior without ROS
+initialization.
+"""
 
 from __future__ import annotations
 
@@ -12,8 +15,14 @@ from irobot.src.robots.sawyer.examples import move_neutral
 
 
 def result(*, executed=False):
-    plan = SimpleNamespace(start=(0.0,) * 7, end=(0.2,) * 7, duration=4.0, minimum_duration=3.0)
-    execution = SimpleNamespace(reference_duration=4.0, elapsed_duration=4.3) if executed else None
+    plan = SimpleNamespace(
+        start=(0.0,) * 7, end=(0.2,) * 7, duration=4.0, minimum_duration=3.0
+    )
+    execution = (
+        SimpleNamespace(reference_duration=4.0, elapsed_duration=4.3)
+        if executed
+        else None
+    )
     return SimpleNamespace(plan=plan, execution=execution)
 
 
@@ -31,7 +40,9 @@ def test_main_routes_to_the_sawyer_neutral_example():
 
 def test_default_preview_uses_only_public_arm_api(capsys):
     robot = controller()
-    with patch.object(move_neutral, 'SawyerController', return_value=robot) as factory:
+    with patch.object(
+        move_neutral, 'SawyerController', return_value=robot
+    ) as factory:
         assert move_neutral.main([]) == 0
     config = factory.call_args.args[0]
     assert not config.enable_gripper
@@ -65,6 +76,9 @@ def test_execution_replans_after_preview_and_reports_measurement(capsys):
     ],
 )
 def test_invalid_settings_fail_before_connecting(args):
-    with patch.object(move_neutral, 'SawyerController') as factory, pytest.raises(SystemExit, match='2'):
+    with (
+        patch.object(move_neutral, 'SawyerController') as factory,
+        pytest.raises(SystemExit, match='2'),
+    ):
         move_neutral.main(args)
     factory.assert_not_called()

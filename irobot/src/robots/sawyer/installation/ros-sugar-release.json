@@ -1,0 +1,8 @@
+{
+  "repository": "https://github.com/automatika-robotics/sugarcoat",
+  "revision": "5d64e015488fe9f0ca7b844028e7907f43785db0",
+  "version": "0.8.2",
+  "platform": "Ubuntu 22.04 x86_64 / Humble / Python 3.12.16",
+  "conda_packages": 201,
+  "scope": "Optional ros_sugar lifecycle application; direct driver does not depend on it"
+}

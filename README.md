@@ -3,7 +3,7 @@
 
 **irobot** is a Python library of robot drivers developed at the **iHuman Lab**. Each driver wraps a robot's hardware SDK into a clean, importable Python class. Install irobot, import the driver for your robot, and build your application on top — no framework lock-in required.
 
-Drivers work standalone (plain Python) or as ROS2 components via [ros_sugar](https://github.com/automatika-robotics/ros-sugar), with no `colcon` build step.
+Drivers work standalone in Python or through optional ROS 2 components. Sawyer provides a direct Humble node and an optional ros_sugar application adapter. Custom Sawyer interfaces require an explicit CMake build; the core driver does not.
 
 ---
 
@@ -12,7 +12,7 @@ Drivers work standalone (plain Python) or as ROS2 components via [ros_sugar](htt
 | Robot | Description | Driver Docs |
 |-------|-------------|-------------|
 | [Crazyflie 2.x](https://www.bitcraze.io/products/crazyflie-2-1/) | Nano quadrotor by Bitcraze | [irobot/src/robots/crazyflie/README.md](irobot/src/robots/crazyflie/README.md) |
-| Sawyer | Right arm and Intera electric gripper through the ROS 1/ROS 2 bridge | [irobot/src/robots/sawyer/README.md](irobot/src/robots/sawyer/README.md) |
+| Sawyer | Direct Python connection for the right arm and Intera electric gripper (in development) | [irobot/src/robots/sawyer/README.md](irobot/src/robots/sawyer/README.md) |
 
 ---
 
@@ -21,7 +21,7 @@ Drivers work standalone (plain Python) or as ROS2 components via [ros_sugar](htt
 - Python 3.11 or higher
 - The hardware SDK for your robot (see the robot's README for installation)
 - **ROS2 + ros_sugar** — only required if you are using ROS2-based components (optional)
-- **Sawyer:** the pinned ROS 2/Conda/bridge runtime is required even for plain Python; its driver guide includes installation.
+- **Sawyer (`sawyer_py`):** direct Python transport is in development; no ROS runtime or bridge is required for core operation. The optional ROS 2 Humble component uses the same driver. Motion, cameras and peripherals have partial physical evidence, but enable recovery produced unexpected movement and now blocks physical qualification. Sawyer is disabled/software-stopped; head pan is deferred. See the driver checklist.
 
 ---
 
@@ -53,7 +53,10 @@ robot.connect()
 # See your robot's README for full usage and examples
 ```
 
-The development `main.py` runs the Sawyer neutral example: `python main.py` previews and `python main.py --execute` moves the arm. Start the Sawyer bridge first as described in its driver guide.
+The development `main.py` runs the Sawyer neutral example: `python main.py` previews and `python main.py --execute` moves the arm. Configure the direct Sawyer connection as described in its driver guide.
+
+Sawyer development references: [files and functions](irobot/src/robots/sawyer/IMPLEMENTATION_GUIDE.md)
+and [unfinished work](irobot/src/robots/sawyer/UNFINISHED_WORK.md).
 
 Each robot exports its classes at the top level of the `irobot` package. See the [Supported Robots](#-supported-robots) table above for links to robot-specific documentation.
 

@@ -1,0 +1,19 @@
+# Generated from the pinned public Intera schema.
+uint8 IMPEDANCE_MODE=1
+uint8 FORCE_MODE=2
+uint8 IMPEDANCE_WITH_FORCE_LIMIT_MODE=3
+uint8 FORCE_WITH_MOTION_LIMIT_MODE=4
+std_msgs/Header header
+bool interaction_control_active
+float64[] k_impedance
+bool[] max_impedance
+float64[] d_impedance
+float64[] k_nullspace
+float64[] force_command
+geometry_msgs/Pose interaction_frame
+string endpoint_name
+bool in_endpoint_frame
+bool disable_damping_in_force_control
+bool disable_reference_resetting
+uint8[] interaction_control_mode
+bool rotations_for_constrained_zero_g

@@ -94,7 +94,10 @@ class CartesianMotionOptions(MotionOptions):
             'planning_timeout',
         ):
             positive(name, getattr(self, name))
-        if type(self.max_samples) is not int or self.max_samples < MIN_IK_SAMPLES:
+        if (
+            type(self.max_samples) is not int
+            or self.max_samples < MIN_IK_SAMPLES
+        ):
             msg = 'max_samples must be an integer >= 11'
             raise ValueError(msg)
         if not self.frame or not self.frame.lstrip('/'):
@@ -103,12 +106,33 @@ class CartesianMotionOptions(MotionOptions):
 
 
 @dataclass(frozen=True)
+class StreamOptions:
+    """Application envelopes; these do not replace controller safeguards."""
+
+    rate: float = 100.0
+    max_velocity: float = 0.1
+    max_acceleration: float = 0.5
+    max_displacement: float = 0.1
+    effort_fraction: float = 0.05
+    position_speed: float = 0.05
+
+    def __post_init__(self):
+        for name in self.__dataclass_fields__:
+            positive(name, getattr(self, name))
+        if not MIN_CONTROL_RATE <= self.rate <= MAX_CONTROL_RATE:
+            msg = 'rate must be between 50 and 250 Hz'
+            raise ValueError(msg)
+        if self.effort_fraction > 1 or self.position_speed > 1:
+            msg = 'Effort fraction and position speed must be at most one'
+            raise ValueError(msg)
+
+
+@dataclass(frozen=True)
 class SawyerConfig:
     """
-    Right-arm bridge client configuration. Construction sends no commands.
+    Direct right-arm connection settings. Construction sends no commands.
 
-    ROS_MASTER_URI is needed only for neutral-pose lookup unless neutral_joints
-    is provided. ROS_IP is a bridge-process setting, not a DDS client setting.
+    ros_ip must advertise an address reachable by Sawyer. ROS 2 is optional.
     """
 
     node_name: str = 'irobot_sawyer'
@@ -138,27 +162,71 @@ class SawyerConfig:
     tip: str | None = None
     domain_id: int | None = None
     ros_master_uri: str | None = None
+    ros_ip: str | None = None
+    transport_timeout: float = 0.2
+    transport_retry_interval: float = 0.2
+    transport_idle_timeout: float = 5.0
+    registration_refresh_interval: float = 2.0
     neutral_joints: tuple[float, ...] | None = None
     neutral_parameter: str = '/named_poses/right'
     parameter_timeout: float = 5.0
     enable_gripper: bool = True
+    allow_unvalidated_modes: bool = False
     gripper_open_position: float = 0.041667
     gripper_timeout: float = 10.0
     joint_state_topic: str = '/robot/joint_states'
     robot_state_topic: str = '/robot/state'
+    enable_topic: str = '/robot/set_super_enable'
+    reset_topic: str = '/robot/set_super_reset'
+    software_stop_topic: str = '/robot/set_super_stop'
+    version_parameter: str = (
+        '/manifest/robot_software/version/HLR_VERSION_STRING'
+    )
+    robot_description_parameter: str = '/robot_description'
+    head_state_topic: str = '/robot/head/head_state'
+    head_command_topic: str = '/robot/head/command_head_pan'
+    head_display_topic: str = '/robot/head_display'
+    camera_namespace: str = '/io/internal_camera'
+    io_namespace: str = '/io/robot'
+    device_timeout: float = 5.0
+    enable_max_displacement: float = 0.02
+    head_position_tolerance: float = 0.01
     collision_topic: str = '/robot/limb/right/collision_detection_state'
     joint_limits_topic: str = '/robot/joint_limits'
     joint_command_topic: str = '/robot/limb/right/joint_command'
     command_timeout_topic: str = '/robot/limb/right/joint_command_timeout'
+    speed_ratio_topic: str = '/robot/limb/right/set_speed_ratio'
+    interaction_command_topic: str = (
+        '/robot/limb/right/interaction_control_command'
+    )
+    interaction_state_topic: str = (
+        '/robot/limb/right/interaction_controller/state'
+    )
+    diagnostics_topic: str = '/diagnostics'
+    tf_topic: str = '/tf'
+    tf_static_topic: str = '/tf_static'
+    native_motion_action: str = '/motion/motion_command'
+    calibration_action: str = '/calibration_command'
+    action_server_timeout: float = 2.0
     endpoint_topic: str = '/robot/limb/right/endpoint_state'
     tip_states_topic: str = '/robot/limb/right/tip_states'
     ik_service: str = '/ExternalTools/right/PositionKinematicsNode/IKService'
     fk_service: str = '/ExternalTools/right/PositionKinematicsNode/FKService'
     gripper_namespace: str = '/io/end_effector/right_gripper'
-    motion: CartesianMotionOptions = field(default_factory=CartesianMotionOptions)
+    motion: CartesianMotionOptions = field(
+        default_factory=CartesianMotionOptions
+    )
 
     def __post_init__(self):
         for name in (
+            'transport_timeout',
+            'device_timeout',
+            'enable_max_displacement',
+            'head_position_tolerance',
+            'transport_retry_interval',
+            'transport_idle_timeout',
+            'registration_refresh_interval',
+            'action_server_timeout',
             'connect_timeout',
             'feedback_timeout',
             'command_timeout',
@@ -188,11 +256,17 @@ class SawyerConfig:
             if type(value) is not int or value <= 0:
                 msg = f'{name} must be a positive integer'
                 raise ValueError(msg)
-        if self.feedback_timeout > MAX_WATCHDOG or self.command_timeout > MAX_WATCHDOG:
+        if (
+            self.feedback_timeout > MAX_WATCHDOG
+            or self.command_timeout > MAX_WATCHDOG
+        ):
             msg = 'Feedback and command timeouts must be <= 0.2 seconds'
             raise ValueError(msg)
         if type(self.enable_gripper) is not bool:
             msg = 'enable_gripper must be a boolean'
+            raise ValueError(msg)
+        if type(self.allow_unvalidated_modes) is not bool:
+            msg = 'allow_unvalidated_modes must be a boolean'
             raise ValueError(msg)
         if not 0 <= self.gripper_open_position <= MAX_GRIPPER_OPEN_POSITION:
             msg = 'gripper_open_position must be between 0 and 0.041667 meters'
@@ -200,8 +274,21 @@ class SawyerConfig:
         if not self.frame or not self.frame.lstrip('/'):
             msg = 'A reference frame is required'
             raise ValueError(msg)
+        self._validate_connection()
+        if self.neutral_joints is not None and (
+            len(self.neutral_joints) != len(JOINT_NAMES)
+            or not all(math.isfinite(q) for q in self.neutral_joints)
+        ):
+            msg = 'neutral_joints must contain seven finite angles in radians'
+            raise ValueError(msg)
+        if not isinstance(self.motion, CartesianMotionOptions):
+            msg = 'motion must be CartesianMotionOptions'
+            raise TypeError(msg)
+
+    def _validate_connection(self):
         if self.domain_id is not None and (
-            type(self.domain_id) is not int or not 0 <= self.domain_id <= MAX_ROS_DOMAIN
+            type(self.domain_id) is not int
+            or not 0 <= self.domain_id <= MAX_ROS_DOMAIN
         ):
             msg = 'domain_id must be an integer between 0 and 232'
             raise ValueError(msg)
@@ -210,70 +297,3 @@ class SawyerConfig:
             if parsed.scheme != 'http' or not parsed.hostname:
                 msg = 'ros_master_uri must be an http:// ROS 1 master URL'
                 raise ValueError(msg)
-        if self.neutral_joints is not None and (
-            len(self.neutral_joints) != len(JOINT_NAMES) or not all(math.isfinite(q) for q in self.neutral_joints)
-        ):
-            msg = 'neutral_joints must contain seven finite angles in radians'
-            raise ValueError(msg)
-        if not isinstance(self.motion, CartesianMotionOptions):
-            msg = 'motion must be CartesianMotionOptions'
-            raise TypeError(msg)
-
-    def bridge_configuration(self) -> dict:
-        """Generate bridge routes from the same hardware settings as the client."""
-
-        def telemetry(topic, message, *, latched=False, depth=1):
-            qos = {'history': 'keep_last', 'depth': depth, 'reliability': 'reliable' if latched else 'best_effort'}
-            if latched:
-                qos['durability'] = 'transient_local'
-            return {
-                'topic': topic,
-                'type': message,
-                'queue_size': depth,
-                'direction': '1to2',
-                'enabled': True,
-                'qos': qos,
-            }
-
-        topics = [
-            telemetry(self.joint_state_topic, 'sensor_msgs/msg/JointState', depth=5),
-            telemetry(self.robot_state_topic, 'intera_core_msgs/msg/RobotAssemblyState'),
-            telemetry(self.collision_topic, 'intera_core_msgs/msg/CollisionDetectionState'),
-            telemetry(self.joint_limits_topic, 'intera_core_msgs/msg/JointLimits', latched=True),
-            telemetry(self.endpoint_topic, 'intera_core_msgs/msg/EndpointState', depth=5),
-            telemetry(self.tip_states_topic, 'intera_core_msgs/msg/EndpointStates'),
-        ]
-        seconds = int(self.command_timeout)
-        lifespan = {'secs': seconds, 'nsecs': round((self.command_timeout - seconds) * 1e9)}
-        for topic, message in (
-            (self.joint_command_topic, 'intera_core_msgs/msg/JointCommand'),
-            (self.command_timeout_topic, 'std_msgs/msg/Float64'),
-        ):
-            qos = {'history': 'keep_last', 'depth': 1, 'reliability': 'reliable'}
-            if topic == self.joint_command_topic:
-                qos['lifespan'] = lifespan
-            topics.append(
-                {'topic': topic, 'type': message, 'queue_size': 1, 'direction': '2to1', 'enabled': False, 'qos': qos}
-            )
-        if self.enable_gripper:
-            topics.append(
-                telemetry(self.gripper_namespace + '/state', 'intera_core_msgs/msg/IODeviceStatus', latched=True)
-            )
-            topics.append(
-                {
-                    'topic': self.gripper_namespace + '/command',
-                    'type': 'intera_core_msgs/msg/IOComponentCommand',
-                    'queue_size': 1,
-                    'direction': '2to1',
-                    'enabled': True,
-                    'qos': {'history': 'keep_last', 'depth': 1, 'reliability': 'reliable'},
-                }
-            )
-        services = [
-            {'service': name, 'type': message, 'package': ''}
-            for name, message in (
-                (self.ik_service, 'intera_core_msgs/SolvePositionIK'),
-                (self.fk_service, 'intera_core_msgs/SolvePositionFK'),
-            )
-        ]
-        return {'topics': topics, 'services_1_to_2': [], 'services_2_to_1': services, 'actions': []}

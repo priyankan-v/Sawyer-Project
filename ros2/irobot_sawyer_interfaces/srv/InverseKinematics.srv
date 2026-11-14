@@ -1,0 +1,7 @@
+geometry_msgs/PoseStamped pose
+float64[7] seed
+string tip
+---
+bool success
+string detail
+float64[7] position

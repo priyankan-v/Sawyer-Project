@@ -1,0 +1,6 @@
+float64[] positions
+string tip
+---
+bool success
+string detail
+bool[] in_collision

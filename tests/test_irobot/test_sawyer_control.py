@@ -1,8 +1,8 @@
-"""Packaged controller with a virtual plant; never initialize ROS or use hardware."""
+"""Virtual-plant driver checks; no ROS initialization or robot access."""
 
 # Numeric regression bounds and controlled private fixtures are intentional.
 # ruff: noqa: PLR2004, SLF001, PT009, SIM117
-# Fault fixtures deliberately exercise nested cleanup and private resource lifecycles.
+# Fault fixtures exercise nested cleanup and private resource lifecycles.
 from __future__ import annotations
 
 import copy
@@ -14,22 +14,6 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-pytest.importorskip('rclpy')
-pytest.importorskip('intera_core_msgs')
-
-from builtin_interfaces.msg import Time
-from intera_core_msgs.msg import (
-    EndpointState,
-    EndpointStates,
-    IOComponentStatus,
-    IODataStatus,
-    IODeviceStatus,
-    IOStatus,
-    JointCommand,
-    RobotAssemblyState,
-)
-from sensor_msgs.msg import JointState
-
 from irobot import SawyerConfig, SawyerController
 from irobot.src.robots.sawyer.config import JOINT_NAMES
 from irobot.src.robots.sawyer.core.base import (
@@ -39,7 +23,19 @@ from irobot.src.robots.sawyer.core.base import (
     JointBounds,
     JointFeedback,
     SawyerGripper,
-    _BridgeClient,
+    _ArmSession,
+)
+from irobot.src.robots.sawyer.core.wire import (
+    EndpointState,
+    EndpointStates,
+    IOComponentStatus,
+    IODataStatus,
+    IODeviceStatus,
+    IOStatus,
+    JointCommand,
+    JointState,
+    RobotAssemblyState,
+    Time,
 )
 
 
@@ -64,7 +60,12 @@ def gripper_message(calibrated=True):  # noqa: FBT002
                 status=IOStatus(tag='ready'),
             )
         )
-    return IODeviceStatus(device=IOComponentStatus(name='right_gripper', status=IOStatus(tag='ready')), signals=signals)
+    return IODeviceStatus(
+        device=IOComponentStatus(
+            name='right_gripper', status=IOStatus(tag='ready')
+        ),
+        signals=signals,
+    )
 
 
 class Plant:
@@ -72,10 +73,14 @@ class Plant:
         self.now = 100.0
         self.q, self.velocity, self.command = [0.0] * 7, [0.0] * 7, [0.0] * 7
         self.messages = []
-        self.stale = self.drop_pose = self.interrupt = self.cancel = self.collide = False
+        self.stale = self.drop_pose = self.interrupt = self.cancel = (
+            self.collide
+        ) = False
         self.pose_shift = 0.0
-        self.robot = SawyerController(SawyerConfig(enable_gripper=False, neutral_joints=(0.2,) * 7))
-        node = self.node = _BridgeClient.__new__(_BridgeClient)
+        self.robot = SawyerController(
+            SawyerConfig(enable_gripper=False, neutral_joints=(0.2,) * 7)
+        )
+        node = self.node = _ArmSession.__new__(_ArmSession)
         self.robot._node, self.robot._connected = node, True
         node.config = self.robot.config
         node.joints, node.velocity = tuple(self.q), tuple(self.velocity)
@@ -83,7 +88,9 @@ class Plant:
         node.feedback.update(JOINT_NAMES, self.q, self.velocity, self.now)
         node.last_feedback_error = node.last_limits_error = None
         node.state = RobotAssemblyState(enabled=True, ready=True)
-        node.limits = JointBounds((-3.0,) * 7, (3.0,) * 7, (1.0,) * 7, (1.0,) * 7)
+        node.limits = JointBounds(
+            (-3.0,) * 7, (3.0,) * 7, (1.0,) * 7, (1.0,) * 7
+        )
         node.collision, node.streaming = False, False
         node.joints_at = node.state_at = node.collision_at = self.now
         node.cancel_requested = threading.Event()
@@ -92,14 +99,20 @@ class Plant:
         node.watchdog_pub.get_subscription_count.return_value = 1
         node.command_pub.publish.side_effect = self.publish
         node.get_clock = MagicMock()
-        node.get_clock.return_value.now.return_value.to_msg.return_value = Time(sec=123)
+        node.get_clock.return_value.now.return_value.to_msg.return_value = (
+            Time(sec=123)
+        )
         node.get_logger = MagicMock()
         node.pose_feedback = EndpointFeedback('base', 0.2)
         self.feed_pose()
 
     def publish(self, message):
         self.messages.append(copy.deepcopy(message))
-        self.command = list(message.velocity) if message.mode == JointCommand.VELOCITY_MODE else [0.0] * 7
+        self.command = (
+            list(message.velocity)
+            if message.mode == JointCommand.VELOCITY_MODE
+            else [0.0] * 7
+        )
 
     def feed_pose(self):
         state = EndpointState(valid=True)
@@ -108,7 +121,9 @@ class Plant:
         state.pose.orientation.w = 1.0
         with patch('time.monotonic', return_value=self.now):
             self.node.pose_feedback.on_endpoint(state)
-            self.node.pose_feedback.on_tips(EndpointStates(names=['right_hand'], states=[state]))
+            self.node.pose_feedback.on_tips(
+                EndpointStates(names=['right_hand'], states=[state])
+            )
 
     def spin(self, timeout_sec):
         if self.now > 100.1:
@@ -122,13 +137,23 @@ class Plant:
         dt = max(timeout_sec, 0.00001)
         self.now += dt
         for i in range(7):
-            self.velocity[i] += (self.command[i] - self.velocity[i]) * min(1.0, dt / 0.04)
+            self.velocity[i] += (self.command[i] - self.velocity[i]) * min(
+                1.0, dt / 0.04
+            )
             self.q[i] += self.velocity[i] * dt
         if not (self.stale and self.node.streaming):
-            self.node.on_joints(JointState(name=list(JOINT_NAMES), position=self.q, velocity=self.velocity))
+            self.node.on_joints(
+                JointState(
+                    name=list(JOINT_NAMES),
+                    position=self.q,
+                    velocity=self.velocity,
+                )
+            )
             self.node.state_at = self.node.collision_at = self.now
         # An unrelated gripper sample must never refresh stale arm feedback.
-        self.node.on_joints(JointState(name=['finger'], position=[0.0], velocity=[0.0]))
+        self.node.on_joints(
+            JointState(name=['finger'], position=[0.0], velocity=[0.0])
+        )
         if not self.drop_pose:
             self.feed_pose()
 
@@ -142,12 +167,61 @@ class Plant:
 
     def kinematics(self):
         adapter = MagicMock()
-        adapter.inverse.side_effect = lambda pose, seed: (*pose.position, *seed[3:])
-        adapter.forward.side_effect = lambda qs: [CartesianPose(q[:3], (0, 0, 0, 1)) for q in qs]
+        adapter.inverse.side_effect = lambda pose, seed: (
+            *pose.position,
+            *seed[3:],
+        )
+        adapter.forward.side_effect = lambda qs: [
+            CartesianPose(q[:3], (0, 0, 0, 1)) for q in qs
+        ]
         return adapter
 
 
 class ArmTests(unittest.TestCase):
+    def test_public_kinematics_and_invalid_inputs_never_command_motion(self):
+        plant = Plant()
+        adapter = plant.kinematics()
+        with (
+            plant.running(),
+            patch(
+                'irobot.src.robots.sawyer.core.base.InteraKinematics',
+                return_value=adapter,
+            ),
+        ):
+            pose = plant.robot.forward_kinematics([(0.0,) * 7])[0]
+            assert plant.robot.inverse_kinematics(pose) == (0.0,) * 7
+            with pytest.raises(ValueError, match='outside'):
+                plant.robot.forward_kinematics([(4.0,) * 7])
+        assert adapter.close.call_count == 3
+        assert not plant.messages
+        plant.node.watchdog_pub.publish.assert_not_called()
+
+    def test_external_cancel_before_execution_never_publishes(self):
+        plant = Plant()
+        cancelled = threading.Event()
+        cancelled.set()
+        with plant.running(), pytest.raises(RuntimeError, match='cancelled'):
+            plant.robot.move_to_neutral(
+                duration=2, execute=True, cancel_event=cancelled
+            )
+        assert not plant.messages
+        assert cancelled.is_set()
+
+    def test_multi_waypoint_execution_and_preview_validate_whole_path(self):
+        plant = Plant()
+        with plant.running():
+            with pytest.raises(ValueError, match='outside'):
+                plant.robot.move_trajectory(
+                    [(0.1,) * 7, (4.0,) * 7], [2.0, 12.0], execute=True
+                )
+            assert not plant.messages
+            result = plant.robot.move_trajectory(
+                [(0.1,) * 7, (-0.1,) * 7], [2.0, 4.0], execute=True
+            )
+        assert result.execution.reference_duration == 4.0
+        assert max(abs(q + 0.1) for q in plant.q) < 0.02
+        assert plant.messages[-1].mode == JointCommand.POSITION_MODE
+
     def test_neutral_preview_and_infeasible_execution_never_publish(self):
         plant = Plant()
         with plant.running():
@@ -176,7 +250,10 @@ class ArmTests(unittest.TestCase):
                     plant.robot.move_to_neutral(duration=2, execute=True)
             assert not plant.node.streaming
             zeros = [
-                m for m in plant.messages if m.mode == JointCommand.VELOCITY_MODE and list(m.velocity) == [0.0] * 7
+                m
+                for m in plant.messages
+                if m.mode == JointCommand.VELOCITY_MODE
+                and list(m.velocity) == [0.0] * 7
             ]
             assert len(zeros) >= 5
 
@@ -192,7 +269,10 @@ class ArmTests(unittest.TestCase):
 
         with (
             plant.running(),
-            patch('irobot.src.robots.sawyer.core.controller.QuinticTrajectory', side_effect=plan_and_cancel),
+            patch(
+                'irobot.src.robots.sawyer.core.controller.QuinticTrajectory',
+                side_effect=plan_and_cancel,
+            ),
             pytest.raises(RuntimeError, match='cancelled'),
         ):
             plant.robot.move_to_neutral(duration=2, execute=True)
@@ -207,24 +287,37 @@ class ArmTests(unittest.TestCase):
         assert not plant.messages
         plant = Plant()
         plant.node.command_pub.get_subscription_count.return_value = 0
-        with plant.running(), pytest.raises(RuntimeError, match='command/watchdog route absent'):
+        with (
+            plant.running(),
+            pytest.raises(
+                RuntimeError, match='command/watchdog subscribers absent'
+            ),
+        ):
             plant.robot.move_to_neutral(duration=2, execute=True)
         assert not plant.messages
 
-    def test_neutral_parameter_is_reordered_and_missing_master_is_actionable(self):
+    def test_neutral_parameter_is_reordered_and_missing_master_is_actionable(
+        self,
+    ):
         robot = SawyerController()
         proxy = MagicMock()
         proxy.__enter__.return_value.getParam.return_value = (
             1,
             '',
-            {'joint_names': list(JOINT_NAMES[::-1]), 'poses': {'neutral': list(range(7))}},
+            {
+                'joint_names': list(JOINT_NAMES[::-1]),
+                'poses': {'neutral': list(range(7))},
+            },
         )
         with (
             patch.dict('os.environ', {'ROS_MASTER_URI': 'http://robot:11311'}),
             patch('xmlrpc.client.ServerProxy', return_value=proxy),
         ):
             assert robot._neutral_pose() == (6, 5, 4, 3, 2, 1, 0)
-        with patch.dict('os.environ', {}, clear=True), pytest.raises(RuntimeError, match='ROS_MASTER_URI'):
+        with (
+            patch.dict('os.environ', {}, clear=True),
+            pytest.raises(RuntimeError, match='ROS_MASTER_URI'),
+        ):
             robot._neutral_pose()
 
 
@@ -233,12 +326,17 @@ class CartesianTests(unittest.TestCase):
         plant = Plant()
         with (
             plant.running(),
-            patch('irobot.src.robots.sawyer.core.controller.InteraKinematics', return_value=plant.kinematics()),
+            patch(
+                'irobot.src.robots.sawyer.core.controller.InteraKinematics',
+                return_value=plant.kinematics(),
+            ),
         ):
             preview = plant.robot.move_relative(dz_cm=10, duration=2)
             assert preview.plan.line.end.position == (0, 0, 0.1)
             assert not plant.messages
-            result = plant.robot.move_relative(dz_cm=10, duration=2, execute=True)
+            result = plant.robot.move_relative(
+                dz_cm=10, duration=2, execute=True
+            )
         assert result.execution is not None
         assert abs(plant.q[2] - 0.1) < 0.003
         assert plant.messages[-1].mode == JointCommand.POSITION_MODE
@@ -255,7 +353,10 @@ class CartesianTests(unittest.TestCase):
         with (
             plant.running(),
             patch.object(plant.node, 'spin_once', side_effect=lose_pose),
-            patch('irobot.src.robots.sawyer.core.controller.InteraKinematics', return_value=plant.kinematics()),
+            patch(
+                'irobot.src.robots.sawyer.core.controller.InteraKinematics',
+                return_value=plant.kinematics(),
+            ),
         ):
             with pytest.raises(RuntimeError, match='Stale Cartesian'):
                 plant.robot.move_relative(dz_cm=10, duration=2, execute=True)
@@ -275,7 +376,9 @@ class CartesianTests(unittest.TestCase):
 class GripperTests(unittest.TestCase):
     def gripper(self, calibrated=True):  # noqa: FBT002
         node = MagicMock()
-        node.get_clock.return_value.now.return_value.to_msg.return_value = Time(sec=123)
+        node.get_clock.return_value.now.return_value.to_msg.return_value = (
+            Time(sec=123)
+        )
         gripper = SawyerGripper(node, SawyerConfig())
         gripper.publisher.get_subscription_count.return_value = 1
         gripper.on_state(gripper_message(calibrated=calibrated))
@@ -340,7 +443,9 @@ class GripperSettlingTests(unittest.TestCase):
         node = MagicMock()
         item = SawyerGripper(node, SawyerConfig(gripper_timeout=1.0))
         now = [0.0]
-        node.spin_once.side_effect = lambda **_: now.__setitem__(0, now[0] + 0.05)
+        node.spin_once.side_effect = lambda **_: now.__setitem__(
+            0, now[0] + 0.05
+        )
         item.completed = lambda *_: not 0.05 <= now[0] < 0.1
         with patch('time.monotonic', side_effect=lambda: now[0]):
             item.wait_completion('calibrate', 0.0)

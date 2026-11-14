@@ -1,0 +1,6 @@
+float64[] positions
+string tip
+---
+bool success
+string detail
+geometry_msgs/PoseStamped[] poses

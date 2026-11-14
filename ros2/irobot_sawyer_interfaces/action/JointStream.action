@@ -1,0 +1,23 @@
+uint8 POSITION=1
+uint8 VELOCITY=2
+uint8 TORQUE=3
+uint8 TRAJECTORY=4
+uint8 mode
+float64 duration
+float64 rate
+float64 max_velocity
+float64 max_acceleration
+float64 max_displacement
+float64 effort_fraction
+float64 position_speed
+float64 lease_timeout
+---
+bool success
+string detail
+uint64 samples
+float64 max_command_gap
+---
+string session_id
+float64 elapsed
+float64[7] position
+float64[7] velocity

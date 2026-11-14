@@ -15,8 +15,14 @@ import time
 
 
 def main():
-    if os.environ.get('ROS_LOCALHOST_ONLY') != '1' or os.environ.get('ROS_DOMAIN_ID') != '231':
-        msg = 'Use ROS_LOCALHOST_ONLY=1 ROS_DOMAIN_ID=231 for this synthetic check'
+    if (
+        os.environ.get('ROS_LOCALHOST_ONLY') != '1'
+        or os.environ.get('ROS_DOMAIN_ID') != '231'
+    ):
+        msg = (
+            'Use ROS_LOCALHOST_ONLY=1 ROS_DOMAIN_ID=231 '
+            'for this synthetic check'
+        )
         raise RuntimeError(msg)
     from intera_core_msgs.msg import (
         CollisionDetectionState,
@@ -29,7 +35,12 @@ def main():
     from rclpy.context import Context
     from rclpy.executors import SingleThreadedExecutor
     from rclpy.node import Node
-    from rclpy.qos import DurabilityPolicy, QoSProfile, ReliabilityPolicy, qos_profile_sensor_data
+    from rclpy.qos import (
+        DurabilityPolicy,
+        QoSProfile,
+        ReliabilityPolicy,
+        qos_profile_sensor_data,
+    )
     from sensor_msgs.msg import JointState
 
     from irobot import SawyerConfig, SawyerController
@@ -40,7 +51,11 @@ def main():
     executor = SingleThreadedExecutor(context=context)
     executor.add_node(node)
     names = [f'right_j{i}' for i in range(7)]
-    latched = QoSProfile(depth=1, reliability=ReliabilityPolicy.RELIABLE, durability=DurabilityPolicy.TRANSIENT_LOCAL)
+    latched = QoSProfile(
+        depth=1,
+        reliability=ReliabilityPolicy.RELIABLE,
+        durability=DurabilityPolicy.TRANSIENT_LOCAL,
+    )
     tip = EndpointState(valid=True)
     tip.header.frame_id = 'base'
     tip.pose.orientation.w = 1.0
@@ -50,7 +65,11 @@ def main():
             JointState(name=names, position=[0.0] * 7, velocity=[0.0] * 7),
             qos_profile_sensor_data,
         ),
-        ('/robot/state', RobotAssemblyState(enabled=False, ready=False), qos_profile_sensor_data),
+        (
+            '/robot/state',
+            RobotAssemblyState(enabled=False, ready=False),
+            qos_profile_sensor_data,
+        ),
         (
             '/robot/limb/right/collision_detection_state',
             CollisionDetectionState(collision_state=False),
@@ -68,15 +87,28 @@ def main():
             latched,
         ),
         ('/robot/limb/right/endpoint_state', tip, qos_profile_sensor_data),
-        ('/robot/limb/right/tip_states', EndpointStates(names=['right_hand'], states=[tip]), qos_profile_sensor_data),
+        (
+            '/robot/limb/right/tip_states',
+            EndpointStates(names=['right_hand'], states=[tip]),
+            qos_profile_sensor_data,
+        ),
     ]
-    publishers = [(node.create_publisher(type(message), topic, qos), message) for topic, message, qos in samples]
+    publishers = [
+        (node.create_publisher(type(message), topic, qos), message)
+        for topic, message, qos in samples
+    ]
     commands = []
-    node.create_subscription(JointCommand, '/robot/limb/right/joint_command', commands.append, 1)
-    node.create_timer(0.01, lambda: [pub.publish(message) for pub, message in publishers])
+    node.create_subscription(
+        JointCommand, '/robot/limb/right/joint_command', commands.append, 1
+    )
+    node.create_timer(
+        0.01, lambda: [pub.publish(message) for pub, message in publishers]
+    )
     thread = threading.Thread(target=executor.spin, daemon=True)
     thread.start()
-    robot = SawyerController(SawyerConfig(domain_id=231, enable_gripper=False, connect_timeout=5.0))
+    robot = SawyerController(
+        SawyerConfig(domain_id=231, enable_gripper=False, connect_timeout=5.0)
+    )
     try:
         assert robot.connect()
         assert robot.joint_positions == (0.0,) * 7
@@ -86,10 +118,15 @@ def main():
         assert not status['ready'], status
         assert not status['enabled'], status
         robot.disconnect()
-        assert context.ok(), 'Driver shut down the simulator/application context'
+        assert (
+            context.ok()
+        ), 'Driver shut down the simulator/application context'
         time.sleep(0.05)
         assert not commands, 'Read-only connection published arm commands'
-        print('PASS: synthetic DDS feedback, read-only connection, and independent context shutdown.')
+        print(
+            'PASS: synthetic DDS feedback, read-only connection, '
+            'and independent context shutdown.'
+        )
     finally:
         robot.disconnect()
         executor.shutdown()

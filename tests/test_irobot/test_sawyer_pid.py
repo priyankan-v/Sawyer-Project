@@ -8,12 +8,22 @@ import unittest
 
 import pytest
 
-from irobot.src.robots.sawyer.core.controller import JointPIDController, QuinticTrajectory
+from irobot.src.robots.sawyer.core.controller import (
+    JointPIDController,
+    QuinticTrajectory,
+)
 
 
 class PIDTests(unittest.TestCase):
     def controller(self, **kwargs):
-        settings = {'size': 1, 'kp': 2, 'ki': 0.1, 'kd': 0.05, 'max_velocity': 2, 'max_acceleration': 10}
+        settings = {
+            'size': 1,
+            'kp': 2,
+            'ki': 0.1,
+            'kd': 0.05,
+            'max_velocity': 2,
+            'max_acceleration': 10,
+        }
         settings.update(kwargs)
         return JointPIDController(**settings)
 
@@ -71,7 +81,10 @@ class PIDTests(unittest.TestCase):
             {'position_lower': [1], 'position_upper': [-1]},
             {'position_lower': [0]},
         ):
-            with self.subTest(settings=settings), pytest.raises(ValueError, match='.'):
+            with (
+                self.subTest(settings=settings),
+                pytest.raises(ValueError, match='.'),
+            ):
                 self.controller(**settings)
         pid = self.controller()
         for dt in (0, -1, float('nan'), float('inf')):
@@ -88,7 +101,9 @@ class PIDTests(unittest.TestCase):
         q, velocity, peak_error, dt = 0.0, 0.0, 0.0, 0.005
         for tick in range(1401):
             reference = path.sample(tick * dt)
-            command = pid.update(reference.position, [q], reference.velocity, [velocity], dt)[0]
+            command = pid.update(
+                reference.position, [q], reference.velocity, [velocity], dt
+            )[0]
             velocity += (command - velocity) * dt / 0.04
             q += velocity * dt
             peak_error = max(peak_error, abs(q - reference.position[0]))

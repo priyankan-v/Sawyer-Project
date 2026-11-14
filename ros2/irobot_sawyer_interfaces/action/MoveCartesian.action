@@ -1,0 +1,9 @@
+geometry_msgs/PoseStamped target
+float64 duration
+float64 speed
+float64 max_acceleration
+---
+bool success
+string detail
+---
+geometry_msgs/PoseStamped actual

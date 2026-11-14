@@ -15,6 +15,14 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
 ]
 packages = [{ include = "irobot" }]
+include = [
+    { path = "irobot/src/robots/sawyer/CAPABILITY_LEDGER.json", format = ["sdist", "wheel"] },
+    { path = "irobot/src/robots/sawyer/installation/humble-linux-64.explicit.txt", format = ["sdist", "wheel"] },
+    { path = "irobot/src/robots/sawyer/installation/fastdds-cameras.xml", format = ["sdist", "wheel"] },
+    { path = "irobot/src/robots/sawyer/installation/wire_schema.json", format = ["sdist", "wheel"] },
+    { path = "irobot/src/robots/sawyer/installation/INTERA_LICENSE.txt", format = ["sdist", "wheel"] },
+    { path = "irobot/src/robots/sawyer/installation/THIRD_PARTY_NOTICES.md", format = ["sdist", "wheel"] },
+]
 
 # ros_sugar, numpy, scipy, attrs are system-installed alongside ROS2.
 [tool.poetry.dependencies]
@@ -39,7 +47,7 @@ ruff = "^0.6.7"
 
 
 [tool.isort]
-line_length = 120
+line_length = 79
 profile = "black"
 multi_line_output = 3
 force_grid_wrap = 2
@@ -110,7 +118,7 @@ exclude = [
     "node_modules",
     "venv",
 ]
-line-length = 120
+line-length = 79
 
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
@@ -123,7 +131,7 @@ target-version = "py311"
 [tool.ruff.flake8-quotes]
 docstring-quotes = "double"
 inline-quotes = "single"
-multiline-quotes = "single"
+multiline-quotes = "double"
 
 [tool.ruff.mccabe]
 max-complexity = 10

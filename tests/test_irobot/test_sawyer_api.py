@@ -2,12 +2,13 @@
 
 # Numeric regression bounds and controlled private fixtures are intentional.
 # ruff: noqa: PLR2004, SLF001, PT009, SIM117
-# Fault fixtures deliberately exercise nested cleanup and private resource lifecycles.
+# Fault fixtures exercise nested cleanup and private resource lifecycles.
 from __future__ import annotations
 
 import subprocess
 import sys
 import unittest
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -18,25 +19,36 @@ from irobot.src.robots.sawyer.config import MotionOptions
 
 class LifecycleTests(unittest.TestCase):
     def attach(self, robot):
-        robot._context = MagicMock()
-        robot._executor = MagicMock()
+        robot._transport = MagicMock()
         robot._node = MagicMock()
+        robot._node.state = SimpleNamespace(
+            enabled=True, ready=True, stopped=False, error=False
+        )
         robot._gripper = MagicMock() if robot.config.enable_gripper else None
 
     def test_import_and_construction_do_not_load_ros(self):
         code = (
             'from irobot import SawyerConfig, SawyerBase, SawyerController; '
             'r = SawyerController(SawyerConfig()); '
-            'assert not r.is_connected; assert not r.get_status()["connected"]; '
+            'assert not r.is_connected; '
+            'assert not r.get_status()["connected"]; '
             'r.disconnect(); import sys; '
-            'assert not any(x.startswith("rclpy") for x in sys.modules)'
+            'blocked = {"rclpy", "rospy", "intera_core_msgs", "cflib"}; '
+            'assert not any(x.split(".")[0] in blocked for x in sys.modules)'
         )
-        result = subprocess.run([sys.executable, '-c', code], capture_output=True, text=True, check=False)  # noqa: S603
+        result = subprocess.run(  # noqa: S603
+            [sys.executable, '-c', code],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
         assert result.returncode == 0, result.stderr
 
     def test_connect_and_reconnect_do_not_command_or_duplicate_runtime(self):
         robot = SawyerController()
-        with patch.object(robot, '_open_runtime', side_effect=lambda: self.attach(robot)) as open_runtime:
+        with patch.object(
+            robot, '_open_runtime', side_effect=lambda: self.attach(robot)
+        ) as open_runtime:
             assert robot.connect()
             node = robot._node
             assert robot.connect()
@@ -51,21 +63,23 @@ class LifecycleTests(unittest.TestCase):
 
         def fail():
             self.attach(robot)
-            self.executor, self.context, self.node = robot._executor, robot._context, robot._node
-            robot._node.wait_inputs.side_effect = RuntimeError('Missing feedback')
+            self.transport = robot._transport
+            robot._node.wait_inputs.side_effect = RuntimeError(
+                'Missing feedback'
+            )
 
         with patch.object(robot, '_open_runtime', side_effect=fail):
             with pytest.raises(RuntimeError, match='Missing feedback'):
                 robot.connect()
-        self.executor.shutdown.assert_called_once()
-        self.context.shutdown.assert_called_once()
-        self.node.destroy_node.assert_called_once()
+        self.transport.destroy_node.assert_called_once()
         assert not robot.is_connected
         assert robot._node is None
 
     def test_context_manager_disconnects_after_failure(self):
         robot = SawyerBase(SawyerConfig(enable_gripper=False))
-        with patch.object(robot, '_open_runtime', side_effect=lambda: self.attach(robot)):
+        with patch.object(
+            robot, '_open_runtime', side_effect=lambda: self.attach(robot)
+        ):
             with pytest.raises(ValueError, match='application'):  # noqa: PT012
                 with robot:
                     assert robot.is_connected
@@ -93,9 +107,17 @@ class LifecycleTests(unittest.TestCase):
             {'neutral_joints': (0.0,) * 6},
             {'gripper_open_position': float('nan')},
         ):
-            with self.subTest(settings=settings), pytest.raises(ValueError, match='.'):
+            with (
+                self.subTest(settings=settings),
+                pytest.raises(ValueError, match='.'),
+            ):
                 SawyerConfig(**settings)
-        for settings in ({'speed': 2}, {'rate': 10}, {'time': float('nan')}, {'execute': 'yes'}):
+        for settings in (
+            {'speed': 2},
+            {'rate': 10},
+            {'time': float('nan')},
+            {'execute': 'yes'},
+        ):
             with pytest.raises(ValueError, match='.'):
                 MotionOptions(**settings)
 
@@ -109,7 +131,10 @@ class LifecycleTests(unittest.TestCase):
 
     def test_simultaneous_operations_are_rejected(self):
         robot = SawyerController()
-        with robot._operation(), pytest.raises(RuntimeError, match='already running'):
+        with (
+            robot._operation(),
+            pytest.raises(RuntimeError, match='already running'),
+        ):
             robot.connect()
 
     def test_gripper_methods_preview_by_default_and_disabled_is_explicit(self):
@@ -129,15 +154,21 @@ if __name__ == '__main__':
     unittest.main()
 
 
-class BridgeConfigurationTests(unittest.TestCase):
-    def test_routes_come_from_driver_config(self):
-        config = SawyerConfig(joint_state_topic='/custom/joints', enable_gripper=False)
-        routes = config.bridge_configuration()
-        topics = {entry['topic']: entry for entry in routes['topics']}
-        assert config.joint_state_topic in topics
-        assert '/robot/joint_states' not in topics
-        assert config.gripper_namespace+'/state' not in topics
-        assert not topics[config.joint_command_topic]['enabled']
-        assert not topics[config.command_timeout_topic]['enabled']
-        assert topics[config.joint_command_topic]['qos']['lifespan']['nsecs'] == round(config.command_timeout*1e9)
-        assert {service['service'] for service in routes['services_2_to_1']} == {config.ik_service, config.fk_service}
+def test_readonly_validation_skips_planning_when_controller_is_stopped():
+    from unittest.mock import MagicMock
+
+    from irobot.src.robots.sawyer.examples.validate_direct import validate
+
+    robot = MagicMock()
+    robot.get_status.return_value = {
+        'ready': False,
+        'enabled': False,
+        'stopped': True,
+        'error': True,
+    }
+    robot.devices.robot_state.return_value = {'stopped': True}
+    report = validate(robot)
+    assert report['robot_state']['stopped']
+    assert report['motion_validation'].startswith('skipped')
+    robot.move_to_neutral.assert_not_called()
+    robot.devices.set_enabled.assert_not_called()

@@ -21,17 +21,31 @@ def main():
     parser.add_argument('--execute', action='store_true')
     parser.add_argument('--no-gripper', action='store_true')
     args = parser.parse_args()
-    config = SawyerConfig(enable_gripper=not args.no_gripper, motion=CartesianMotionOptions(speed=args.speed))
+    config = SawyerConfig(
+        enable_gripper=not args.no_gripper,
+        motion=CartesianMotionOptions(speed=args.speed),
+    )
     with SawyerController(config) as robot:
         kwargs = {'duration': args.time, 'execute': args.execute}
         result = (
             robot.move_to_neutral(**kwargs)
             if args.motion == 'neutral'
-            else robot.move_relative(args.dx_cm, args.dy_cm, args.dz_cm, **kwargs)
+            else robot.move_relative(
+                args.dx_cm, args.dy_cm, args.dz_cm, **kwargs
+            )
         )
-        trajectory = result.plan if args.motion == 'neutral' else result.plan.trajectory
-        print(f'Reference duration: {trajectory.duration:.3f}s; minimum: {trajectory.minimum_duration:.3f}s')
-        print('Executed.' if result.execution is not None else 'Preview/no motion.')
+        trajectory = (
+            result.plan if args.motion == 'neutral' else result.plan.trajectory
+        )
+        print(
+            f'Reference duration: {trajectory.duration:.3f}s; '
+            f'minimum: {trajectory.minimum_duration:.3f}s'
+        )
+        print(
+            'Executed.'
+            if result.execution is not None
+            else 'Preview/no motion.'
+        )
 
 
 if __name__ == '__main__':

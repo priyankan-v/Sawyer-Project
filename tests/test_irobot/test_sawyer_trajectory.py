@@ -39,13 +39,19 @@ class QuinticTests(unittest.TestCase):
         expected = math.sqrt(10 / math.sqrt(3))
         self.assertAlmostEqual(path.duration, expected)
         for fraction in ((3 - math.sqrt(3)) / 6, (3 + math.sqrt(3)) / 6):
-            self.assertAlmostEqual(abs(path.sample(path.duration * fraction).acceleration[0]), 1)
+            self.assertAlmostEqual(
+                abs(path.sample(path.duration * fraction).acceleration[0]), 1
+            )
         with pytest.raises(ValueError, match='.'):
-            QuinticTrajectory([0], [1], 100, duration=expected * 0.99, max_acceleration=1)
+            QuinticTrajectory(
+                [0], [1], 100, duration=expected * 0.99, max_acceleration=1
+            )
 
     def test_longer_duration_reduces_derivatives(self):
         fast = QuinticTrajectory([0], [1], 1, max_acceleration=2)
-        slow = QuinticTrajectory([0], [1], 1, duration=2 * fast.duration, max_acceleration=2)
+        slow = QuinticTrajectory(
+            [0], [1], 1, duration=2 * fast.duration, max_acceleration=2
+        )
         a, b = fast.sample(fast.duration / 3), slow.sample(slow.duration / 3)
         self.assertAlmostEqual(a.position[0], b.position[0])
         self.assertAlmostEqual(a.velocity[0], 2 * b.velocity[0])
@@ -55,10 +61,26 @@ class QuinticTests(unittest.TestCase):
     def test_derivatives_match_finite_differences(self):
         path = QuinticTrajectory([0], [1], 1, duration=3)
         t, step = 0.8, 1e-5
-        left, center, right = path.sample(t - step), path.sample(t), path.sample(t + step)
-        self.assertAlmostEqual((right.position[0] - left.position[0]) / (2 * step), center.velocity[0], places=8)
-        self.assertAlmostEqual((right.velocity[0] - left.velocity[0]) / (2 * step), center.acceleration[0], places=8)
-        self.assertAlmostEqual((right.acceleration[0] - left.acceleration[0]) / (2 * step), center.jerk[0], places=8)
+        left, center, right = (
+            path.sample(t - step),
+            path.sample(t),
+            path.sample(t + step),
+        )
+        self.assertAlmostEqual(
+            (right.position[0] - left.position[0]) / (2 * step),
+            center.velocity[0],
+            places=8,
+        )
+        self.assertAlmostEqual(
+            (right.velocity[0] - left.velocity[0]) / (2 * step),
+            center.acceleration[0],
+            places=8,
+        )
+        self.assertAlmostEqual(
+            (right.acceleration[0] - left.acceleration[0]) / (2 * step),
+            center.jerk[0],
+            places=8,
+        )
 
     def test_random_seven_joint_moves_obey_limits_and_monotonicity(self):
         randomizer = random.Random(42)
@@ -67,13 +89,21 @@ class QuinticTests(unittest.TestCase):
             end = [randomizer.uniform(-3, 3) for _ in range(7)]
             velocity = [randomizer.uniform(0.1, 2) for _ in range(7)]
             acceleration = [randomizer.uniform(0.2, 5) for _ in range(7)]
-            path = QuinticTrajectory(start, end, velocity, max_acceleration=acceleration)
+            path = QuinticTrajectory(
+                start, end, velocity, max_acceleration=acceleration
+            )
             for n in range(201):
                 sample = path.sample(path.duration * n / 200)
                 for i in range(7):
                     assert abs(sample.velocity[i]) <= velocity[i] + 1e-10
-                    assert abs(sample.acceleration[i]) <= acceleration[i] + 1e-10
-                    assert min(start[i], end[i]) - 1e-10 <= sample.position[i] <= max(start[i], end[i]) + 1e-10
+                    assert (
+                        abs(sample.acceleration[i]) <= acceleration[i] + 1e-10
+                    )
+                    assert (
+                        min(start[i], end[i]) - 1e-10
+                        <= sample.position[i]
+                        <= max(start[i], end[i]) + 1e-10
+                    )
 
     def test_stationary_auto_and_requested_duration(self):
         path = QuinticTrajectory([1, 2], [1, 2], 1)
@@ -93,10 +123,16 @@ class QuinticTests(unittest.TestCase):
             ([0], [1], float('inf')),
         ]
         for arguments in cases:
-            with self.subTest(arguments=arguments), pytest.raises(ValueError, match='.'):
+            with (
+                self.subTest(arguments=arguments),
+                pytest.raises(ValueError, match='.'),
+            ):
                 QuinticTrajectory(*arguments)
         for duration in (0, -1, float('nan'), float('inf')):
-            with self.subTest(duration=duration), pytest.raises(ValueError, match='.'):
+            with (
+                self.subTest(duration=duration),
+                pytest.raises(ValueError, match='.'),
+            ):
                 QuinticTrajectory([0], [1], 1, duration=duration)
         with pytest.raises(ValueError, match='.'):
             QuinticTrajectory([0], [1], 1, max_acceleration=0)

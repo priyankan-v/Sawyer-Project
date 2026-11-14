@@ -1,0 +1,11 @@
+irobot_sawyer_interfaces/InteractionControlCommand command
+float64 duration
+---
+bool success
+bool activation_confirmed
+bool deactivation_confirmed
+string detail
+---
+float64 elapsed
+float64[7] position
+float64[7] velocity

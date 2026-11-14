@@ -1,4 +1,4 @@
-"""Sawyer bridge connection, feedback, hardware IO and lifecycle."""
+"""Sawyer direct connection, feedback, hardware IO and lifecycle."""
 
 # Named trajectory bounds and retry/stop scopes stay explicit for review.
 from __future__ import annotations
@@ -20,9 +20,21 @@ from irobot.src.robots.sawyer.config import (
 )
 
 
+def receipt_time(message):
+    return getattr(message, 'received_at', 0.0) or time.monotonic()
+
+
 def vector(values, size, name, *, positive=False, nonnegative=False):
-    result = (float(values),) * size if isinstance(values, int | float) else tuple(float(value) for value in values)
-    if len(result) != size or not all(math.isfinite(value) for value in result):
+    items = (
+        (values,) * size if isinstance(values, int | float) else tuple(values)
+    )
+    if any(isinstance(value, bool) for value in items):
+        msg = f'{name} requires numeric values rather than booleans'
+        raise ValueError(msg)
+    result = tuple(float(value) for value in items)
+    if len(result) != size or not all(
+        math.isfinite(value) for value in result
+    ):
         msg = f'{name} must contain {size} finite values'
         raise ValueError(msg)
     if positive and any(value <= 0 for value in result):
@@ -41,13 +53,21 @@ class CartesianPose:
     frame: str = 'base'
 
     def __post_init__(self):
-        object.__setattr__(self, 'position', vector(self.position, 3, 'Cartesian position'))
+        object.__setattr__(
+            self, 'position', vector(self.position, 3, 'Cartesian position')
+        )
         quaternion = vector(self.orientation, 4, 'orientation quaternion')
         norm = math.sqrt(sum(value * value for value in quaternion))
-        if not math.isfinite(norm) or norm < QUATERNION_MIN_NORM or abs(norm - 1) > QUATERNION_NORM_TOLERANCE:
+        if (
+            not math.isfinite(norm)
+            or norm < QUATERNION_MIN_NORM
+            or abs(norm - 1) > QUATERNION_NORM_TOLERANCE
+        ):
             msg = 'Orientation must be a valid approximately unit quaternion'
             raise ValueError(msg)
-        object.__setattr__(self, 'orientation', tuple(value / norm for value in quaternion))
+        object.__setattr__(
+            self, 'orientation', tuple(value / norm for value in quaternion)
+        )
         frame = self.frame.lstrip('/')
         if not frame:
             msg = 'A Cartesian reference frame is required'
@@ -59,8 +79,17 @@ def pose_error(actual, desired):
     if actual.frame != desired.frame:
         msg = f'Pose frame mismatch: {actual.frame} != {desired.frame}'
         raise ValueError(msg)
-    dot = abs(sum(a * b for a, b in zip(actual.orientation, desired.orientation, strict=False)))
-    return math.dist(actual.position, desired.position), 2 * math.acos(min(1.0, dot))
+    dot = abs(
+        sum(
+            a * b
+            for a, b in zip(
+                actual.orientation, desired.orientation, strict=False
+            )
+        )
+    )
+    return math.dist(actual.position, desired.position), 2 * math.acos(
+        min(1.0, dot)
+    )
 
 
 class JointFeedback:
@@ -81,8 +110,9 @@ class JointFeedback:
         self.velocity = {}
         self.position_at = {}
         self.velocity_at = {}
+        self.effort, self.effort_at = {}, {}
 
-    def update(self, names, positions, velocities, now):
+    def update(self, names, positions, velocities, now, efforts=()):
         relevant = set(self.names).intersection(names)
         if not relevant:
             return False
@@ -96,13 +126,21 @@ class JointFeedback:
         for label, values, cache, times in (
             ('position', positions, self.position, self.position_at),
             ('velocity', velocities, self.velocity, self.velocity_at),
+            ('effort', efforts, self.effort, self.effort_at),
         ):
             if len(values) == 0:
                 continue
             if len(values) != len(names):
-                msg = f'Arm JointState {label} length {len(values)} != names length {len(names)}'
+                msg = (
+                    f'Arm JointState {label} length {len(values)} != names '
+                    f'length {len(names)}'
+                )
                 raise ValueError(msg)
-            selected = {name: float(value) for name, value in zip(names, values, strict=False) if name in relevant}
+            selected = {
+                name: float(value)
+                for name, value in zip(names, values, strict=False)
+                if name in relevant
+            }
             if not all(math.isfinite(value) for value in selected.values()):
                 msg = f'Non-finite arm JointState {label}'
                 raise ValueError(msg)
@@ -114,7 +152,10 @@ class JointFeedback:
         return bool(updates)
 
     def snapshot(self):
-        if any(name not in self.position or name not in self.velocity for name in self.names):
+        if any(
+            name not in self.position or name not in self.velocity
+            for name in self.names
+        ):
             return None, None, 0.0
         return (
             tuple(self.position[name] for name in self.names),
@@ -123,14 +164,23 @@ class JointFeedback:
         )
 
     def fresh_positions(self, now, timeout):
-        """Position hold needs fresh positions even if velocity feedback expired."""
-        if any(name not in self.position_at or now - self.position_at[name] >= timeout for name in self.names):
+        """
+        Position hold needs fresh positions even if velocity feedback expired.
+        """
+        if any(
+            name not in self.position_at
+            or now - self.position_at[name] >= timeout
+            for name in self.names
+        ):
             return None
         return tuple(self.position[name] for name in self.names)
 
     def issues(self, now, timeout):
         issues = []
-        for label, times in (('position', self.position_at), ('velocity', self.velocity_at)):
+        for label, times in (
+            ('position', self.position_at),
+            ('velocity', self.velocity_at),
+        ):
             missing = [name for name in self.names if name not in times]
             stale = [
                 f'{name} ({now - times[name]:.3f}s old)'
@@ -140,7 +190,9 @@ class JointFeedback:
             if missing:
                 issues.append(f"missing {label}: {', '.join(missing)}")
             if stale:
-                issues.append(f"stale {label} (limit {timeout:.3f}s): {', '.join(stale)}")
+                issues.append(
+                    f"stale {label} (limit {timeout:.3f}s): {', '.join(stale)}"
+                )
         return issues
 
 
@@ -173,11 +225,20 @@ class JointBounds:
     def from_message(cls, message):
         bounds = cls(
             *(
-                ordered_values(message.joint_names, getattr(message, field), field)
-                for field in ('position_lower', 'position_upper', 'velocity', 'accel')
+                ordered_values(
+                    message.joint_names, getattr(message, field), field
+                )
+                for field in (
+                    'position_lower',
+                    'position_upper',
+                    'velocity',
+                    'accel',
+                )
             )
         )
-        if any(a >= b for a, b in zip(bounds.lower, bounds.upper, strict=False)):
+        if any(
+            a >= b for a, b in zip(bounds.lower, bounds.upper, strict=False)
+        ):
             msg = 'Invalid joint position bounds'
             raise ValueError(msg)
         if any(value <= 0 for value in bounds.velocity + bounds.acceleration):
@@ -187,22 +248,35 @@ class JointBounds:
 
     def check_position(self, positions, label, tolerance=0.0):
         positions = vector(positions, 7, label)
-        for name, position, lower, upper in zip(JOINT_NAMES, positions, self.lower, self.upper, strict=False):
+        for name, position, lower, upper in zip(
+            JOINT_NAMES, positions, self.lower, self.upper, strict=False
+        ):
             if not lower - tolerance <= position <= upper + tolerance:
-                msg = f'{label}: {name}={position:.6f} outside [{lower}, {upper}]'
+                msg = (
+                    f'{label}: {name}={position:.6f} outside [{lower}, '
+                    f'{upper}]'
+                )
                 raise ValueError(msg)
 
 
 def from_pose(pose, frame):
     return CartesianPose(
         (pose.position.x, pose.position.y, pose.position.z),
-        (pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w),
+        (
+            pose.orientation.x,
+            pose.orientation.y,
+            pose.orientation.z,
+            pose.orientation.w,
+        ),
         frame,
     )
 
 
 class EndpointFeedback:
-    """Named endpoint cache; avoids guessing that an anonymous pose is a fingertip."""
+    """
+    Named endpoint cache; avoids guessing that an anonymous pose is a
+    fingertip.
+    """
 
     def __init__(self, fallback_frame, feedback_timeout, config=None):
         self.config = config or SawyerConfig()
@@ -210,6 +284,7 @@ class EndpointFeedback:
         self.feedback_timeout = feedback_timeout
         self.endpoint = None
         self.tips = {}
+        self.raw_tips = {}
         self.last_error = None
 
     def on_endpoint(self, message):
@@ -217,26 +292,54 @@ class EndpointFeedback:
             if not message.valid:
                 msg = 'Endpoint pose has valid=false'
                 raise ValueError(msg)  # noqa: TRY301
-            self.endpoint = (from_pose(message.pose, message.header.frame_id or self.frame), time.monotonic())
+            self.endpoint = (
+                from_pose(message.pose, message.header.frame_id or self.frame),
+                receipt_time(message),
+            )
         except ValueError as exc:
             self.endpoint = None
             self.last_error = str(exc)
 
     def on_tips(self, message):
-        if len(message.names) != len(message.states) or len(set(message.names)) != len(message.names):
+        if len(message.names) != len(message.states) or len(
+            set(message.names)
+        ) != len(message.names):
             self.tips.clear()
+            self.raw_tips.clear()
             self.last_error = 'Malformed named tip-state array'
             return
-        now = time.monotonic()
+        now = receipt_time(message)
+        self.tips = {
+            name: value
+            for name, value in self.tips.items()
+            if name in message.names
+        }
+        self.raw_tips = {
+            name: value
+            for name, value in self.raw_tips.items()
+            if name in message.names
+        }
         for name, state in zip(message.names, message.states, strict=False):
             try:
                 if not state.valid:
                     msg = f'Tip {name} has valid=false'
                     raise ValueError(msg)  # noqa: TRY301
-                frame = state.header.frame_id or message.header.frame_id or self.frame
+                frame = (
+                    state.header.frame_id
+                    or message.header.frame_id
+                    or self.frame
+                )
                 self.tips[name] = (from_pose(state.pose, frame), now)
+                stamp = state.header.stamp
+                if not stamp.sec and not stamp.nanosec:
+                    stamp = message.header.stamp
+                header = replace(state.header, frame_id=frame, stamp=stamp)
+                normalized = replace(state, header=header)
+                normalized.received_at = state.received_at
+                self.raw_tips[name] = (normalized, now)
             except ValueError as exc:
                 self.tips.pop(name, None)
+                self.raw_tips.pop(name, None)
                 self.last_error = str(exc)
 
     def read(self, tip):
@@ -248,14 +351,20 @@ class EndpointFeedback:
             raise RuntimeError(msg)
         pose, received = self.tips[tip]
         if time.monotonic() - received >= self.feedback_timeout:
-            msg = f'Stale Cartesian pose for {tip}: {time.monotonic() - received:.3f}s old'
+            msg = (
+                f'Stale Cartesian pose for {tip}: '
+                f'{time.monotonic() - received:.3f}s old'
+            )
             raise RuntimeError(msg)
         return pose
 
     def select(self, requested=None):
         if requested:
             return requested, self.read(requested)
-        if self.endpoint is None or time.monotonic() - self.endpoint[1] >= self.feedback_timeout:
+        if (
+            self.endpoint is None
+            or time.monotonic() - self.endpoint[1] >= self.feedback_timeout
+        ):
             msg = 'Missing/stale /robot/limb/right/endpoint_state'
             raise RuntimeError(msg)
         matches = []
@@ -279,16 +388,32 @@ class EndpointFeedback:
 
 
 class InteraKinematics:
-    """Seeded IK and batched FK. No motion commands are sent by this adapter."""
+    """
+    Seeded IK and batched FK. No motion commands are sent by this adapter.
+    """
 
-    def __init__(self, node, tip, frame, request_timeout=None, planning_timeout=None, health_check=None):  # noqa: PLR0913
+    def __init__(  # noqa: PLR0913
+        self,
+        node,
+        tip,
+        frame,
+        request_timeout=None,
+        planning_timeout=None,
+        health_check=None,
+    ):
         self.node, self.tip, self.frame = node, tip, frame
-        self.request_timeout = node.config.motion.ik_timeout if request_timeout is None else request_timeout
+        self.request_timeout = (
+            node.config.motion.ik_timeout
+            if request_timeout is None
+            else request_timeout
+        )
         self.deadline = time.monotonic() + (
-            node.config.motion.planning_timeout if planning_timeout is None else planning_timeout
+            node.config.motion.planning_timeout
+            if planning_timeout is None
+            else planning_timeout
         )
         self.health_check = health_check
-        from intera_core_msgs.srv import SolvePositionFK, SolvePositionIK
+        from .wire import SolvePositionFK, SolvePositionIK
 
         self.ik = node.create_client(SolvePositionIK, node.config.ik_service)
         self.fk = node.create_client(SolvePositionFK, node.config.fk_service)
@@ -299,14 +424,27 @@ class InteraKinematics:
 
     def wait_ready(self, timeout=None):
         deadline = min(
-            time.monotonic() + (self.node.config.connect_timeout if timeout is None else timeout), self.deadline
+            time.monotonic()
+            + (
+                self.node.config.connect_timeout
+                if timeout is None
+                else timeout
+            ),
+            self.deadline,
         )
-        for client, name in ((self.ik, self.node.config.ik_service), (self.fk, self.node.config.fk_service)):
-            while not client.wait_for_service(timeout_sec=self.node.config.input_poll_timeout):
+        for client, name in (
+            (self.ik, self.node.config.ik_service),
+            (self.fk, self.node.config.fk_service),
+        ):
+            while not client.wait_for_service(
+                timeout_sec=self.node.config.input_poll_timeout
+            ):
                 if time.monotonic() >= deadline:
-                    msg = f'Kinematics service unavailable: {name}; check bridge configuration'
+                    msg = f'Kinematics service unavailable: {name}'
                     raise RuntimeError(msg)
-                self.node.spin_once(timeout_sec=self.node.config.callback_slice)
+                self.node.spin_once(
+                    timeout_sec=self.node.config.callback_slice
+                )
 
     def call(self, client, request, label):
         if time.monotonic() >= self.deadline:
@@ -319,7 +457,9 @@ class InteraKinematics:
                 if time.monotonic() >= deadline:
                     msg = f'{label} response timed out'
                     raise TimeoutError(msg)  # noqa: TRY301
-                self.node.spin_once(timeout_sec=self.node.config.callback_slice)
+                self.node.spin_once(
+                    timeout_sec=self.node.config.callback_slice
+                )
                 if self.health_check:
                     self.health_check()
             response = future.result()
@@ -332,9 +472,7 @@ class InteraKinematics:
             raise
 
     def inverse(self, pose, seed):
-        from geometry_msgs.msg import PoseStamped
-        from intera_core_msgs.srv import SolvePositionIK
-        from sensor_msgs.msg import JointState
+        from .wire import JointState, PoseStamped, SolvePositionIK
 
         if pose.frame != self.frame:
             msg = 'IK pose frame changed during planning'
@@ -342,15 +480,24 @@ class InteraKinematics:
         target = PoseStamped()
         target.header.frame_id = pose.frame
         target.header.stamp = self.node.get_clock().now().to_msg()
-        target.pose.position.x, target.pose.position.y, target.pose.position.z = pose.position
-        (target.pose.orientation.x, target.pose.orientation.y, target.pose.orientation.z, target.pose.orientation.w) = (
-            pose.orientation
-        )
+        (
+            target.pose.position.x,
+            target.pose.position.y,
+            target.pose.position.z,
+        ) = pose.position
+        (
+            target.pose.orientation.x,
+            target.pose.orientation.y,
+            target.pose.orientation.z,
+            target.pose.orientation.w,
+        ) = pose.orientation
         request = SolvePositionIK.Request()
         request.pose_stamp = [target]
         request.tip_names = [self.tip]
         request.seed_mode = SolvePositionIK.Request.SEED_USER
-        request.seed_angles = [JointState(name=list(JOINT_NAMES), position=list(seed))]
+        request.seed_angles = [
+            JointState(name=list(JOINT_NAMES), position=list(seed))
+        ]
         request.use_nullspace_goal = [False]
         response = self.call(self.ik, request, 'IK')
         if len(response.result_type) != 1:
@@ -358,42 +505,76 @@ class InteraKinematics:
             raise ValueError(msg)
         code = int(response.result_type[0])
         if code <= 0:
-            reasons = {-1: 'unreachable pose', -2: 'self collision', -3: 'unknown endpoint'}
-            msg = f'IK rejected position {pose.position}: {reasons.get(code, code)}'
+            reasons = {
+                -1: 'unreachable pose',
+                -2: 'self collision',
+                -3: 'unknown endpoint',
+            }
+            msg = (
+                f'IK rejected position {pose.position}: '
+                f'{reasons.get(code, code)}'
+            )
             raise ValueError(msg)
         if len(response.joints) != 1:
             msg = 'IK returned a malformed joint solution'
             raise ValueError(msg)
-        return ordered_values(response.joints[0].name, response.joints[0].position, 'IK solution')
+        return ordered_values(
+            response.joints[0].name, response.joints[0].position, 'IK solution'
+        )
 
-    def forward(self, configurations):
-        from intera_core_msgs.srv import SolvePositionFK
-        from sensor_msgs.msg import JointState
+    def forward_results(self, configurations):
+        from .wire import JointState, SolvePositionFK
 
         poses = []
         for offset in range(0, len(configurations), 32):
             batch = configurations[offset : offset + 32]
             request = SolvePositionFK.Request()
-            request.configuration = [JointState(name=list(JOINT_NAMES), position=list(values)) for values in batch]
+            request.configuration = [
+                JointState(name=list(JOINT_NAMES), position=list(values))
+                for values in batch
+            ]
             request.tip_names = [self.tip] * len(batch)
             response = self.call(self.fk, request, 'FK')
             if any(
-                len(field) != len(batch) for field in (response.pose_stamp, response.is_valid, response.in_collision)
+                len(field) != len(batch)
+                for field in (
+                    response.pose_stamp,
+                    response.is_valid,
+                    response.in_collision,
+                )
             ):
                 msg = 'FK returned a malformed response'
                 raise ValueError(msg)
             for stamped, valid, collision in zip(
-                response.pose_stamp, response.is_valid, response.in_collision, strict=False
+                response.pose_stamp,
+                response.is_valid,
+                response.in_collision,
+                strict=False,
             ):
-                if not valid or collision:
-                    msg = f'FK rejected path configuration: valid={valid}, in_collision={collision}'
+                if not valid:
+                    msg = (
+                        f'FK rejected path configuration: valid={valid}, '
+                        f'in_collision={collision}'
+                    )
                     raise ValueError(msg)
-                pose = from_pose(stamped.pose, stamped.header.frame_id or self.frame)
+                pose = from_pose(
+                    stamped.pose, stamped.header.frame_id or self.frame
+                )
                 if pose.frame != self.frame:
-                    msg = f'FK frame {pose.frame} does not match requested frame {self.frame}'
+                    msg = (
+                        f'FK frame {pose.frame} does not match requested '
+                        f'frame {self.frame}'
+                    )
                     raise ValueError(msg)
-                poses.append(pose)
+                poses.append((pose, bool(collision)))
         return poses
+
+    def forward(self, configurations):
+        results = self.forward_results(configurations)
+        if any(collision for _, collision in results):
+            msg = 'FK rejected a path configuration in collision'
+            raise ValueError(msg)
+        return [pose for pose, _ in results]
 
 
 @dataclass(frozen=True)
@@ -415,13 +596,21 @@ def read_signals(message):
         if not isinstance(data, list) or len(data) != 1:
             # This utility handles scalar gripper/cuff signals only.
             continue
-        result[signal.name] = Signal(data[0], formatting['type'], formatting.get('role', ''), signal.status.tag)
+        result[signal.name] = Signal(
+            data[0],
+            formatting['type'],
+            formatting.get('role', ''),
+            signal.status.tag,
+        )
     return result
 
 
 def signal_value(signals, name, kind=None):
     if name not in signals:
-        msg = f'Missing signal {name}; this utility requires the standard Intera electric gripper/cuff'
+        msg = (
+            f'Missing signal {name}; this utility requires the standard '
+            f'Intera electric gripper/cuff'
+        )
         raise ValueError(msg)
     signal = signals[name]
     if signal.status != 'ready':
@@ -434,7 +623,9 @@ def signal_value(signals, name, kind=None):
         msg = f'Signal {name} is not a JSON boolean'
         raise ValueError(msg)
     if kind == 'float' and (
-        isinstance(signal.value, bool) or not isinstance(signal.value, int | float) or not math.isfinite(signal.value)
+        isinstance(signal.value, bool)
+        or not isinstance(signal.value, int | float)
+        or not math.isfinite(signal.value)
     ):
         msg = f'Signal {name} is not a finite number'
         raise ValueError(msg)
@@ -463,16 +654,19 @@ def time_key(stamp):
 
 class SawyerGripper:
     def __init__(self, node, config):
-        from intera_core_msgs.msg import IOComponentCommand, IODeviceStatus
-        from rclpy.qos import DurabilityPolicy, QoSProfile, ReliabilityPolicy
+        from .wire import IOComponentCommand, IODeviceStatus
 
         self.node, self.config = node, config
         self.message = None
         self.signals = {}
         self.error = None
-        qos = QoSProfile(depth=1, reliability=ReliabilityPolicy.RELIABLE, durability=DurabilityPolicy.TRANSIENT_LOCAL)
-        node.create_subscription(IODeviceStatus, config.gripper_namespace + '/state', self.on_state, qos)
-        self.publisher = node.create_publisher(IOComponentCommand, config.gripper_namespace + '/command', 1)
+        self.cancel_event = None
+        node.create_subscription(
+            IODeviceStatus, config.gripper_namespace + '/state', self.on_state
+        )
+        self.publisher = node.create_publisher(
+            IOComponentCommand, config.gripper_namespace + '/command'
+        )
 
     def on_state(self, message):
         try:
@@ -487,24 +681,41 @@ class SawyerGripper:
     def wait_for(self, predicate, timeout, description):
         deadline = time.monotonic() + timeout
         while not predicate():
+            if self.cancel_event is not None and self.cancel_event.is_set():
+                msg = 'Gripper operation cancelled'
+                raise RuntimeError(msg)
             if time.monotonic() >= deadline:
                 msg = f'{description}. {self.error or ""}'
                 raise TimeoutError(msg)
             self.node.spin_once(timeout_sec=self.config.callback_timeout)
 
     def wait_for_state(self, timeout):
-        self.wait_for(lambda: self.message is not None, timeout, 'No valid gripper state from bridge')
+        self.wait_for(
+            lambda: self.message is not None,
+            timeout,
+            'No valid gripper state from Sawyer',
+        )
 
     def require_ready(self, action):
         if self.message is None:
             msg = 'No valid gripper state'
             raise RuntimeError(msg)
-        if action != 'stop' and signal_value(self.signals, 'has_error', 'bool'):
+        if action == 'reboot':
+            if signal_value(self.signals, 'is_moving', 'bool'):
+                msg = 'Stop the gripper explicitly before rebooting'
+                raise RuntimeError(msg)
+            return
+        if action != 'stop' and signal_value(
+            self.signals, 'has_error', 'bool'
+        ):
             msg = 'Gripper reports an error'
             raise RuntimeError(msg)
-        if action in ('open', 'close'):
+        if action in ('open', 'close', 'move', 'start'):
             if not signal_value(self.signals, 'is_calibrated', 'bool'):
-                msg = 'Gripper is not calibrated; explicitly call calibrate_gripper(execute=True)'
+                msg = (
+                    'Gripper is not calibrated; explicitly call '
+                    'calibrate_gripper(execute=True)'
+                )
                 raise RuntimeError(msg)
             if self.message.device.status.tag != 'ready':
                 msg = f'Gripper is {self.message.device.status.tag}'
@@ -512,15 +723,20 @@ class SawyerGripper:
             if signal_value(self.signals, 'is_moving', 'bool'):
                 msg = 'Gripper is already moving'
                 raise RuntimeError(msg)
-        elif action != 'stop' and self.message.device.status.tag not in ('ready', 'unready'):
+        elif action != 'stop' and self.message.device.status.tag not in (
+            'ready',
+            'unready',
+        ):
             msg = f'Gripper is {self.message.device.status.tag}'
             raise RuntimeError(msg)
 
     def make_message(self, values):
-        from intera_core_msgs.msg import IOComponentCommand
+        from .wire import IOComponentCommand
 
         return IOComponentCommand(
-            time=self.node.get_clock().now().to_msg(), op='set', args=command_args(self.signals, values)
+            time=self.node.get_clock().now().to_msg(),
+            op='set',
+            args=command_args(self.signals, values),
         )
 
     def send(self, values):
@@ -529,16 +745,24 @@ class SawyerGripper:
         deadline = time.monotonic() + self.config.gripper_timeout
         while True:
             if not self.publisher.get_subscription_count():
-                msg = 'No gripper command bridge subscription'
+                msg = 'No gripper command subscriber'
                 raise RuntimeError(msg)
             self.publisher.publish(message)
             try:
                 self.wait_for(
-                    lambda: self.message is not None and key in [time_key(stamp) for stamp in self.message.commands],
-                    min(self.config.gripper_ack_retry_interval, max(0.001, deadline - time.monotonic())),
+                    lambda: self.message is not None
+                    and key
+                    in [time_key(stamp) for stamp in self.message.commands],
+                    min(
+                        self.config.gripper_ack_retry_interval,
+                        max(0.001, deadline - time.monotonic()),
+                    ),
                     'Waiting for IO acknowledgement',
                 )
-                if values != {'go': False} and signal_value(self.signals, 'has_error', 'bool'):
+                if values not in (
+                    {'go': False},
+                    {'reboot': True},
+                ) and signal_value(self.signals, 'has_error', 'bool'):
                     msg = 'Gripper reports an error after acknowledgement'
                     raise RuntimeError(msg)
                 return  # noqa: TRY300
@@ -547,9 +771,16 @@ class SawyerGripper:
                     msg = 'Gripper did not acknowledge the command'
                     raise TimeoutError(msg) from None
 
-    def completed(self, action, target):
+    def completed(self, action, target):  # noqa: PLR0911
         if self.message is None:
             return False
+        if action == 'reboot':
+            return (
+                self.message.device.status.tag in ('ready', 'unready')
+                and not signal_value(self.signals, 'is_calibrated', 'bool')
+                and not signal_value(self.signals, 'is_moving', 'bool')
+                and not signal_value(self.signals, 'has_error', 'bool')
+            )
         if self.message.device.status.tag in ('down', 'error'):
             msg = f'Gripper is {self.message.device.status.tag}'
             raise RuntimeError(msg)
@@ -560,21 +791,33 @@ class SawyerGripper:
         required = (
             ('has_error', 'is_calibrated', 'is_moving')
             if action == 'calibrate'
-            else ('has_error', 'is_calibrated', 'is_moving', 'position_response_m', 'is_gripping')
+            else (
+                'has_error',
+                'is_calibrated',
+                'is_moving',
+                'position_response_m',
+                'is_gripping',
+            )
         )
-        if any(name in self.signals and self.signals[name].status != 'ready' for name in required):
+        if any(
+            name in self.signals and self.signals[name].status != 'ready'
+            for name in required
+        ):
             return False
         if signal_value(self.signals, 'has_error', 'bool'):
             msg = 'Gripper reports an error'
             raise RuntimeError(msg)
-        if not signal_value(self.signals, 'is_calibrated', 'bool') or signal_value(self.signals, 'is_moving', 'bool'):
+        if not signal_value(
+            self.signals, 'is_calibrated', 'bool'
+        ) or signal_value(self.signals, 'is_moving', 'bool'):
             return False
         if action == 'calibrate':
             return True
         return abs(
             signal_value(self.signals, 'position_response_m', 'float') - target
         ) <= self.config.gripper_position_tolerance or (
-            action == 'close' and signal_value(self.signals, 'is_gripping', 'bool')
+            action in ('close', 'move')
+            and signal_value(self.signals, 'is_gripping', 'bool')
         )
 
     def wait_completion(self, action, target):
@@ -588,9 +831,15 @@ class SawyerGripper:
             now = time.monotonic()
             if stable_since is None:
                 stable_since = now
-            return now - stable_since >= self.config.gripper_settle_confirmation
+            return (
+                now - stable_since >= self.config.gripper_settle_confirmation
+            )
 
-        self.wait_for(settled, self.config.gripper_timeout, f'Gripper {action} did not complete')
+        self.wait_for(
+            settled,
+            self.config.gripper_timeout,
+            f'Gripper {action} did not complete',
+        )
 
     def request_stop(self):
         try:
@@ -599,19 +848,46 @@ class SawyerGripper:
                 self.publisher.publish(message)
                 self.node.spin_until(time.monotonic() + 0.05)
         except Exception as exc:  # noqa: BLE001
-            self.node.get_logger().warning(f'Gripper stop delivery unconfirmed: {exc}')
+            self.node.get_logger().warning(
+                f'Gripper stop delivery unconfirmed: {exc}'
+            )
 
-    def perform(self, action, *, execute=False):
+    def perform(
+        self, action, *, execute=False, cancel_event=None, position=None
+    ):
         if type(execute) is not bool:
             msg = 'execute must be a boolean'
             raise ValueError(msg)
+        if action not in (
+            'open',
+            'close',
+            'move',
+            'calibrate',
+            'stop',
+            'start',
+            'reboot',
+        ):
+            msg = 'Unknown gripper action'
+            raise ValueError(msg)
+        if execute and cancel_event is not None and cancel_event.is_set():
+            msg = 'Gripper operation cancelled'
+            raise RuntimeError(msg)
         self.wait_for_state(self.config.connect_timeout)
         target = self.config.gripper_open_position if action == 'open' else 0.0
+        if action == 'move':
+            target = vector((position,), 1, 'Gripper position')[0]
+            if not 0 <= target <= self.config.gripper_open_position:
+                msg = 'Gripper position exceeds the configured travel'
+                raise ValueError(msg)
+        if action == 'start':
+            target = signal_value(self.signals, 'position_m', 'float')
         values = (
             {'position_m': target, 'go': True}
-            if action in ('open', 'close')
+            if action in ('open', 'close', 'move', 'start')
             else {'calibrate': True}
             if action == 'calibrate'
+            else {'reboot': True}
+            if action == 'reboot'
             else {'go': False}
         )
         encoded = command_args(self.signals, values)
@@ -619,90 +895,131 @@ class SawyerGripper:
             return {'action': action, 'executed': False, 'command': encoded}
         self.require_ready(action)
         self.wait_for(
-            lambda: self.publisher.get_subscription_count() > 0, self.config.connect_timeout, 'No gripper command route'
+            lambda: self.publisher.get_subscription_count() > 0,
+            self.config.connect_timeout,
+            'No gripper command route',
         )
         self.require_ready(action)
         try:
+            self.cancel_event = cancel_event
+            if cancel_event is not None and cancel_event.is_set():
+                msg = 'Gripper operation cancelled'
+                raise RuntimeError(msg)  # noqa: TRY301
             self.send(values)
             if action != 'stop':
-                self.wait_completion(action, target)
+                completion = action
+                if action in ('move', 'start'):
+                    current = signal_value(
+                        self.signals, 'position_response_m', 'float'
+                    )
+                    completion = 'close' if target < current else 'open'
+                self.wait_completion(completion, target)
         except BaseException:
             self.request_stop()
             raise
+        finally:
+            self.cancel_event = None
         return {'action': action, 'executed': True}
 
 
-class _BridgeClient:
-    def __init__(self, config, ros_node, executor):
-        from intera_core_msgs.msg import (
+class _ArmSession:
+    def __init__(self, config, transport):
+        from .wire import (
             CollisionDetectionState,
             EndpointState,
             EndpointStates,
+            Float64,
             JointCommand,
             JointLimits,
+            JointState,
             RobotAssemblyState,
         )
-        from rclpy.duration import Duration
-        from rclpy.qos import DurabilityPolicy, QoSProfile, ReliabilityPolicy, qos_profile_sensor_data
-        from sensor_msgs.msg import JointState
-        from std_msgs.msg import Float64
 
-        self.config = config
-        self.ros_node, self.executor = ros_node, executor
-        self.joints = self.velocity = self.state = self.limits = self.collision = None
+        self.config, self.transport = config, transport
+        self.joints = self.velocity = self.state = None
+        self.limits = self.collision = None
+        self.joint_effort_limits = None
         self.feedback = JointFeedback(JOINT_NAMES)
         self.last_feedback_error = self.last_limits_error = None
         self.joints_at = self.state_at = self.collision_at = 0.0
         self.streaming = False
         self.cancel_requested = threading.Event()
-        self.create_subscription(JointState, self.config.joint_state_topic, self.on_joints, qos_profile_sensor_data)
-        self.create_subscription(
-            RobotAssemblyState, self.config.robot_state_topic, self.on_state, qos_profile_sensor_data
+        self.pose_feedback = EndpointFeedback(
+            config.frame, config.feedback_timeout, config
         )
-        self.create_subscription(
-            CollisionDetectionState, self.config.collision_topic, self.on_collision, qos_profile_sensor_data
+        for kind, topic, callback in (
+            (JointState, config.joint_state_topic, self.on_joints),
+            (RobotAssemblyState, config.robot_state_topic, self.on_state),
+            (
+                CollisionDetectionState,
+                config.collision_topic,
+                self.on_collision,
+            ),
+            (JointLimits, config.joint_limits_topic, self.on_limits),
+            (
+                EndpointState,
+                config.endpoint_topic,
+                self.pose_feedback.on_endpoint,
+            ),
+            (
+                EndpointStates,
+                config.tip_states_topic,
+                self.pose_feedback.on_tips,
+            ),
+        ):
+            transport.create_subscription(kind, topic, callback)
+        self.command_pub = transport.create_publisher(
+            JointCommand, config.joint_command_topic
         )
-        limits_qos = QoSProfile(
-            depth=1, reliability=ReliabilityPolicy.RELIABLE, durability=DurabilityPolicy.TRANSIENT_LOCAL
-        )
-        self.create_subscription(JointLimits, self.config.joint_limits_topic, self.on_limits, limits_qos)
-        command_qos = QoSProfile(
-            depth=1, reliability=ReliabilityPolicy.RELIABLE, lifespan=Duration(seconds=self.config.command_timeout)
-        )
-        self.command_pub = self.create_publisher(JointCommand, self.config.joint_command_topic, command_qos)
-        self.watchdog_pub = self.create_publisher(Float64, self.config.command_timeout_topic, 1)
-        self.pose_feedback = EndpointFeedback(self.config.frame, self.config.feedback_timeout, self.config)
-        self.create_subscription(
-            EndpointState, self.config.endpoint_topic, self.pose_feedback.on_endpoint, qos_profile_sensor_data
-        )
-        self.create_subscription(
-            EndpointStates, self.config.tip_states_topic, self.pose_feedback.on_tips, qos_profile_sensor_data
+        self.watchdog_pub = transport.create_publisher(
+            Float64, config.command_timeout_topic
         )
 
     def __getattr__(self, name):
-        return getattr(self.ros_node, name)
+        return getattr(object.__getattribute__(self, 'transport'), name)
 
     def spin_once(self, timeout_sec=0.02):
-        """Use the persistent executor assigned by SawyerBase."""
-        self.executor.spin_once(timeout_sec=timeout_sec)
+        self.transport.spin_once(timeout_sec=timeout_sec)
 
     def on_joints(self, message):
         try:
-            updated = self.feedback.update(message.name, message.position, message.velocity, time.monotonic())
+            updated = self.feedback.update(
+                message.name,
+                message.position,
+                message.velocity,
+                receipt_time(message),
+                efforts=message.effort,
+            )
         except ValueError as exc:
             self.last_feedback_error = str(exc)
             return
         if updated:
-            self.joints, self.velocity, self.joints_at = self.feedback.snapshot()
+            self.joints, self.velocity, self.joints_at = (
+                self.feedback.snapshot()
+            )
             self.last_feedback_error = None
 
     def on_state(self, message):
-        self.state, self.state_at = message, time.monotonic()
+        self.state, self.state_at = message, receipt_time(message)
 
     def on_collision(self, message):
-        self.collision, self.collision_at = message.collision_state, time.monotonic()
+        self.collision, self.collision_at = (
+            message.collision_state,
+            receipt_time(message),
+        )
 
     def on_limits(self, message):
+        self.joint_effort_limits = None
+        if message.effort:
+            try:
+                values = ordered_values(
+                    message.joint_names, message.effort, 'Effort limits'
+                )
+                self.joint_effort_limits = vector(
+                    values, 7, 'Effort limits', positive=True
+                )
+            except ValueError:
+                self.get_logger().warning('Invalid published effort limits')
         try:
             self.limits = JointBounds.from_message(message)
             self.last_limits_error = None
@@ -711,59 +1028,135 @@ class _BridgeClient:
             self.last_limits_error = str(exc)
             self.get_logger().error(str(exc))
 
-    def input_issues(self):
+    def input_issues(self, *, require_collision=True):
         now = time.monotonic()
         issues = []
         joint_issues = self.feedback.issues(now, self.config.feedback_timeout)
         if joint_issues:
             issues.append('/robot/joint_states: ' + '; '.join(joint_issues))
             if self.last_feedback_error:
-                issues.append('last rejected arm sample: ' + self.last_feedback_error)
+                issues.append(
+                    'last rejected arm sample: ' + self.last_feedback_error
+                )
         for topic, value, stamp in (
-            ('/robot/state', self.state, self.state_at),
-            ('/robot/limb/right/collision_detection_state', self.collision, self.collision_at),
+            (self.config.robot_state_topic, self.state, self.state_at),
+            (
+                self.config.collision_topic,
+                self.collision,
+                self.collision_at,
+            ),
         ):
+            if not require_collision and topic == self.config.collision_topic:
+                continue
             if value is None:
                 issues.append(f'{topic}: no sample received')
             elif now - stamp >= self.config.feedback_timeout:
-                issues.append(f'{topic}: {now - stamp:.3f}s old (limit {self.config.feedback_timeout:.3f}s)')
+                issues.append(
+                    f'{topic}: {now - stamp:.3f}s old (limit '
+                    f'{self.config.feedback_timeout:.3f}s)'
+                )
         if self.limits is None:
-            issues.append('/robot/joint_limits: ' + (self.last_limits_error or 'no valid sample received'))
+            issues.append(
+                '/robot/joint_limits: '
+                + (self.last_limits_error or 'no valid sample received')
+            )
         return issues
 
-    def fresh(self):
-        return not self.input_issues()
+    def fresh(self, *, require_collision=True):
+        return not self.input_issues(require_collision=require_collision)
 
     def check_ready(self):
+        transport = self.__dict__.get('transport')
+        if transport is not None and not transport.master_available:
+            msg = 'Robot master registration is unavailable'
+            raise RuntimeError(msg)
+        if transport is not None and transport.conflicting_publishers:
+            msg = 'Another joint command publisher is active: ' + ', '.join(
+                transport.conflicting_publishers
+            )
+            raise RuntimeError(msg)
         issues = self.input_issues()
         if issues:
             raise RuntimeError('Missing/stale feedback: ' + '; '.join(issues))
-        if not self.state.enabled or not self.state.ready or self.state.stopped or self.state.error:
+        if (
+            not self.state.enabled
+            or not self.state.ready
+            or self.state.stopped
+            or self.state.error
+        ):
             msg = (
-                f'Robot not ready: enabled={self.state.enabled}, ready={self.state.ready}, '
+                f'Robot not ready: enabled={self.state.enabled}, '
+                f'ready={self.state.ready}, '
                 f'stopped={self.state.stopped}, error={self.state.error}'
             )
             raise RuntimeError(msg)
         if self.collision:
             msg = 'Robot reports a collision'
             raise RuntimeError(msg)
-        self.limits.check_position(self.joints, 'Measured position', tolerance=1e-4)
+        self.limits.check_position(
+            self.joints, 'Measured position', tolerance=1e-4
+        )
 
     def wait_inputs(self, execute, timeout=None):
-        deadline = time.monotonic() + (self.config.connect_timeout if timeout is None else timeout)
-        while not self.fresh() or (execute and not self.routes_connected()):
+        deadline = time.monotonic() + (
+            self.config.connect_timeout if timeout is None else timeout
+        )
+        while not self.fresh(require_collision=execute) or (
+            execute and not self.routes_connected()
+        ):
             if time.monotonic() >= deadline:
                 issues = self.input_issues()
                 if execute and not self.routes_connected():
-                    issues.append('command/watchdog route absent; launch bridge with commands:=true')
+                    issues.append('Sawyer command/watchdog subscribers absent')
                 raise RuntimeError('Preflight timed out: ' + '; '.join(issues))
             self.spin_once(timeout_sec=self.config.input_poll_timeout)
 
+    def wait_robot_state(self, timeout=None):
+        deadline = time.monotonic() + (
+            self.config.connect_timeout if timeout is None else timeout
+        )
+        while (
+            self.state is None
+            or time.monotonic() - self.state_at >= self.config.feedback_timeout
+        ):
+            if time.monotonic() >= deadline:
+                msg = 'No fresh assembly state from Sawyer'
+                raise TimeoutError(msg)
+            self.spin_once(timeout_sec=self.config.callback_slice)
+
+    def status_snapshot(self):
+        """Read already-dispatched state without network access or mutation."""
+        issues = self.input_issues()
+        if not issues:
+            try:
+                self.check_ready()
+                self.pose_feedback.select(self.config.tip)
+            except (RuntimeError, ValueError) as exc:
+                issues.append(str(exc))
+        return {
+            'connected': True,
+            'ready': not issues,
+            'issues': issues,
+            'enabled': bool(self.state and self.state.enabled),
+            'stopped': bool(self.state and self.state.stopped),
+            'error': bool(self.state and self.state.error),
+            'homed': bool(self.state and self.state.homed),
+            'collision': self.collision,
+            'joints': self.joints,
+            'velocities': self.velocity,
+            'joint_feedback_fresh': not self.feedback.issues(
+                time.monotonic(), self.config.feedback_timeout
+            ),
+        }
+
     def routes_connected(self):
-        return self.command_pub.get_subscription_count() > 0 and self.watchdog_pub.get_subscription_count() > 0
+        return (
+            self.command_pub.get_subscription_count() > 0
+            and self.watchdog_pub.get_subscription_count() > 0
+        )
 
     def publish_velocity(self, velocity):
-        from intera_core_msgs.msg import JointCommand
+        from .wire import JointCommand
 
         message = JointCommand()
         message.header.stamp = self.get_clock().now().to_msg()
@@ -773,26 +1166,50 @@ class _BridgeClient:
         self.command_pub.publish(message)
 
     def spin_until(self, deadline):
-        """Service callbacks for a real interval even when callbacks return immediately."""
-        while time.monotonic() < deadline:
-            self.spin_once(timeout_sec=max(0.0, min(self.config.callback_slice, deadline - time.monotonic())))
-
-    def stop(self):
         """
-        Request zero velocity, then measured-position hold as in SDK exit_control_mode.
+        Service callbacks for a real interval even when callbacks return
+        immediately.
+        """
+        while time.monotonic() < deadline:
+            self.spin_once(
+                timeout_sec=max(
+                    0.0,
+                    min(
+                        self.config.callback_slice, deadline - time.monotonic()
+                    ),
+                )
+            )
 
-        Delivery and physical stopping cannot be confirmed after a connection loss.
+    def stop(self, *, position_only=False):
+        """
+        Request zero velocity, then measured-position hold as in SDK
+        exit_control_mode.
+
+        Delivery and physical stopping cannot be confirmed after a
+        connection loss.
         The robot's command watchdog remains set to 0.2 s for velocity mode.
         """
-        from intera_core_msgs.msg import JointCommand
+        from .wire import JointCommand
 
         if not self.streaming:
             return
         try:
-            for _ in range(self.config.stop_zero_samples):
+            state = self.__dict__.get('state')
+            if state is not None and (
+                state.stopped or not state.enabled or state.error
+            ):
+                return
+            zero_samples = (
+                0 if position_only else self.config.stop_zero_samples
+            )
+            for _ in range(zero_samples):
                 self.publish_velocity((0.0,) * 7)
-                self.spin_until(time.monotonic() + self.config.stop_publish_interval)
-            positions = self.feedback.fresh_positions(time.monotonic(), self.config.feedback_timeout)
+                self.spin_until(
+                    time.monotonic() + self.config.stop_publish_interval
+                )
+            positions = self.feedback.fresh_positions(
+                time.monotonic(), self.config.feedback_timeout
+            )
             if positions is not None:
                 hold = JointCommand()
                 hold.mode = JointCommand.POSITION_MODE
@@ -801,41 +1218,87 @@ class _BridgeClient:
                 for _ in range(self.config.stop_hold_samples):
                     hold.header.stamp = self.get_clock().now().to_msg()
                     self.command_pub.publish(hold)
-                    self.spin_until(time.monotonic() + self.config.stop_publish_interval)
+                    self.spin_until(
+                        time.monotonic() + self.config.stop_publish_interval
+                    )
         except Exception as exc:  # noqa: BLE001
-            self.get_logger().warning(f'Stop command delivery could not be confirmed: {exc}')
+            self.get_logger().warning(
+                f'Stop command delivery could not be confirmed: {exc}'
+            )
         finally:
             self.streaming = False
 
     def check_trajectory_limits(self, trajectory):
-        if any(a < b for a, b in zip(self.limits.velocity, trajectory.max_velocity, strict=False)) or any(
-            a < b for a, b in zip(self.limits.acceleration, trajectory.max_acceleration, strict=False)
+        if any(
+            a < b
+            for a, b in zip(
+                self.limits.velocity, trajectory.max_velocity, strict=False
+            )
+        ) or any(
+            a < b
+            for a, b in zip(
+                self.limits.acceleration,
+                trajectory.max_acceleration,
+                strict=False,
+            )
         ):
             msg = 'Robot limits changed during the move; replan required'
             raise RuntimeError(msg)
         # Cartesian IK paths can have interior joint extrema beyond both ends.
         minimum = getattr(
-            trajectory, 'min_position', tuple(min(a, b) for a, b in zip(trajectory.start, trajectory.end, strict=False))
+            trajectory,
+            'min_position',
+            tuple(
+                min(a, b)
+                for a, b in zip(trajectory.start, trajectory.end, strict=False)
+            ),
         )
         maximum = getattr(
-            trajectory, 'max_position', tuple(max(a, b) for a, b in zip(trajectory.start, trajectory.end, strict=False))
+            trajectory,
+            'max_position',
+            tuple(
+                max(a, b)
+                for a, b in zip(trajectory.start, trajectory.end, strict=False)
+            ),
         )
-        self.limits.check_position(minimum, 'Reference position minimum', tolerance=1e-8)
-        self.limits.check_position(maximum, 'Reference position maximum', tolerance=1e-8)
+        self.limits.check_position(
+            minimum, 'Reference position minimum', tolerance=1e-8
+        )
+        self.limits.check_position(
+            maximum, 'Reference position maximum', tolerance=1e-8
+        )
 
-    def track(self, trajectory, controller, options, *, label='Motion', on_step=None, at_goal=None, announce=True):  # noqa: PLR0912, PLR0913, PLR0915
-        from std_msgs.msg import Float64
+    def track(  # noqa: PLR0912, PLR0913, PLR0915
+        self,
+        trajectory,
+        controller,
+        options,
+        *,
+        label='Motion',
+        on_step=None,
+        at_goal=None,
+        announce=True,
+    ):
+        from .wire import Float64
 
         if self.cancel_requested.is_set():
             msg = 'Motion cancelled'
             raise RuntimeError(msg)
         period = 1.0 / options.rate
-        timeout = options.timeout if options.timeout is not None else trajectory.duration + options.settle_time
+        timeout = (
+            options.timeout
+            if options.timeout is not None
+            else trajectory.duration + options.settle_time
+        )
         if timeout < trajectory.duration:
             msg = '--timeout must be at least the planned motion duration'
             raise ValueError(msg)
         self.check_ready()
         self.check_trajectory_limits(trajectory)
+        transport = self.__dict__.get('transport')
+        if transport is not None:
+            transport.check_command_owner()
+            self.check_ready()
         controller.reset(self.velocity)
         self.watchdog_pub.publish(Float64(data=self.config.command_timeout))
         start = time.monotonic()
@@ -843,8 +1306,19 @@ class _BridgeClient:
         stable_since = None
         next_watchdog = start + self.config.watchdog_refresh_interval
         self.streaming = True
+        transport = self.__dict__.get('transport')
+        generation = transport.generation if transport is not None else None
         try:
             while True:
+                if (
+                    transport is not None
+                    and transport.generation != generation
+                ):
+                    msg = (
+                        'Transport registration changed; explicit restart '
+                        'required'
+                    )
+                    raise RuntimeError(msg)
                 if self.cancel_requested.is_set():
                     msg = 'Motion cancelled'
                     raise RuntimeError(msg)
@@ -854,37 +1328,76 @@ class _BridgeClient:
                     continue
                 dt, elapsed = now - previous, now - start
                 if dt > self.config.command_timeout / 2:
-                    msg = f'Control loop missed its deadline (>{self.config.command_timeout/2:.3f} s); stopping'
+                    msg = (
+                        f'Control loop missed its deadline '
+                        f'(>{self.config.command_timeout/2:.3f} s); stopping'
+                    )
                     raise RuntimeError(msg)
                 if elapsed > timeout:
                     msg = f'Motion/settling timeout; {label} was not confirmed'
                     raise TimeoutError(msg)
                 self.check_ready()
                 if not self.routes_connected():
-                    msg = 'Bridge command subscription disappeared'
+                    msg = 'Sawyer command subscriber disappeared'
                     raise RuntimeError(msg)
                 self.check_trajectory_limits(trajectory)
                 reference = trajectory.sample(elapsed)
-                if max(abs(a - b) for a, b in zip(reference.position, self.joints, strict=False)) > options.max_error:
+                if (
+                    max(
+                        abs(a - b)
+                        for a, b in zip(
+                            reference.position, self.joints, strict=False
+                        )
+                    )
+                    > options.max_error
+                ):
                     msg = 'Joint tracking error exceeded --max-error'
                     raise RuntimeError(msg)
                 if on_step is not None:
                     on_step(elapsed, reference)
-                command = controller.update(reference.position, self.joints, reference.velocity, self.velocity, dt)
+                command = controller.update(
+                    reference.position,
+                    self.joints,
+                    reference.velocity,
+                    self.velocity,
+                    dt,
+                )
+                self.check_ready()
+                if time.monotonic() - now > self.config.command_timeout / 2:
+                    msg = 'Control callback missed its deadline; stopping'
+                    raise RuntimeError(msg)
+                if self.cancel_requested.is_set():
+                    msg = 'Motion cancelled'
+                    raise RuntimeError(msg)
                 self.publish_velocity(command)
                 if now >= next_watchdog:
-                    self.watchdog_pub.publish(Float64(data=self.config.command_timeout))
+                    self.watchdog_pub.publish(
+                        Float64(data=self.config.command_timeout)
+                    )
                     next_watchdog = now + self.config.watchdog_refresh_interval
                 arrived = (
                     elapsed >= trajectory.duration
-                    and max(abs(a - b) for a, b in zip(trajectory.end, self.joints, strict=False))
+                    and max(
+                        abs(a - b)
+                        for a, b in zip(
+                            trajectory.end, self.joints, strict=False
+                        )
+                    )
                     < self.config.position_tolerance
-                    and max(map(abs, self.velocity)) < self.config.velocity_tolerance
+                    and max(map(abs, self.velocity))
+                    < self.config.velocity_tolerance
                     and max(map(abs, command)) < self.config.velocity_tolerance
                     and (at_goal is None or at_goal())
                 )
-                stable_since = (now if stable_since is None else stable_since) if arrived else None
-                if stable_since is not None and now - stable_since >= self.config.settle_confirmation:
+                stable_since = (
+                    (now if stable_since is None else stable_since)
+                    if arrived
+                    else None
+                )
+                if (
+                    stable_since is not None
+                    and now - stable_since >= self.config.settle_confirmation
+                ):
                     break
                 previous, next_tick = now, now + period
         finally:
@@ -895,13 +1408,18 @@ class _BridgeClient:
         return MotionResult(trajectory.duration, elapsed, tuple(self.joints))
 
     def wait_pose(self, tip=None, timeout=None):
-        deadline = time.monotonic() + (self.config.connect_timeout if timeout is None else timeout)
+        deadline = time.monotonic() + (
+            self.config.connect_timeout if timeout is None else timeout
+        )
         while True:
             try:
                 return self.pose_feedback.select(tip)
             except RuntimeError as exc:
                 if time.monotonic() >= deadline:
-                    msg = f'Cartesian pose unavailable: {exc}. Check endpoint/tip-state routes'
+                    msg = (
+                        f'Cartesian pose unavailable: {exc}. Check '
+                        f'endpoint/tip-state routes'
+                    )
                     raise RuntimeError(msg) from exc
                 self.spin_once(timeout_sec=self.config.callback_timeout)
 
@@ -909,49 +1427,72 @@ class _BridgeClient:
         issues = self.input_issues()
         if issues:
             # Polynomial fitting can occupy this thread; drain queued feedback
-            # before treating old receipt times as a transport failure. No motion
+            # before treating old receipt times as a transport failure. No
+            # motion
             # is being commanded during planning. Execution retains the strict
             # per-step feedback watchdog in ArmMotionNode.
-            self.wait_inputs(False, timeout=self.config.planning_refresh_timeout)
+            self.wait_inputs(
+                False, timeout=self.config.planning_refresh_timeout
+            )
         if max(map(abs, self.velocity)) >= self.config.velocity_tolerance:
             msg = 'Cartesian rest-to-rest planning requires a stationary arm'
             raise RuntimeError(msg)
         if (
-            max(abs(a - b) for a, b in zip(self.joints, start_joints, strict=False))
+            max(
+                abs(a - b)
+                for a, b in zip(self.joints, start_joints, strict=False)
+            )
             > self.config.planning_joint_tolerance
         ):
-            msg = 'Arm moved during Cartesian planning; rerun from the new pose'
+            msg = (
+                'Arm moved during Cartesian planning; rerun from the new pose'
+            )
             raise RuntimeError(msg)
-        _, current_pose = self.wait_pose(tip, timeout=self.config.planning_refresh_timeout)
+        _, current_pose = self.wait_pose(
+            tip, timeout=self.config.planning_refresh_timeout
+        )
         position, orientation = pose_error(current_pose, start_pose)
         if (
             position > self.config.planning_position_tolerance
             or orientation > self.config.planning_orientation_tolerance
         ):
-            msg = 'Endpoint moved during Cartesian planning; rerun from the new pose'
+            msg = (
+                'Endpoint moved during Cartesian planning; rerun from the '
+                'new pose'
+            )
             raise RuntimeError(msg)
 
 
 class SawyerBase:
     """
-    Owns one private ROS context, node, and persistent executor.
+    Owns the direct Python connection to Sawyer.
 
-    Construction is offline. connect() attaches to an already running bridge;
-    it never starts a bridge, enables Sawyer, or calibrates the gripper.
-    Methods are synchronous and service callbacks on this private executor.
+    Construction is offline. connect() registers transport only; it never
+    enables Sawyer or calibrates the gripper. Methods are synchronous and
+    process feedback on the caller thread.
     Poll get_status()/state properties to refresh feedback while idle.
     """
 
     def __init__(self, config: SawyerConfig | None = None):
         self.config = config or SawyerConfig()
-        self._node = self._executor = self._context = self._gripper = self._ros_node = None
+        self._node = self._gripper = self._transport = None
+        self._devices = None
+        self._actions = None
+        self._interaction = None
         self._connected = False
         self._busy = threading.Lock()
 
     @contextmanager
-    def _operation(self):
-        if not self._busy.acquire(blocking=False):
-            msg = 'A Sawyer operation is already running; use one command owner'
+    def _operation(self, *, timeout=0.0):
+        acquired = (
+            self._busy.acquire(timeout=timeout)
+            if timeout > 0
+            else self._busy.acquire(blocking=False)
+        )
+        if not acquired:
+            msg = (
+                'A Sawyer operation is already running; use one command owner'
+            )
             raise RuntimeError(msg)
         try:
             yield
@@ -959,36 +1500,91 @@ class SawyerBase:
             self._busy.release()
 
     def _open_runtime(self):
-        # Keep public imports and configuration usable before installing ROS.
-        from ..setup_runtime import require_current_runtime
+        from .motion import MotionActions
+        from .peripherals import SawyerDevices
+        from .transport import DirectTransport
 
-        require_current_runtime()
-        from rclpy.context import Context
-        from rclpy.executors import SingleThreadedExecutor
-        from rclpy.node import Node
-
-        self._context = Context()
-        self._context.init(args=[], domain_id=self.config.domain_id)
-        self._executor = SingleThreadedExecutor(context=self._context)
-        self._ros_node = Node(self.config.node_name, context=self._context)
-        self._executor.add_node(self._ros_node)
-        self._node = _BridgeClient(self.config, self._ros_node, self._executor)
+        self._transport = DirectTransport(self.config)
+        self._node = _ArmSession(self.config, self._transport)
         if self.config.enable_gripper:
             self._gripper = SawyerGripper(self._node, self.config)
+        self._devices = SawyerDevices(self)
+        self._actions = MotionActions(self._node, self.config)
+
+    @property
+    def devices(self):
+        """Explicit robot, head, display, and camera operations."""
+        self._require_connected()
+        return self._devices
+
+    @property
+    def capabilities(self):
+        """
+        Versioned SDK coverage; hardware evidence is separate from
+        readiness.
+        """
+        from importlib.resources import files
+
+        report = json.loads(
+            files('irobot.src.robots.sawyer')
+            .joinpath('CAPABILITY_LEDGER.json')
+            .read_text()
+        )
+        report['runtime'] = {
+            'connected': self.is_connected,
+            'allow_unvalidated_modes': self.config.allow_unvalidated_modes,
+        }
+        return report
+
+    def check_version(self, compatible=('5.3.1',)):
+        """
+        Check the selected public-SDK baseline without changing the
+        robot.
+        """
+        version = str(
+            self.get_parameter(self.config.version_parameter)
+        ).lstrip('v')
+        if not any(
+            version == prefix or version.startswith(prefix + '.')
+            for prefix in compatible
+        ):
+            msg = f'Unqualified Intera version: {version}'
+            raise RuntimeError(msg)
+        return version
 
     def connect(self) -> bool:
-        """Wait for arm, endpoint and optional gripper feedback; send no commands."""
+        """
+        Open a session without actuation, including while stopped/disabled.
+
+        Healthy enabled sessions also validate arm/tip feedback. Every motion
+        still requires fresh collision feedback and a ready controller.
+        """
         with self._operation():
             if self._connected:
-                self._refresh()
+                self._node.wait_robot_state()
                 return True
             try:
                 self._open_runtime()
                 deadline = time.monotonic() + self.config.connect_timeout
-                self._node.wait_inputs(False, timeout=max(0.001, deadline - time.monotonic()))
-                self._node.wait_pose(self.config.tip, timeout=max(0.001, deadline - time.monotonic()))
-                if self._gripper is not None:
-                    self._gripper.wait_for_state(timeout=max(0.001, deadline - time.monotonic()))
+                self._node.wait_robot_state()
+                state = self._node.state
+                if (
+                    state.enabled
+                    and state.ready
+                    and not state.stopped
+                    and not state.error
+                ):
+                    self._node.wait_inputs(
+                        False, timeout=max(0.001, deadline - time.monotonic())
+                    )
+                    self._node.wait_pose(
+                        self.config.tip,
+                        timeout=max(0.001, deadline - time.monotonic()),
+                    )
+                    if self._gripper is not None:
+                        self._gripper.wait_for_state(
+                            timeout=max(0.001, deadline - time.monotonic())
+                        )
                 self._connected = True
             except BaseException:
                 self._close_runtime()
@@ -1008,7 +1604,9 @@ class SawyerBase:
 
     @property
     def is_connected(self) -> bool:
-        """Whether this object has an open session; get_status() checks freshness."""
+        """
+        Whether this object has an open session; get_status() checks freshness.
+        """
         return self._connected
 
     @property
@@ -1024,63 +1622,248 @@ class SawyerBase:
             return tuple(self._node.velocity)
 
     @property
+    def joint_efforts(self):
+        """Measured Nm, requiring a recent value for each arm joint."""
+        with self._operation():
+            self._refresh()
+            deadline = time.monotonic() + self.config.connect_timeout
+            feedback = self._node.feedback
+            while any(
+                name not in feedback.effort_at
+                or time.monotonic() - feedback.effort_at[name]
+                >= self.config.feedback_timeout
+                for name in JOINT_NAMES
+            ):
+                if time.monotonic() >= deadline:
+                    msg = 'Seven fresh measured joint efforts unavailable'
+                    raise TimeoutError(msg)
+                self._node.spin_once(self.config.callback_slice)
+            return tuple(feedback.effort[name] for name in JOINT_NAMES)
+
+    @property
+    def joint_limits(self):
+        with self._operation():
+            self._refresh()
+            return asdict(self._node.limits)
+
+    def get_parameter(self, name):
+        with self._operation():
+            self._require_connected()
+            return self._node.master('getParam', name)
+
+    @property
+    def robot_description(self):
+        return self.get_parameter(self.config.robot_description_parameter)
+
+    @property
+    def joint_effort_limits(self):
+        from .model import effort_limits
+
+        model = effort_limits(self.robot_description)
+        with self._operation():
+            self._refresh()
+            published = self._node.joint_effort_limits
+            if published is None:
+                msg = 'Published joint effort limits are unavailable'
+                raise RuntimeError(msg)
+            return tuple(
+                min(a, b) for a, b in zip(model, published, strict=True)
+            )
+
+    @property
+    def endpoint_state(self):
+        return self.get_tip_state(self.config.tip)
+
+    def get_tip_state(self, tip=None):
+        """Read the complete named endpoint state in its declared frame."""
+        from copy import deepcopy
+
+        with self._operation():
+            self._refresh()
+            tip, _ = self._node.wait_pose(tip or self.config.tip)
+            return deepcopy(self._node.pose_feedback.raw_tips[tip][0])
+
+    @property
+    def tip_names(self):
+        with self._operation():
+            self._refresh()
+            now = time.monotonic()
+            return tuple(
+                name
+                for name, (
+                    _,
+                    received,
+                ) in self._node.pose_feedback.tips.items()
+                if now - received <= self.config.feedback_timeout
+            )
+
+    def poll(self, timeout=0.02):
+        """
+        Dispatch direct feedback and registered callbacks without
+        commands.
+        """
+        if not math.isfinite(timeout) or timeout < 0:
+            msg = 'Polling timeout must be finite and nonnegative'
+            raise ValueError(msg)
+        with self._operation():
+            self._require_connected()
+            self._node.spin_once(timeout_sec=timeout)
+            return self._node.status_snapshot()
+
+    @property
+    def endpoint_velocity(self):
+        state = self.endpoint_state
+        return {
+            'linear': (
+                state.twist.linear.x,
+                state.twist.linear.y,
+                state.twist.linear.z,
+            ),
+            'angular': (
+                state.twist.angular.x,
+                state.twist.angular.y,
+                state.twist.angular.z,
+            ),
+            'frame': state.header.frame_id or self.config.frame,
+        }
+
+    @property
+    def endpoint_effort(self):
+        state = self.endpoint_state
+        return {
+            'force': (
+                state.wrench.force.x,
+                state.wrench.force.y,
+                state.wrench.force.z,
+            ),
+            'torque': (
+                state.wrench.torque.x,
+                state.wrench.torque.y,
+                state.wrench.torque.z,
+            ),
+            'frame': state.header.frame_id or self.config.frame,
+        }
+
+    @property
     def endpoint_pose(self):
         """CartesianPose: meters, quaternion (x,y,z,w), and reference frame."""
         with self._operation():
             self._refresh()
             return self._node.wait_pose(self.config.tip)[1]
 
+    @contextmanager
+    def _kinematics(self, tip):
+        self._require_connected()
+        deadline = time.monotonic() + self.config.connect_timeout
+        while self._node.limits is None:
+            if time.monotonic() >= deadline:
+                msg = 'Published joint limits unavailable for kinematics'
+                raise TimeoutError(msg)
+            self._node.spin_once(timeout_sec=self.config.callback_slice)
+        selected = tip or self.config.tip or 'right_hand'
+        kinematics = InteraKinematics(self._node, selected, self.config.frame)
+        try:
+            kinematics.wait_ready()
+            yield kinematics
+        finally:
+            kinematics.close()
+
+    def forward_kinematics(self, configurations, *, tip=None):
+        """Return poses for seven-joint configurations; reject invalid FK."""
+        with self._operation(), self._kinematics(tip) as kinematics:
+            configurations = [
+                vector(values, len(JOINT_NAMES), 'FK configuration')
+                for values in configurations
+            ]
+            for values in configurations:
+                self._node.limits.check_position(values, 'FK configuration')
+            return kinematics.forward(configurations)
+
+    def configuration_collisions(self, configurations, *, tip=None):
+        """Query the controller's FK collision flags without moving the arm."""
+        with self._operation(), self._kinematics(tip) as kinematics:
+            values = [
+                vector(item, len(JOINT_NAMES), 'Collision configuration')
+                for item in configurations
+            ]
+            for item in values:
+                self._node.limits.check_position(
+                    item, 'Collision configuration'
+                )
+            return tuple(
+                collision
+                for _, collision in kinematics.forward_results(values)
+            )
+
+    def inverse_kinematics(self, pose, *, seed=None, tip=None):
+        """Return a seeded seven-joint solution without commanding motion."""
+        if not isinstance(pose, CartesianPose):
+            msg = 'pose must be CartesianPose'
+            raise TypeError(msg)
+        with self._operation(), self._kinematics(tip) as kinematics:
+            if seed is None:
+                self._node.wait_inputs(False)
+            seed = (
+                tuple(self._node.joints)
+                if seed is None
+                else vector(seed, len(JOINT_NAMES), 'IK seed')
+            )
+            self._node.limits.check_position(seed, 'IK seed')
+            joints = kinematics.inverse(pose, seed)
+            self._node.limits.check_position(joints, 'IK solution')
+            return joints
+
     @property
     def gripper_state(self) -> dict:
-        """Return the latest standard Intera gripper signals without commanding it."""
+        """
+        Return the latest standard Intera gripper signals without commanding
+        it.
+        """
         with self._operation():
             self._require_connected()
             if self._gripper is None:
                 msg = 'Gripper support is disabled in SawyerConfig'
                 raise RuntimeError(msg)
-            self._node.spin_until(time.monotonic() + self.config.callback_timeout)
+            self._node.spin_until(
+                time.monotonic() + self.config.callback_timeout
+            )
             self._gripper.wait_for_state(self.config.connect_timeout)
             return {
                 'device_status': self._gripper.message.device.status.tag,
-                **{name: signal.value for name, signal in self._gripper.signals.items()},
+                **{
+                    name: signal.value
+                    for name, signal in self._gripper.signals.items()
+                },
             }
 
     def get_status(self) -> dict:
         with self._operation():
             if not self._connected:
-                return {'connected': False, 'ready': False, 'issues': ['Disconnected']}
-            self._node.spin_until(time.monotonic() + self.config.callback_timeout)
-            issues = self._node.input_issues()
-            state = self._node.state
-            ready = not issues
-            if not issues:
-                try:
-                    self._node.check_ready()
-                    self._node.pose_feedback.select(self.config.tip)
-                except (RuntimeError, ValueError) as exc:
-                    issues.append(str(exc))
-                    ready = False
-            return {
-                'connected': True,
-                'ready': bool(ready),
-                'issues': issues,
-                'enabled': bool(state and state.enabled),
-                'collision': self._node.collision,
-                'joints': self._node.joints,
-                'velocities': self._node.velocity,
-            }
+                return {
+                    'connected': False,
+                    'ready': False,
+                    'issues': ['Disconnected'],
+                }
+            self._node.spin_until(
+                time.monotonic() + self.config.callback_timeout
+            )
+            return self._node.status_snapshot()
 
     def _motion_options(self, options=None, *, duration=None, execute=False):
         if options is not None and not isinstance(options, MotionOptions):
             msg = 'options must be MotionOptions or CartesianMotionOptions'
             raise ValueError(msg)
-        if options is not None and not isinstance(options, CartesianMotionOptions):
+        if options is not None and not isinstance(
+            options, CartesianMotionOptions
+        ):
             options = replace(self.config.motion, **asdict(options))
         selected = options or self.config.motion
         return replace(
             selected,
             frame=self.config.frame,
-            tip=self.config.tip if options is None or options.tip is None else options.tip,
+            tip=self.config.tip
+            if options is None or options.tip is None
+            else options.tip,
             time=duration if duration is not None else selected.time,
             execute=execute,
         )
@@ -1091,24 +1874,17 @@ class SawyerBase:
                 self._node.stop()
         finally:
             try:
-                if self._executor is not None:
-                    self._executor.shutdown()
+                if self._transport is not None:
+                    self._transport.destroy_node()
             finally:
-                try:
-                    if self._ros_node is not None:
-                        self._ros_node.destroy_node()
-                    elif self._node is not None:
-                        self._node.destroy_node()
-                finally:
-                    try:
-                        if self._context is not None and self._context.ok():
-                            self._context.shutdown()
-                    finally:
-                        self._node = self._executor = self._context = self._gripper = self._ros_node = None
-                        self._connected = False
+                self._node = self._gripper = self._transport = None
+                self._devices = None
+                self._actions = None
+                self._interaction = None
+                self._connected = False
 
     def disconnect(self):
-        """Release this object's resources, leaving the external bridge running."""
+        """Release this object's direct connection resources."""
         with self._operation():
             self._close_runtime()
 

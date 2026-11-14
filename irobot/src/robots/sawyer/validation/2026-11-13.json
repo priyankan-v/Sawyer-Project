@@ -1,0 +1,2085 @@
+{
+  "date_utc": "2026-11-13T21:17:59.773981+00:00",
+  "branch": "sawyer_py",
+  "base_commit": "7d8851027c883bbfbb94f55c6656e313c1d7310e",
+  "revision_note": "Uncommitted development working tree; source checksums at report packaging, not timestamps of individual physical tests.",
+  "environment": {
+    "os": "Ubuntu 22.04.5 LTS",
+    "architecture": "x86_64",
+    "python": "3.12.16",
+    "ros2": "Humble",
+    "robot": "5.3.1.192-.0-3d373b7",
+    "control_msgs": {
+      "version": "4.9.0",
+      "build": "np2py312h2ed9cc7_18",
+      "url": "https://conda.anaconda.org/robostack-staging/linux-64/ros-humble-control-msgs-4.9.0-np2py312h2ed9cc7_18.conda",
+      "sha256": "639e04229415516ea600916c06fc9297c78382dfeb7e2bd13b5e9861d6a0d381",
+      "installed_in": "ros2_env; added exactly one frozen package from the checksum-verified archive"
+    }
+  },
+  "operator_conditions": {
+    "clear_path": true,
+    "empty_gripper": true,
+    "operator_has_emergency_stop": true,
+    "source": "Explicit user confirmation"
+  },
+  "software": {
+    "tests_passed": 119,
+    "subtests_passed": 27,
+    "test_warnings": 2,
+    "ruff_version": "0.6.7",
+    "ruff_check": "passed",
+    "ruff_format_check": "17 changed Python files passed at 79-column formatting",
+    "reference_ros1_message_checks": 87,
+    "schema_regeneration": "byte-identical",
+    "clean_environment_hardware_validation": false
+  },
+  "source_sha256": {
+    "irobot/__init__.py": "d70ae4a43b7a913c4d8eec1a37864e2f521435d3fc1c650d3bd41c733451267d",
+    "irobot/src/robots/sawyer/config.py": "52fd05e0ac806c36b6e51986aa33d453225d6a0f6e9b0d0a4dc14b814808b8f4",
+    "irobot/src/robots/sawyer/core/__init__.py": "0ebebccfce685b49b792c9b03d58a050d398a03f574df8fa83cb00a008e84943",
+    "irobot/src/robots/sawyer/core/base.py": "12ec1b74f4f92cbe2b836dfab72520c85e934886f2beec802d2f050c7f9395c1",
+    "irobot/src/robots/sawyer/core/controller.py": "e8d0ebde1945cd35e017b8724c6a168dabdc682bdf8e5f39b283a912eed7f4b1",
+    "irobot/src/robots/sawyer/core/peripherals.py": "0d783df0816bd1bc547102cd137b19011880d431720c02ced611a59520942b65",
+    "irobot/src/robots/sawyer/core/transport.py": "bee04e0ed899bb16300f363455067d9597b3521d6f68d3cffcebd7d11d7e87ae",
+    "irobot/src/robots/sawyer/core/wire.py": "5cd1d91b834b924cb0b239e4da9df93fef9d7e68be3fcf1d645a63155bd35b6b",
+    "irobot/src/robots/sawyer/examples/validate_direct.py": "813dc1a680fdfbbc0d445bf2046ca78487f73df1294c4184a6b0d1e4f8d6ceb4",
+    "irobot/src/robots/sawyer/installation/generate_wire_schema.py": "9a6c89f3d638013ea2d96bc45c9d1f9283cd8834098b27769b4a8003826de12a",
+    "irobot/src/robots/sawyer/installation/inventory_sdk.py": "34e64b251764c1ca8c5e3f0f71df2e247c78b61ba61c92c53675b23fe502b06c",
+    "irobot/src/robots/sawyer/installation/wire_schema.json": "3de9a4ed0404e641ee5bc1b70377664fe9902f924315541e7df92a947a3c77fd",
+    "irobot/src/robots/sawyer/ros2.py": "5b2511c57d98fb0351ac01014ec2dbbf00997193d7bba06cb10e78ed30963891",
+    "pyproject.toml": "b0484c4c73913f98876bab1ea868757ec772d0bb13e59e4b4f383983860542e6",
+    "tests/test_irobot/test_sawyer_api.py": "24a00a83461c0b25570a1b198306eaec112b432487d3c82ae1930b3cea2aba0e",
+    "tests/test_irobot/test_sawyer_control.py": "6cd35a25a65652bac0d0d4b6490f3be9e5e50240de43784c3cc06f02ef4dbdd6",
+    "tests/test_irobot/test_sawyer_feedback.py": "a079c4d325753e4300621d675b2a40346f341149704d842494d737418c83e788",
+    "tests/test_irobot/test_sawyer_neutral_example.py": "97d3fd7a0adef2a9205232c2495be3801ac636c6ab1a217128fed80c6cac0b86",
+    "tests/test_irobot/test_sawyer_peripherals.py": "7f2fdfdbafd9312d2b2a117b2039503d8268eb277c1f964db281e3e2bfc478f9",
+    "tests/test_irobot/test_sawyer_pid.py": "c9202b564c65dc6bbe7d6904bc95c389fe8d78f2f2edafc2ba53494b62d2eee9",
+    "tests/test_irobot/test_sawyer_planner.py": "f9f8b4b81141a747186b52be6bbc185fe252e94ff5d20d524cbcefe50e435dfd",
+    "tests/test_irobot/test_sawyer_ros2.py": "43e4c9534c45effb0186b9f0dc60a27b4dfade3385fea427da0c10dfa3c37c8f",
+    "tests/test_irobot/test_sawyer_saved_pose.py": "8fad96b6a74624c99198c92b0bed3821e7f71ac4a3f903300c56cc1a092c2890",
+    "tests/test_irobot/test_sawyer_setup.py": "f88d02918f0c3554368a5602b9be7d8fcf7a87484ce421b8156b24fb2561794f",
+    "tests/test_irobot/test_sawyer_trajectory.py": "9c911303a25d5938060cfbe0f53d227ddd8db99b26c99c0a3e03ca2fd36f4e2b",
+    "tests/test_irobot/test_sawyer_transport.py": "63d876288469abc999b47936c9573c5b418e789ce2a3ced9df0a6dba10efee45",
+    "tests/test_irobot/test_sawyer_wire.py": "aecd4c64b34250a2b96ddc3a5b63e1d6dbf4f2ef1e3f86a2d88218dcf85272ce"
+  },
+  "observations": {
+    "direct_readonly": {
+      "scope": "direct read-only hardware validation",
+      "actuation": false,
+      "version": "5.3.1.192-.0-3d373b7",
+      "existing_command_publishers": [],
+      "topic_types": [
+        [
+          "/io/comms/io/state",
+          "intera_core_msgs/IODeviceStatus"
+        ],
+        [
+          "/robot/collision_object",
+          "arm_navigation_msgs/CollisionObject"
+        ],
+        [
+          "/usb/ready",
+          "usbservice/UsbDevices"
+        ],
+        [
+          "/robot/digital_io/head_button_triangle_light/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/robot/accelerometer_names",
+          "motor_control_msgs/StringArray"
+        ],
+        [
+          "/robot/analog_io/torso_fan/state",
+          "intera_core_msgs/AnalogIOState"
+        ],
+        [
+          "/robot/digital_io/head_button_ok/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/lights/cuff_command",
+          "lightworks/CuffState"
+        ],
+        [
+          "/robot/limb/right/endpoint_state",
+          "intera_core_msgs/EndpointState"
+        ],
+        [
+          "/motion/interpolated_path",
+          "intera_motion_msgs/InterpolatedPath"
+        ],
+        [
+          "/robot/head_display",
+          "sensor_msgs/Image"
+        ],
+        [
+          "/robot/limb/right/joint_tracking_error",
+          "intera_motion_msgs/JointTrackingError"
+        ],
+        [
+          "/robot/digital_io/torso_digital_input0/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/collision/right/debug",
+          "motor_control_msgs/JointCollisionEstimatorDebug"
+        ],
+        [
+          "/errors",
+          "rethink_errors/Error"
+        ],
+        [
+          "/robot/limb/right/tip_states",
+          "intera_core_msgs/EndpointStates"
+        ],
+        [
+          "/robot/digital_io/torso_camera_power/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/collision/right/collision_detection",
+          "motor_control_msgs/CollisionDetection"
+        ],
+        [
+          "/robot/homing_names",
+          "motor_control_msgs/StringArray"
+        ],
+        [
+          "/robot/digital_io/right_button_ok/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/io/comms/io/config",
+          "intera_core_msgs/IODeviceConfiguration"
+        ],
+        [
+          "/io/robot/safety/state",
+          "intera_core_msgs/IODeviceStatus"
+        ],
+        [
+          "/io/internal_camera/config",
+          "intera_core_msgs/IONodeConfiguration"
+        ],
+        [
+          "/robot/digital_io/head_button_triangle/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/robot/set_motor_voltage_low",
+          "std_msgs/Bool"
+        ],
+        [
+          "/tf_action/result",
+          "tf2_msgs/LookupTransformActionResult"
+        ],
+        [
+          "/robot/digital_io/right_button_back/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/robot/limb/right/command_joint_position",
+          "motor_control_msgs/JointMotionCommand"
+        ],
+        [
+          "/robot/limb/right/suppress_contact_safety",
+          "std_msgs/Empty"
+        ],
+        [
+          "/robot/digital_io/right_inner_light/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/robot/navigators/right_navigator/state",
+          "intera_core_msgs/NavigatorState"
+        ],
+        [
+          "/io/comms/state",
+          "intera_core_msgs/IONodeStatus"
+        ],
+        [
+          "/robot/limb/right/endpoint_tracking_error",
+          "intera_motion_msgs/EndpointTrackingError"
+        ],
+        [
+          "/robot/digital_io/right_button_sawyer/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/robot/limb/right/command_stiffness",
+          "std_msgs/UInt32"
+        ],
+        [
+          "/robot/limb/right/arm_state_estimate",
+          "motor_control_msgs/ArmStateEstimate"
+        ],
+        [
+          "/robot/limb/right/limb_state",
+          "motor_control_msgs/LimbState"
+        ],
+        [
+          "/robot/navigators/head_navigator/state",
+          "intera_core_msgs/NavigatorState"
+        ],
+        [
+          "/robot/limb/right/attached_mass",
+          "std_msgs/Float32"
+        ],
+        [
+          "/io/internal_camera/head_camera/image_raw",
+          "sensor_msgs/Image"
+        ],
+        [
+          "/robot/limb_names",
+          "motor_control_msgs/StringArray"
+        ],
+        [
+          "/io/robot/config",
+          "intera_core_msgs/IONodeConfiguration"
+        ],
+        [
+          "/robot/digital_io/right_button_circle_light/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/robot/limb/right/stiffness_constraint",
+          "motor_control_msgs/StiffnessConstraint"
+        ],
+        [
+          "/robot/attached_collision_object",
+          "arm_navigation_msgs/AttachedCollisionObject"
+        ],
+        [
+          "/io/robot/robot/config",
+          "intera_core_msgs/IODeviceConfiguration"
+        ],
+        [
+          "/robot/limb/right/command_stiffness_limit",
+          "motor_control_msgs/Stiffness"
+        ],
+        [
+          "/robot/analog_io/torso_lighting/state",
+          "intera_core_msgs/AnalogIOState"
+        ],
+        [
+          "/io/internal_camera/right_hand_camera/state",
+          "intera_core_msgs/IODeviceStatus"
+        ],
+        [
+          "/robot/limb/right/interaction_controller/state",
+          "intera_core_msgs/InteractionControlState"
+        ],
+        [
+          "/robot/limb/right/interaction_control_command",
+          "intera_core_msgs/InteractionControlCommand"
+        ],
+        [
+          "/robot/limb/right/velocity_controller_state",
+          "motor_control_msgs/VelocityControllerState"
+        ],
+        [
+          "/tf_action/goal",
+          "tf2_msgs/LookupTransformActionGoal"
+        ],
+        [
+          "/motion/motion_command/cancel",
+          "actionlib_msgs/GoalID"
+        ],
+        [
+          "/calibration_command/cancel",
+          "actionlib_msgs/GoalID"
+        ],
+        [
+          "/tf_action/cancel",
+          "actionlib_msgs/GoalID"
+        ],
+        [
+          "/robot/digital_io/right_button_back_light/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/io/robot/pneumatic/state",
+          "intera_core_msgs/IODeviceStatus"
+        ],
+        [
+          "/io/robot/navigator/state",
+          "intera_core_msgs/IODeviceStatus"
+        ],
+        [
+          "/intera/endpoint_ids",
+          "motor_control_msgs/StringArray"
+        ],
+        [
+          "/robot/digital_io/head_red_light/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/robot/limb/right/stiffness",
+          "motor_control_msgs/Stiffness"
+        ],
+        [
+          "/robot/urdf",
+          "intera_core_msgs/URDFConfiguration"
+        ],
+        [
+          "/robot/digital_io/right_lower_button/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/robot/limb/right/use_default_spring_model",
+          "std_msgs/Empty"
+        ],
+        [
+          "/robot/limb/right/set_feed_forward_weights",
+          "motor_control_msgs/JointPosition"
+        ],
+        [
+          "/robot/in_sim_mode",
+          "std_msgs/Bool"
+        ],
+        [
+          "/robot/digital_io/right_hand_green_light/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/robot/digital_io/right_button_triangle_light/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/calibration_command/feedback",
+          "intera_core_msgs/CalibrationCommandActionFeedback"
+        ],
+        [
+          "/io/internal_camera/head_camera/config",
+          "intera_core_msgs/IODeviceConfiguration"
+        ],
+        [
+          "/robot/accelerometer_states",
+          "motor_control_msgs/AccelerometerStates"
+        ],
+        [
+          "/robot/analog_io_states",
+          "intera_core_msgs/AnalogIOStates"
+        ],
+        [
+          "/io/end_effector/command",
+          "intera_core_msgs/IOComponentCommand"
+        ],
+        [
+          "/robot/digital_io/right_button_square/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/robot/joint_state_publish_rate",
+          "std_msgs/UInt16"
+        ],
+        [
+          "/log/export_request",
+          "std_msgs/String"
+        ],
+        [
+          "/robot/digital_io/right_lower_cuff/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/robot/accelerometer/right_accelerometer/state",
+          "sensor_msgs/Imu"
+        ],
+        [
+          "/io/robot/pneumatic/command",
+          "intera_core_msgs/IOComponentCommand"
+        ],
+        [
+          "/robot/set_sim_mode",
+          "std_msgs/Bool"
+        ],
+        [
+          "/camera_field_calibration/status",
+          "actionlib_msgs/GoalStatusArray"
+        ],
+        [
+          "/robot/analog_io/right_analog_input/state",
+          "intera_core_msgs/AnalogIOState"
+        ],
+        [
+          "/log/export_status",
+          "log_exporter/Status"
+        ],
+        [
+          "/motion/interaction_control_command",
+          "intera_core_msgs/InteractionControlCommand"
+        ],
+        [
+          "/robot/digital_io/head_button_circle_light/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/io/comms/io/command",
+          "intera_core_msgs/IOComponentCommand"
+        ],
+        [
+          "/io/internal_camera/right_hand_camera/events",
+          "std_msgs/String"
+        ],
+        [
+          "/robot/set_homing_mode",
+          "intera_core_msgs/HomingCommand"
+        ],
+        [
+          "/camera_field_calibration/goal",
+          "intera_core_msgs/CameraFieldCalibrationCommandActionGoal"
+        ],
+        [
+          "/robot/digital_io/head_blue_light/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/lights/cuff_state",
+          "lightworks/CuffState"
+        ],
+        [
+          "/robot/digital_io/right_hand_camera_power/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/robot/ref_joint_states",
+          "sensor_msgs/JointState"
+        ],
+        [
+          "/camera_field_calibration/feedback",
+          "intera_core_msgs/CameraFieldCalibrationCommandActionFeedback"
+        ],
+        [
+          "/io/robot/safety/config",
+          "intera_core_msgs/IODeviceConfiguration"
+        ],
+        [
+          "/io/internal_camera/right_hand_camera/camera_info",
+          "sensor_msgs/CameraInfo"
+        ],
+        [
+          "/tf_action/status",
+          "actionlib_msgs/GoalStatusArray"
+        ],
+        [
+          "/robot/limb/right/gravity_compensation_torques",
+          "intera_core_msgs/SEAJointState"
+        ],
+        [
+          "/robot/limb/right/command_twist_speed_limit",
+          "motor_control_msgs/SpeedLimit"
+        ],
+        [
+          "/robot/digital_io/head_button_back_light/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/io/robot/cuff/config",
+          "intera_core_msgs/IODeviceConfiguration"
+        ],
+        [
+          "/robot/digital_io/torso_safety_stop/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/robot/analog_io/right_vacuum_sensor_analog/state",
+          "intera_core_msgs/AnalogIOState"
+        ],
+        [
+          "/engine/task_state",
+          "motor_control_msgs/TaskState"
+        ],
+        [
+          "/robot/head/command_head_pan",
+          "intera_core_msgs/HeadPanCommand"
+        ],
+        [
+          "/motion/motion_command/result",
+          "intera_motion_msgs/MotionCommandActionResult"
+        ],
+        [
+          "/io/robot/cuff/state",
+          "intera_core_msgs/IODeviceStatus"
+        ],
+        [
+          "/io/robot/pneumatic/config",
+          "intera_core_msgs/IODeviceConfiguration"
+        ],
+        [
+          "/robot/homing_states",
+          "intera_core_msgs/HomingState"
+        ],
+        [
+          "/robot/state",
+          "intera_core_msgs/RobotAssemblyState"
+        ],
+        [
+          "/robot/limb/right/joint_command_timeout",
+          "std_msgs/Float64"
+        ],
+        [
+          "/motion/motion_command/feedback",
+          "intera_motion_msgs/MotionCommandActionFeedback"
+        ],
+        [
+          "/io/internal_camera/command",
+          "intera_core_msgs/IOComponentCommand"
+        ],
+        [
+          "/robot/digital_io/right_valve_1b/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/tf",
+          "tf2_msgs/TFMessage"
+        ],
+        [
+          "/robot/digital_io/head_button_back/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/robot/analog_io/right_wheel/value_uint32",
+          "std_msgs/UInt32"
+        ],
+        [
+          "/robot/analog_io/right_wheel/state",
+          "intera_core_msgs/AnalogIOState"
+        ],
+        [
+          "/io/comms/command",
+          "intera_core_msgs/IOComponentCommand"
+        ],
+        [
+          "/robot/end_effector_names",
+          "motor_control_msgs/StringArray"
+        ],
+        [
+          "/robot/limb/right/collision_avoidance_state",
+          "intera_core_msgs/CollisionAvoidanceState"
+        ],
+        [
+          "/robot/analog_io/head_wheel/value_uint32",
+          "std_msgs/UInt32"
+        ],
+        [
+          "/robot/digital_io/command",
+          "intera_core_msgs/DigitalOutputCommand"
+        ],
+        [
+          "/tf_static",
+          "tf2_msgs/TFMessage"
+        ],
+        [
+          "/robot/digital_io/right_outer_light/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/calibration_command/result",
+          "intera_core_msgs/CalibrationCommandActionResult"
+        ],
+        [
+          "/robot/digital_io/right_hand_blue_light/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/robot/digital_io/head_button_sawyer_light/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/io/robot/state",
+          "intera_core_msgs/IONodeStatus"
+        ],
+        [
+          "/robot/digital_io/head_button_square_light/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/io/robot/navigator/command",
+          "intera_core_msgs/IOComponentCommand"
+        ],
+        [
+          "/io/internal_camera/right_hand_camera/rectify_mono/parameter_descriptions",
+          "dynamic_reconfigure/ConfigDescription"
+        ],
+        [
+          "/update/status",
+          "std_msgs/Int32"
+        ],
+        [
+          "/diagnostics",
+          "diagnostic_msgs/DiagnosticArray"
+        ],
+        [
+          "/motion/motion_command/status",
+          "actionlib_msgs/GoalStatusArray"
+        ],
+        [
+          "/lights/halo",
+          "lightworks/DomeState"
+        ],
+        [
+          "/robot/limb/right/torque_data",
+          "motor_control_msgs/TorqueData"
+        ],
+        [
+          "/robot/limb/right/suppress_hand_overwrench_safety",
+          "std_msgs/Empty"
+        ],
+        [
+          "/io/end_effector/state",
+          "intera_core_msgs/IONodeStatus"
+        ],
+        [
+          "/update/progress",
+          "std_msgs/Int32"
+        ],
+        [
+          "/robot/limb/right/joint_command",
+          "intera_core_msgs/JointCommand"
+        ],
+        [
+          "/rosout",
+          "rosgraph_msgs/Log"
+        ],
+        [
+          "/robot/digital_io/right_button_sawyer_light/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/io/internal_camera/head_camera/image_rect_color",
+          "sensor_msgs/Image"
+        ],
+        [
+          "/robot/digital_io/right_button_circle/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/robot/analog_io/command",
+          "intera_core_msgs/AnalogOutputCommand"
+        ],
+        [
+          "/robot/digital_io/right_shoulder_button/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/robot/digital_io/right_valve_1a/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/robot/limb/right/command_nullspace_setpoint_and_twist_stamped",
+          "motor_control_msgs/NullspaceTwistStamped"
+        ],
+        [
+          "/io/robot/robot/state",
+          "intera_core_msgs/IODeviceStatus"
+        ],
+        [
+          "/io/end_effector/right_gripper/config",
+          "intera_core_msgs/IODeviceConfiguration"
+        ],
+        [
+          "/io/end_effector/right_gripper/command",
+          "intera_core_msgs/IOComponentCommand"
+        ],
+        [
+          "/robot/analog_io/torso_lighting/value_uint32",
+          "std_msgs/UInt32"
+        ],
+        [
+          "/robot/limb/right/suppress_collision_avoidance",
+          "std_msgs/Empty"
+        ],
+        [
+          "/robot/limb/right/command_twist_stamped",
+          "geometry_msgs/TwistStamped"
+        ],
+        [
+          "/robot/joint_names",
+          "motor_control_msgs/StringArray"
+        ],
+        [
+          "/robot/set_super_reset",
+          "std_msgs/Empty"
+        ],
+        [
+          "/io/internal_camera/right_hand_camera/image_rect",
+          "sensor_msgs/Image"
+        ],
+        [
+          "/io/robot/right_end_of_arm/state",
+          "intera_core_msgs/IODeviceStatus"
+        ],
+        [
+          "/io/end_effector/right_gripper/state",
+          "intera_core_msgs/IODeviceStatus"
+        ],
+        [
+          "/io/internal_camera/right_hand_camera/rectify_mono/parameter_updates",
+          "dynamic_reconfigure/Config"
+        ],
+        [
+          "/robot/limb/right/twist_speed_constraint",
+          "motor_control_msgs/SpeedConstraint"
+        ],
+        [
+          "/robot/navigators_names",
+          "motor_control_msgs/StringArray"
+        ],
+        [
+          "/io/robot/right_end_of_arm/command",
+          "intera_core_msgs/IOComponentCommand"
+        ],
+        [
+          "/robot/set_super_enable",
+          "std_msgs/Bool"
+        ],
+        [
+          "/robot/digital_io_states",
+          "intera_core_msgs/DigitalIOStates"
+        ],
+        [
+          "/io/end_effector/config",
+          "intera_core_msgs/IONodeConfiguration"
+        ],
+        [
+          "/io/internal_camera/head_camera/command",
+          "intera_core_msgs/IOComponentCommand"
+        ],
+        [
+          "/robot/limb/right/weight_integral_terms",
+          "motor_control_msgs/WeightIntegralTerms"
+        ],
+        [
+          "/camera_field_calibration/cancel",
+          "actionlib_msgs/GoalID"
+        ],
+        [
+          "/robot/analog_io/right_analog_input/value_uint32",
+          "std_msgs/UInt32"
+        ],
+        [
+          "/io/internal_camera/head_camera/camera_info",
+          "sensor_msgs/CameraInfo"
+        ],
+        [
+          "/robot/analog_io_names",
+          "motor_control_msgs/StringArray"
+        ],
+        [
+          "/rosout_agg",
+          "rosgraph_msgs/Log"
+        ],
+        [
+          "/robot/limb/right/commanded_endpoint_state",
+          "intera_core_msgs/EndpointState"
+        ],
+        [
+          "/robot/analog_io/head_wheel/state",
+          "intera_core_msgs/AnalogIOState"
+        ],
+        [
+          "/robot/digital_io/torso_process_sense0/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/robot/digital_io/right_button_triangle/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/robot/limb/right/set_damping_correction_weights",
+          "motor_control_msgs/JointPosition"
+        ],
+        [
+          "/robot/limb/right/set_dominance",
+          "std_msgs/Bool"
+        ],
+        [
+          "/robot/camera_strobe",
+          "intera_core_msgs/CameraStrobe"
+        ],
+        [
+          "/robot/digital_io/torso_process_sense1/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/calibration_command/status",
+          "actionlib_msgs/GoalStatusArray"
+        ],
+        [
+          "/io/robot/command",
+          "intera_core_msgs/IOComponentCommand"
+        ],
+        [
+          "/robot/digital_io_names",
+          "motor_control_msgs/StringArray"
+        ],
+        [
+          "/tf_action/feedback",
+          "tf2_msgs/LookupTransformActionFeedback"
+        ],
+        [
+          "/robot/limb/right/command_velocity_tozero",
+          "std_msgs/Bool"
+        ],
+        [
+          "/robot/digital_io/right_valve_2a/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/robot/digital_io/torso_foot_pedal/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/robot/limb/right/suppress_cuff_interaction",
+          "std_msgs/Empty"
+        ],
+        [
+          "/robot/digital_io/head_green_light/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/robot/limb/right/collision_detection_state",
+          "intera_core_msgs/CollisionDetectionState"
+        ],
+        [
+          "/io/robot/right_end_of_arm/config",
+          "intera_core_msgs/IODeviceConfiguration"
+        ],
+        [
+          "/robot/digital_io/head_button_circle/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/io/robot/safety/command",
+          "intera_core_msgs/IOComponentCommand"
+        ],
+        [
+          "/io/robot/navigator/config",
+          "intera_core_msgs/IODeviceConfiguration"
+        ],
+        [
+          "/io/internal_camera/head_camera/state",
+          "intera_core_msgs/IODeviceStatus"
+        ],
+        [
+          "/robot/digital_io/right_upper_button/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/motion/motion_command/goal",
+          "intera_motion_msgs/MotionCommandActionGoal"
+        ],
+        [
+          "/robot/navigators_states",
+          "intera_core_msgs/NavigatorStates"
+        ],
+        [
+          "/motion/skip_trajectory",
+          "std_msgs/Bool"
+        ],
+        [
+          "/camera_field_calibration/result",
+          "intera_core_msgs/CameraFieldCalibrationCommandActionResult"
+        ],
+        [
+          "/io/internal_camera/right_hand_camera/command",
+          "intera_core_msgs/IOComponentCommand"
+        ],
+        [
+          "/io/internal_camera/state",
+          "intera_core_msgs/IONodeStatus"
+        ],
+        [
+          "/robot/limb/right/set_speed_ratio",
+          "std_msgs/Float64"
+        ],
+        [
+          "/robot/limb/right/command_twist_speed_limit_scale",
+          "motor_control_msgs/SpeedLimitScale"
+        ],
+        [
+          "/io/internal_camera/right_hand_camera/image_raw",
+          "sensor_msgs/Image"
+        ],
+        [
+          "/robot/digital_io/right_hand_red_light/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/robot/digital_io/right_valve_2b/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/io/internal_camera/head_camera/rectify_color/parameter_descriptions",
+          "dynamic_reconfigure/ConfigDescription"
+        ],
+        [
+          "/robot/set_super_stop",
+          "std_msgs/Empty"
+        ],
+        [
+          "/robot/digital_io/right_button_square_light/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/io/internal_camera/right_hand_camera/cognex_data",
+          "std_msgs/String"
+        ],
+        [
+          "/robot/joint_states",
+          "sensor_msgs/JointState"
+        ],
+        [
+          "/io/internal_camera/right_hand_camera/set_strobe/state",
+          "std_msgs/Bool"
+        ],
+        [
+          "/io/comms/config",
+          "intera_core_msgs/IONodeConfiguration"
+        ],
+        [
+          "/calibration_command/goal",
+          "intera_core_msgs/CalibrationCommandActionGoal"
+        ],
+        [
+          "/robot/head/head_state",
+          "intera_core_msgs/HeadState"
+        ],
+        [
+          "/robot/ref_joint_names",
+          "motor_control_msgs/StringArray"
+        ],
+        [
+          "/robot/analog_io/right_vacuum_sensor_analog/value_uint32",
+          "std_msgs/UInt32"
+        ],
+        [
+          "/io/internal_camera/head_camera/rectify_color/parameter_updates",
+          "dynamic_reconfigure/Config"
+        ],
+        [
+          "/robot/analog_io/torso_fan/value_uint32",
+          "std_msgs/UInt32"
+        ],
+        [
+          "/robot/joint_limits",
+          "intera_core_msgs/JointLimits"
+        ],
+        [
+          "/robot/limb/right/pose_metric_info",
+          "motor_control_msgs/PoseMetrics"
+        ],
+        [
+          "/robot/digital_io/head_button_square/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/io/robot/cuff/command",
+          "intera_core_msgs/IOComponentCommand"
+        ],
+        [
+          "/robot/limb/right/suppress_gravity_compensation",
+          "std_msgs/Empty"
+        ],
+        [
+          "/io/internal_camera/right_hand_camera/config",
+          "intera_core_msgs/IODeviceConfiguration"
+        ],
+        [
+          "/robot/limb/right/suppress_squish_safety",
+          "std_msgs/Empty"
+        ],
+        [
+          "/robot/digital_io/head_button_sawyer/state",
+          "intera_core_msgs/DigitalIOState"
+        ],
+        [
+          "/io/robot/robot/command",
+          "intera_core_msgs/IOComponentCommand"
+        ]
+      ],
+      "status": {
+        "connected": true,
+        "ready": true,
+        "issues": [],
+        "enabled": true,
+        "collision": false,
+        "joints": [
+          1.247337890625,
+          1.129,
+          -1.022369140625,
+          -0.21745703125,
+          2.7180458984375,
+          -0.15921484375,
+          -2.7830185546875
+        ],
+        "velocities": [
+          -0.001,
+          -0.001,
+          -0.001,
+          -0.001,
+          -0.001,
+          -0.001,
+          -0.001
+        ]
+      },
+      "joint_positions": [
+        1.247337890625,
+        1.129,
+        -1.022369140625,
+        -0.21745703125,
+        2.7180458984375,
+        -0.15921484375,
+        -2.7830185546875
+      ],
+      "joint_velocities": [
+        -0.001,
+        -0.001,
+        -0.001,
+        -0.001,
+        -0.001,
+        -0.001,
+        -0.001
+      ],
+      "gripper": {
+        "device_status": "unready",
+        "calibrate": false,
+        "cmd_grip": false,
+        "dead_zone_m": 0.002,
+        "force_response_n": -2.0,
+        "go": true,
+        "has_error": false,
+        "is_calibrated": false,
+        "is_gripping": false,
+        "is_moving": false,
+        "position_m": 0.041667,
+        "position_response_m": 0.0,
+        "reboot": false,
+        "right_gripper_tip_object_kg": 0.0,
+        "speed_mps": 1.5
+      },
+      "tip": "right_hand",
+      "pose": {
+        "position": [
+          0.09127787532286145,
+          0.785632075441979,
+          -0.36580752983810355
+        ],
+        "orientation": [
+          0.8615697923879464,
+          0.43387747629994083,
+          0.1743934203086443,
+          -0.1975721725275043
+        ],
+        "frame": "base"
+      },
+      "limits": {
+        "lower": [
+          -3.0503,
+          -3.8095,
+          -3.0426,
+          -3.0439,
+          -2.9761,
+          -2.9761,
+          -4.7124
+        ],
+        "upper": [
+          3.0503,
+          2.2736,
+          3.0426,
+          3.0439,
+          2.9761,
+          2.9761,
+          4.7124
+        ],
+        "velocity": [
+          1.74,
+          1.328,
+          1.957,
+          1.957,
+          3.485,
+          3.485,
+          4.545
+        ],
+        "acceleration": [
+          10.0,
+          8.0,
+          10.0,
+          10.0,
+          12.0,
+          12.0,
+          12.0
+        ]
+      },
+      "command_connections": false,
+      "neutral_preview": {
+        "start": [
+          1.247337890625,
+          1.129,
+          -1.022369140625,
+          -0.21745703125,
+          2.7180458984375,
+          -0.15921484375,
+          -2.7830185546875
+        ],
+        "end": [
+          0.0,
+          -1.18,
+          0.0,
+          2.18,
+          0.0,
+          0.57,
+          3.3161
+        ],
+        "duration": 3.2600715361445785
+      },
+      "fk": [
+        {
+          "position": [
+            0.09127787532286145,
+            0.785632075441979,
+            -0.36580752983810355
+          ],
+          "orientation": [
+            0.8615697923879464,
+            0.43387747629994083,
+            0.1743934203086443,
+            -0.1975721725275043
+          ],
+          "frame": "base"
+        }
+      ],
+      "ik": [
+        1.247337890625,
+        1.129,
+        -1.022369140625,
+        -0.21745703125,
+        2.7180458984375,
+        -0.15921484375,
+        -2.7830185546875
+      ],
+      "loaded_ros_modules": [],
+      "clean_disconnect": true
+    },
+    "direct_motion": {
+      "scope": "direct physical joint and electric-gripper validation",
+      "steps": [
+        {
+          "operation": "joint_delta",
+          "error_rad": 0.00041210937500002487,
+          "elapsed": 3.2045780279995597
+        },
+        {
+          "operation": "restore",
+          "error_rad": 0.0002060546874997904
+        },
+        {
+          "action": "calibrate",
+          "executed": true
+        },
+        {
+          "action": "open",
+          "executed": true
+        },
+        {
+          "action": "close",
+          "executed": true
+        },
+        {
+          "action": "open",
+          "executed": true
+        }
+      ],
+      "final_status": {
+        "connected": true,
+        "ready": true,
+        "issues": [],
+        "enabled": true,
+        "collision": false,
+        "joints": [
+          1.247234375,
+          1.1288974609375,
+          -1.022369140625,
+          -0.21745703125,
+          2.7180458984375,
+          -0.15921484375,
+          -2.783224609375
+        ],
+        "velocities": [
+          -0.001,
+          -0.001,
+          -0.001,
+          -0.001,
+          -0.001,
+          -0.001,
+          -0.001
+        ]
+      },
+      "final_gripper": {
+        "device_status": "ready",
+        "calibrate": false,
+        "cmd_grip": false,
+        "dead_zone_m": 0.002,
+        "force_response_n": 0.0,
+        "go": true,
+        "has_error": false,
+        "is_calibrated": true,
+        "is_gripping": false,
+        "is_moving": false,
+        "position_m": 0.041667,
+        "position_response_m": 0.0405509196428571,
+        "reboot": false,
+        "right_gripper_tip_object_kg": 0.0,
+        "speed_mps": 1.5
+      },
+      "success": true
+    },
+    "direct_neutral_cartesian": {
+      "scope": "direct neutral and Cartesian physical validation",
+      "steps": [
+        {
+          "operation": "neutral",
+          "reference_s": 65.19853522978632,
+          "elapsed_s": 65.40819038500013,
+          "error_rad": 0.00020117187500001688
+        },
+        {
+          "operation": "cartesian_up",
+          "position": [
+            0.4495032700576644,
+            0.1600555329455601,
+            0.22511118708155964
+          ]
+        },
+        {
+          "operation": "cartesian_return",
+          "start": [
+            0.44956273631907145,
+            0.15999145454896155,
+            0.215123523770214
+          ],
+          "final": [
+            0.44942729421994887,
+            0.16010106288597467,
+            0.21501386839589673
+          ]
+        }
+      ],
+      "status": {
+        "connected": true,
+        "ready": true,
+        "issues": [],
+        "enabled": true,
+        "collision": false,
+        "joints": [
+          -9.765625e-06,
+          -1.1798818359375,
+          0.000208984375,
+          2.1802265625,
+          3.41796875e-05,
+          0.5704072265625,
+          3.3164716796875
+        ],
+        "velocities": [
+          -0.001,
+          -0.001,
+          -0.001,
+          -0.001,
+          -0.001,
+          -0.003,
+          -0.001
+        ]
+      },
+      "success": true
+    },
+    "direct_ros2_physical": {
+      "scope": "physical ROS2 Humble separate-client action validation",
+      "domain": 97,
+      "steps": [
+        {
+          "operation": "neutral",
+          "status": 4,
+          "feedback_samples": 67,
+          "max_error_rad": 0.0003716796874999595,
+          "final_joints": [
+            -9.765625e-06,
+            -1.180087890625,
+            6.4453125e-05,
+            2.1800830078125,
+            3.41796875e-05,
+            0.5697880859375,
+            3.3164716796875
+          ]
+        },
+        {
+          "operation": "joint0_plus_0.01",
+          "status": 4,
+          "feedback_samples": 67,
+          "max_error_rad": 0.00024843750000025366,
+          "final_joints": [
+            0.010138671875,
+            -1.1799853515625,
+            6.4453125e-05,
+            2.1799296875,
+            3.41796875e-05,
+            0.5697880859375,
+            3.3158515625
+          ]
+        },
+        {
+          "operation": "return_neutral",
+          "status": 4,
+          "feedback_samples": 67,
+          "max_error_rad": 0.00024843750000025366,
+          "final_joints": [
+            -0.00011328125,
+            -1.1799853515625,
+            6.4453125e-05,
+            2.1800830078125,
+            3.41796875e-05,
+            0.569994140625,
+            3.3158515625
+          ]
+        },
+        {
+          "operation": "cancel_joint0_plus_0.01",
+          "status": 5,
+          "feedback_samples": 12,
+          "max_error_rad": 0.01011328125,
+          "final_joints": [
+            -0.00011328125,
+            -1.1799853515625,
+            6.4453125e-05,
+            2.1800830078125,
+            3.41796875e-05,
+            0.569994140625,
+            3.3158515625
+          ]
+        },
+        {
+          "operation": "restore_neutral_after_cancel",
+          "status": 4,
+          "feedback_samples": 67,
+          "max_error_rad": 8.300781250003553e-05,
+          "final_joints": [
+            -9.765625e-06,
+            -1.1799853515625,
+            6.4453125e-05,
+            2.1800830078125,
+            3.41796875e-05,
+            0.569994140625,
+            3.31605859375
+          ]
+        }
+      ],
+      "final_status": {
+        "connected": true,
+        "ready": true,
+        "issues": [],
+        "enabled": true,
+        "collision": false,
+        "joints": [
+          -9.765625e-06,
+          -1.1799853515625,
+          6.4453125e-05,
+          2.1800830078125,
+          3.41796875e-05,
+          0.569994140625,
+          3.31605859375
+        ],
+        "velocities": [
+          -0.001,
+          -0.001,
+          -0.001,
+          -0.001,
+          -0.001,
+          -0.001,
+          -0.001
+        ],
+        "busy": false,
+        "feedback_age_s": 0.02024601899938716,
+        "job": {
+          "operation": "follow_joint_trajectory",
+          "state": "succeeded",
+          "detail": ""
+        }
+      },
+      "success": true
+    },
+    "direct_peripherals_readonly": {
+      "scope": "direct peripheral read-only validation",
+      "actuation": false,
+      "robot_state": {
+        "homed": true,
+        "ready": true,
+        "enabled": true,
+        "stopped": false,
+        "error": false,
+        "low_voltage": false,
+        "estop_button": 0,
+        "estop_source": 0,
+        "received_at": 6910.484075717
+      },
+      "head_state": {
+        "pan": -0.23487012088298798,
+        "is_turning": false,
+        "is_blocked": false,
+        "pan_mode": 1,
+        "received_at": 6910.514436611
+      },
+      "head_preview": {
+        "executed": false,
+        "command": {
+          "target": -0.22487012088298797,
+          "speed_ratio": 0.1,
+          "pan_mode": 1,
+          "received_at": 0.0
+        }
+      },
+      "io": {
+        "cuff": {
+          "device": "cuff",
+          "status": "ready",
+          "signals": {
+            "right_button_lower": [
+              0
+            ],
+            "right_button_upper": [
+              0
+            ],
+            "right_cuff": [
+              0
+            ]
+          }
+        },
+        "navigator": {
+          "device": "navigator",
+          "status": "ready",
+          "signals": {
+            "head_button_back": [
+              0
+            ],
+            "head_button_circle": [
+              0
+            ],
+            "head_button_ok": [
+              0
+            ],
+            "head_button_show": [
+              0
+            ],
+            "head_button_square": [
+              0
+            ],
+            "head_button_triangle": [
+              0
+            ],
+            "head_wheel": [
+              0
+            ],
+            "right_button_back": [
+              0
+            ],
+            "right_button_circle": [
+              0
+            ],
+            "right_button_ok": [
+              0
+            ],
+            "right_button_show": [
+              0
+            ],
+            "right_button_square": [
+              0
+            ],
+            "right_button_triangle": [
+              0
+            ],
+            "right_wheel": [
+              0
+            ]
+          }
+        },
+        "robot": {
+          "device": "robot",
+          "status": "ready",
+          "signals": {
+            "head_blue_light": [
+              false
+            ],
+            "head_green_light": [
+              false
+            ],
+            "head_red_light": [
+              false
+            ],
+            "right_hand_blue_light": [
+              false
+            ],
+            "right_hand_green_light": [
+              false
+            ],
+            "right_hand_red_light": [
+              false
+            ]
+          }
+        },
+        "right_end_of_arm": {
+          "device": "right_end_of_arm",
+          "status": "ready",
+          "signals": {
+            "right_analog_in": [
+              0
+            ],
+            "right_command": [
+              10,
+              31,
+              98,
+              2,
+              232,
+              3,
+              0,
+              4,
+              93,
+              1,
+              0,
+              0
+            ],
+            "right_ident": [
+              190,
+              1,
+              0,
+              1
+            ],
+            "right_response": [
+              3,
+              4,
+              1,
+              0,
+              36,
+              255,
+              83,
+              2,
+              0,
+              0,
+              0,
+              0
+            ],
+            "right_stp_present": [
+              false
+            ]
+          }
+        }
+      },
+      "cameras": {
+        "head": {
+          "device": "head_camera",
+          "signals": {
+            "camera_streaming": [
+              false
+            ],
+            "resolution": [
+              {
+                "height": 800,
+                "width": 1280
+              }
+            ],
+            "set_exposure": [
+              -1
+            ],
+            "set_flip": [
+              false
+            ],
+            "set_gain": [
+              0
+            ],
+            "set_mirror": [
+              false
+            ],
+            "set_window_x": [
+              0
+            ],
+            "set_window_y": [
+              0
+            ]
+          },
+          "frame_error": "No valid feedback from /io/internal_camera/head_camera/image_rect_color"
+        },
+        "hand": {
+          "device": "right_hand_camera",
+          "signals": {
+            "camera_streaming": [
+              true
+            ],
+            "resolution": [
+              {
+                "height": 480,
+                "width": 752
+              }
+            ],
+            "set_brightness": [
+              10
+            ],
+            "set_embedded_data": [
+              false
+            ],
+            "set_exposure": [
+              32.0
+            ],
+            "set_flip": [
+              false
+            ],
+            "set_gain": [
+              5
+            ],
+            "set_mirror": [
+              false
+            ],
+            "set_strobe": [
+              false
+            ],
+            "set_window_x": [
+              0
+            ],
+            "set_window_y": [
+              0
+            ]
+          },
+          "image": {
+            "width": 752,
+            "height": 480,
+            "encoding": "mono8",
+            "bytes": 360960,
+            "frame": "right_hand_camera",
+            "calibration_width": 752,
+            "calibration_height": 480
+          }
+        }
+      },
+      "status": {
+        "connected": true,
+        "ready": true,
+        "issues": [],
+        "enabled": true,
+        "collision": false,
+        "joints": [
+          -9.765625e-06,
+          -1.1799853515625,
+          -7.91015625e-05,
+          2.1800830078125,
+          3.41796875e-05,
+          0.569994140625,
+          3.31605859375
+        ],
+        "velocities": [
+          -0.001,
+          -0.001,
+          -0.001,
+          -0.001,
+          -0.001,
+          -0.001,
+          -0.001
+        ]
+      }
+    },
+    "direct_head_camera_physical": {
+      "scope": "bounded direct head and head-camera physical validation",
+      "steps": [],
+      "head_initial": {
+        "pan": -0.22443066537380219,
+        "is_turning": false,
+        "is_blocked": false,
+        "pan_mode": 0,
+        "received_at": 7042.51861533
+      },
+      "head_error": "Head did not reach target in active mode",
+      "head_final": {
+        "pan": -0.22443066537380219,
+        "is_turning": false,
+        "is_blocked": false,
+        "pan_mode": 0,
+        "received_at": 7047.789161541
+      },
+      "initial_streaming": {
+        "head": false,
+        "hand": true
+      },
+      "head_stream_status": {
+        "time": {
+          "sec": 1498148462,
+          "nanosec": 335942421,
+          "received_at": 0.0
+        },
+        "device": {
+          "name": "head_camera",
+          "status": {
+            "tag": "ready",
+            "id": "",
+            "detail": "{}",
+            "received_at": 0.0
+          },
+          "received_at": 0.0
+        },
+        "ports": [],
+        "signals": [
+          {
+            "name": "camera_streaming",
+            "format": "{\"role\":\"output\",\"type\":\"bool\"}",
+            "data": "[true]",
+            "status": {
+              "tag": "ready",
+              "id": "",
+              "detail": "{}",
+              "received_at": 0.0
+            },
+            "received_at": 0.0
+          },
+          {
+            "name": "resolution",
+            "format": "{\"role\":\"output\",\"type\":\"object\"}",
+            "data": "[{\"height\":800,\"width\":1280}]",
+            "status": {
+              "tag": "ready",
+              "id": "",
+              "detail": "{}",
+              "received_at": 0.0
+            },
+            "received_at": 0.0
+          },
+          {
+            "name": "set_exposure",
+            "format": "{\"role\":\"output\",\"type\":\"int\"}",
+            "data": "[-1]",
+            "status": {
+              "tag": "ready",
+              "id": "",
+              "detail": "{}",
+              "received_at": 0.0
+            },
+            "received_at": 0.0
+          },
+          {
+            "name": "set_flip",
+            "format": "{\"role\":\"output\",\"type\":\"bool\"}",
+            "data": "[false]",
+            "status": {
+              "tag": "ready",
+              "id": "",
+              "detail": "{}",
+              "received_at": 0.0
+            },
+            "received_at": 0.0
+          },
+          {
+            "name": "set_gain",
+            "format": "{\"role\":\"output\",\"type\":\"int\"}",
+            "data": "[0]",
+            "status": {
+              "tag": "ready",
+              "id": "",
+              "detail": "{}",
+              "received_at": 0.0
+            },
+            "received_at": 0.0
+          },
+          {
+            "name": "set_mirror",
+            "format": "{\"role\":\"output\",\"type\":\"bool\"}",
+            "data": "[false]",
+            "status": {
+              "tag": "ready",
+              "id": "",
+              "detail": "{}",
+              "received_at": 0.0
+            },
+            "received_at": 0.0
+          },
+          {
+            "name": "set_window_x",
+            "format": "{\"role\":\"output\",\"type\":\"int\"}",
+            "data": "[0]",
+            "status": {
+              "tag": "ready",
+              "id": "",
+              "detail": "{}",
+              "received_at": 0.0
+            },
+            "received_at": 0.0
+          },
+          {
+            "name": "set_window_y",
+            "format": "{\"role\":\"output\",\"type\":\"int\"}",
+            "data": "[0]",
+            "status": {
+              "tag": "ready",
+              "id": "",
+              "detail": "{}",
+              "received_at": 0.0
+            },
+            "received_at": 0.0
+          }
+        ],
+        "commands": [
+          {
+            "sec": 1794603217,
+            "nanosec": 962193745,
+            "received_at": 0.0
+          },
+          {
+            "sec": 1794603157,
+            "nanosec": 500114397,
+            "received_at": 0.0
+          },
+          {
+            "sec": 1794603152,
+            "nanosec": 66601667,
+            "received_at": 0.0
+          }
+        ],
+        "responses": [
+          "",
+          "",
+          ""
+        ],
+        "received_at": 7048.381308161
+      },
+      "/io/internal_camera/head_camera/image_raw": {
+        "width": 1280,
+        "height": 800,
+        "encoding": "bgra8",
+        "bytes": 4096000,
+        "received_at": 7048.641165619
+      },
+      "/io/internal_camera/head_camera/image_rect_color": {
+        "width": 1280,
+        "height": 800,
+        "encoding": "bgra8",
+        "bytes": 4096000,
+        "received_at": 7048.677706652
+      },
+      "final_streaming": {
+        "head": false,
+        "hand": true
+      },
+      "status": {
+        "connected": true,
+        "ready": true,
+        "issues": [],
+        "enabled": true,
+        "collision": false,
+        "joints": [
+          -9.765625e-06,
+          -1.1799853515625,
+          -7.91015625e-05,
+          2.1800830078125,
+          3.41796875e-05,
+          0.569994140625,
+          3.31605859375
+        ],
+        "velocities": [
+          -0.001,
+          -0.001,
+          -0.001,
+          -0.001,
+          -0.001,
+          -0.001,
+          -0.001
+        ]
+      }
+    },
+    "direct_head_camera_recheck": {
+      "scope": "direct head refresh and camera public API recheck",
+      "steps": [],
+      "head_initial": {
+        "pan": -0.22443066537380219,
+        "is_turning": false,
+        "is_blocked": false,
+        "pan_mode": 0,
+        "received_at": 7126.791067461
+      },
+      "head_error": "Head did not reach target in active mode",
+      "head_final": {
+        "pan": -0.22443066537380219,
+        "is_turning": false,
+        "is_blocked": false,
+        "pan_mode": 0,
+        "received_at": 7132.011009813
+      },
+      "initial_streaming": {
+        "head": false,
+        "hand": true
+      },
+      "head_frame": {
+        "width": 1280,
+        "height": 800,
+        "encoding": "bgra8",
+        "bytes": 4096000,
+        "frame": "head_camera",
+        "calibration_size": [
+          1280,
+          800
+        ]
+      },
+      "final_streaming": {
+        "head": false,
+        "hand": true
+      },
+      "status": {
+        "connected": true,
+        "ready": true,
+        "issues": [],
+        "enabled": true,
+        "collision": false,
+        "joints": [
+          -9.765625e-06,
+          -1.1799853515625,
+          -7.91015625e-05,
+          2.1800830078125,
+          3.41796875e-05,
+          0.569994140625,
+          3.31605859375
+        ],
+        "velocities": [
+          -0.001,
+          -0.001,
+          -0.001,
+          -0.001,
+          -0.001,
+          -0.001,
+          -0.001
+        ]
+      }
+    },
+    "direct_public_api_readonly": {
+      "date_utc": "2026-11-13T21:08:25.179452+00:00",
+      "initial_status": {
+        "connected": true,
+        "ready": true,
+        "issues": [],
+        "enabled": true,
+        "collision": false,
+        "joints": [
+          -9.765625e-06,
+          -1.1799853515625,
+          -7.91015625e-05,
+          2.1800830078125,
+          3.41796875e-05,
+          0.569994140625,
+          3.31605859375
+        ],
+        "velocities": [
+          -0.001,
+          -0.001,
+          -0.001,
+          -0.001,
+          -0.001,
+          -0.001,
+          -0.001
+        ]
+      },
+      "execute": false,
+      "pose": {
+        "position": [
+          0.44958015999345663,
+          0.15999138958280193,
+          0.21508565920193917
+        ],
+        "orientation": [
+          0.7069818183394759,
+          0.7072236899555446,
+          -0.0015174147893344634,
+          -0.0030097101902067823
+        ],
+        "frame": "base"
+      },
+      "fk": {
+        "position": [
+          0.44958015999345663,
+          0.15999138958280193,
+          0.21508565920193917
+        ],
+        "orientation": [
+          0.7069818183394759,
+          0.7072236899555446,
+          -0.0015174147893344634,
+          -0.0030097101902067823
+        ],
+        "frame": "base"
+      },
+      "ik": [
+        -9.765625e-06,
+        -1.1799853515625,
+        -7.91015625e-05,
+        2.1800830078125,
+        3.41796875e-05,
+        0.569994140625,
+        3.31605859375
+      ],
+      "neutral_duration_s": 0.06922758329722156,
+      "gripper": {
+        "device_status": "ready",
+        "calibrate": false,
+        "cmd_grip": false,
+        "dead_zone_m": 0.002,
+        "force_response_n": -1.75,
+        "go": true,
+        "has_error": false,
+        "is_calibrated": true,
+        "is_gripping": false,
+        "is_moving": false,
+        "position_m": 0.041667,
+        "position_response_m": 0.0405509196428571,
+        "reboot": false,
+        "right_gripper_tip_object_kg": 0.0,
+        "speed_mps": 1.5
+      },
+      "final_status": {
+        "connected": true,
+        "ready": true,
+        "issues": [],
+        "enabled": true,
+        "collision": false,
+        "joints": [
+          -9.765625e-06,
+          -1.1799853515625,
+          -7.91015625e-05,
+          2.1800830078125,
+          3.41796875e-05,
+          0.569994140625,
+          3.31605859375
+        ],
+        "velocities": [
+          -0.001,
+          -0.001,
+          -0.001,
+          -0.001,
+          -0.001,
+          -0.001,
+          -0.001
+        ]
+      },
+      "success": true
+    },
+    "direct_ros2_lifecycle": {
+      "scope": "read-only actual ROS 2 CLI startup and Ctrl-C cleanup",
+      "method": "TTY session 57103; standard Python SIGINT handler",
+      "return_code": 0,
+      "output": "^C",
+      "success": true
+    },
+    "direct_final_cleanup": {
+      "scope": "final read-only registration cleanup audit",
+      "command_publishers": [],
+      "remaining_driver_registrations": []
+    }
+  },
+  "known_development_failures": [
+    "Initial ROS2 command rejected before actuation because idle feedback polling held the operation lock; fixed and covered by deterministic DDS regression and subsequent physical success.",
+    "Requested right_gripper_tip was absent; connection aborted before commands. Physical endpoint is right_hand.",
+    "Initial head-camera capture timed out after streaming acknowledgement; subsequent raw/rectified and public API captures passed.",
+    "Head-pan target arrival failed with repeated refresh; passive state persisted. No head-pan success claim.",
+    "Initial custom ROS2 server used default ROS SIGINT context shutdown and logged an invalid-context publication during cleanup; actual CLI now preserves context during orderly cleanup and exited cleanly."
+  ],
+  "full_sdk_coverage_complete": false
+}

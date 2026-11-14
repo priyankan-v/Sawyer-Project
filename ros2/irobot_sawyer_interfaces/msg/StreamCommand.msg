@@ -1,0 +1,9 @@
+std_msgs/Header header
+string session_id
+uint64 sequence
+uint8 mode
+string[] names
+float64[] position
+float64[] velocity
+float64[] acceleration
+float64[] effort

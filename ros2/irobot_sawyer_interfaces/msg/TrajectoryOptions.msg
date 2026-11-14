@@ -1,0 +1,11 @@
+# Generated from the pinned public Intera schema.
+string CARTESIAN=CARTESIAN
+string JOINT=JOINT
+string interpolation_type
+bool interaction_control
+irobot_sawyer_interfaces/InteractionControlCommand interaction_params
+bool nso_start_offset_allowed
+bool nso_check_end_offset
+irobot_sawyer_interfaces/TrackingOptions tracking_options
+builtin_interfaces/Time end_time
+float64 path_interpolation_step

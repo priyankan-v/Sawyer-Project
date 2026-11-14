@@ -57,7 +57,10 @@ class FeedbackTests(unittest.TestCase):
             (['j0'], [float('nan')], [0]),
             (['j0', 'j0'], [2, 2], [0, 0]),
         ):
-            with self.subTest(names=names, positions=positions), pytest.raises(ValueError, match='.'):
+            with (
+                self.subTest(names=names, positions=positions),
+                pytest.raises(ValueError, match='.'),
+            ):
                 feedback.update(names, positions, velocities, 1.1)
             assert feedback.snapshot() == before
 
@@ -65,7 +68,9 @@ class FeedbackTests(unittest.TestCase):
         feedback = JointFeedback(['j0'])
         feedback.update(['j0'], [1], [0], 1)
         assert not feedback.update(['gripper'], [], [], 1.1)
-        feedback.update(['j0', 'head'], [2, float('nan')], [0, float('nan')], 1.1)
+        feedback.update(
+            ['j0', 'head'], [2, float('nan')], [0, float('nan')], 1.1
+        )
         assert feedback.snapshot() == ((2,), (0,), 1.1)
 
     def test_position_hold_requires_only_fresh_positions(self):

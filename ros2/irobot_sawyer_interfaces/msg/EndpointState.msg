@@ -1,0 +1,6 @@
+# Generated from the pinned public Intera schema.
+std_msgs/Header header
+geometry_msgs/Pose pose
+geometry_msgs/Twist twist
+geometry_msgs/Wrench wrench
+bool valid

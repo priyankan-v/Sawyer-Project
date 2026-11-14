@@ -1,0 +1,5 @@
+string name
+---
+bool success
+string detail
+string json_value
