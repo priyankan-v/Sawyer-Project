@@ -22,8 +22,8 @@ def main(argv=None) -> int:
     parser.add_argument(
         '--speed',
         type=float,
-        default=0.1,
-        help='Fraction of published velocity limits (default: 0.1)',
+        default=1.0,
+        help='Fraction of each published joint velocity limit (default: 1.0)',
     )
     parser.add_argument(
         '--max-accel',

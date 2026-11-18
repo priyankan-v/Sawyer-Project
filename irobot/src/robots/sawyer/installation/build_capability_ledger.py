@@ -11,7 +11,7 @@ from pathlib import Path
 DEFAULT = {
     'availability': 'available',
     'software': 'implemented',
-    'hardware': 'not_tested',
+    'hardware': 'not_recorded',
     'python_api': [],
     'ros2_endpoints': [],
     'controller_interface': [],
@@ -38,9 +38,8 @@ FEATURES = {
         ros2_endpoints=['inventory (std_srvs/Trigger)', 'read_parameter'],
         controller_interface=['ROS master parameters/graph'],
         units='strings/configuration JSON',
-        hardware='verified',
+        hardware='not_recorded',
         evidence=[
-            'validation/2026-11-13.json',
             'tests/test_irobot/test_sawyer_transport.py',
         ],
     ),
@@ -51,29 +50,24 @@ FEATURES = {
             '/robot/state: intera_core_msgs/RobotAssemblyState'
         ],
         units='booleans and vendor stop-source enums',
-        hardware='verified',
-        evidence=['validation/2026-11-13-extended.json:stopped_diagnostic'],
+        hardware='not_recorded',
     ),
     'enable': feature(
         python_api=['devices.set_enabled'],
         ros2_endpoints=['set_enabled'],
         controller_interface=['/robot/set_super_enable: std_msgs/Bool'],
         units='boolean',
-        hardware='failed',
+        hardware='not_recorded',
         limits=(
             'ready confirmation; fresh positions; 0.02 rad enable envelope '
             'by default'
         ),
         cancellation='enable failure requests a latched software stop',
         notes=(
-            'After restart, disable cleared homed. Enable movement '
-            'again exceeded the tightened 0.005 rad envelope and the '
-            'guard latched software stop. Initial cause/homing '
-            'procedure unresolved.'
+            'Enabling requires fresh feedback and preserves the '
+            'displacement guard.'
         ),
         evidence=[
-            'validation/2026-11-13-continuation.json:enable_guard_recovery',
-            'validation/2026-11-13-continuation.json:enable_fault_diagnostics',
             'tests/test_irobot/test_sawyer_peripherals.py',
         ],
     ),
@@ -85,16 +79,13 @@ FEATURES = {
             '/robot/set_super_reset',
         ],
         units='explicit Empty commands',
-        hardware='partial',
+        hardware='not_recorded',
         limits='reset requires stopped state and released physical E-stop',
         notes=(
-            'Software stop physically confirmed after the enable guard '
-            'tripped. Fresh-feedback confirmation and stop requests '
-            'during stale feedback/busy ROS 2 jobs are '
-            'regression-tested. Automatic reset remains forbidden.'
+            'Stop and reset are explicit operations; reset is never '
+            'automatic.'
         ),
         evidence=[
-            'validation/2026-11-13-continuation.json:enable_fault_diagnostics',
             'tests/test_irobot/test_sawyer_peripherals.py',
             'tests/test_irobot/test_sawyer_ros2.py',
         ],
@@ -104,12 +95,11 @@ FEATURES = {
         ros2_endpoints=['joint_states'],
         controller_interface=['/robot/joint_states: sensor_msgs/JointState'],
         units='radians, rad/s, Nm',
-        hardware='verified',
+        hardware='not_recorded',
         limits=(
             'seven canonical arm joints; per-field monotonic receipt '
             'freshness'
         ),
-        evidence=['validation/2026-11-13-extended.json:extended_read'],
     ),
     'limits': feature(
         python_api=[
@@ -120,9 +110,8 @@ FEATURES = {
         ros2_endpoints=['joint_limits', 'read_parameter'],
         controller_interface=['/robot/joint_limits', '/robot_description'],
         units='rad, rad/s, rad/s^2, Nm',
-        hardware='verified',
+        hardware='not_recorded',
         limits='torque uses the minimum of published and URDF effort bounds',
-        evidence=['validation/2026-11-13-extended.json:extended_read'],
     ),
     'endpoint': feature(
         python_api=[
@@ -146,19 +135,18 @@ FEATURES = {
             'm, quaternion xyzw, m/s, rad/s, N, Nm; declared reference '
             'frame'
         ),
-        hardware='verified',
+        hardware='not_recorded',
         limits=(
             'valid named tip and current data; no invented tool-frame '
             'fallback'
         ),
-        evidence=['validation/2026-11-13-extended.json:extended_read'],
     ),
     'joint_motion': feature(
         python_api=['move_to_neutral', 'move_to_joints', 'move_trajectory'],
         ros2_endpoints=['move_to_neutral', 'follow_joint_trajectory'],
         controller_interface=['/robot/limb/right/joint_command'],
         units='rad and seconds',
-        hardware='verified',
+        hardware='not_recorded',
         limits=(
             'published position/velocity/acceleration bounds, fresh '
             'readiness/collision feedback, tracking error and loop deadline'
@@ -167,9 +155,14 @@ FEATURES = {
             'cancel event or stop(); zero velocity then fresh '
             'measured-position hold while enabled'
         ),
+        notes=(
+            'Neutral velocity ceilings and acceleration bounds remain '
+            'configurable.'
+        ),
         evidence=[
-            'validation/2026-11-13.json',
             'tests/test_irobot/test_sawyer_control.py',
+            'tests/test_irobot/test_sawyer_neutral_example.py',
+            'tests/test_irobot/test_sawyer_transport.py',
         ],
     ),
     'joint_stream': feature(
@@ -183,7 +176,7 @@ FEATURES = {
             'joint_command_timeout',
         ],
         units='rad, rad/s, seconds',
-        hardware='verified',
+        hardware='not_recorded',
         limits=(
             'finite session, displacement/speed bounds, measured feedback, '
             'command gap < half watchdog'
@@ -192,10 +185,6 @@ FEATURES = {
             'session cancellation, ROS 2 source-age/sequence lease, '
             'robot-side watchdog'
         ),
-        evidence=[
-            'validation/2026-11-13-extended.json:process_watchdog',
-            'validation/2026-11-13-extended.json:ros2_sustained',
-        ],
     ),
     'torque': feature(
         python_api=['stream_joint_commands (torque)'],
@@ -203,7 +192,7 @@ FEATURES = {
         controller_interface=['JointCommand TORQUE_MODE'],
         units='Nm',
         software='experimental',
-        hardware='partial',
+        hardware='not_recorded',
         limits=(
             'published/URDF effort caps, effort fraction, measured '
             'displacement and speed; allow_unvalidated_modes required'
@@ -212,17 +201,7 @@ FEATURES = {
             'direct measured-position exit; no command after '
             'stopped/disabled state'
         ),
-        notes=(
-            'Earlier 150 ms test exceeded the 0.01 rad exit envelope. '
-            'After controller restart, a 50 ms 0.02 Nm damped pulse '
-            'passed a 0.005 rad envelope (0.003466 rad observed after '
-            'exit). Remains experimental; broader torque operation is '
-            'not qualified.'
-        ),
-        evidence=[
-            'validation/2026-11-13-extended.json:torque_position_exit',
-            'validation/2026-11-13-continuation.json:modes_recovery',
-        ],
+        notes=('Experimental execution requires explicit opt-in.'),
     ),
     'advanced_trajectory': feature(
         python_api=['stream_joint_commands (trajectory)'],
@@ -230,20 +209,13 @@ FEATURES = {
         controller_interface=['JointCommand TRAJECTORY_MODE'],
         units='rad, rad/s, rad/s^2',
         software='experimental',
-        hardware='partial',
+        hardware='not_recorded',
         limits=(
             'reference continuity, published limits, measured envelope; '
             'allow_unvalidated_modes required'
         ),
-        notes=(
-            'A 0.8 s, 0.001 rad moving cycle passed with 79 commands '
-            'and a 0.005 rad envelope. Earlier stationary '
-            'speed-envelope abort retained. Reduced vendor collision '
-            'handling and broader motion remain unqualified; '
-            'experimental opt-in retained.'
-        ),
+        notes=('Experimental execution requires explicit opt-in.'),
         cancellation='direct measured-position hold',
-        evidence=['validation/2026-11-13-continuation.json:modes_recovery'],
     ),
     'kinematics': feature(
         python_api=[
@@ -261,21 +233,13 @@ FEATURES = {
         ],
         controller_interface=['SolvePositionFK', 'SolvePositionIK'],
         units='m, quaternion xyzw, rad; move_relative offsets are cm',
-        hardware='partial',
+        hardware='not_recorded',
         limits=(
             'known frame, joint bounds, seeded IK, collision validity; '
             'Cartesian movement requires ready feedback'
         ),
         cancellation='motion stop/cancel; bounded model-service calls',
-        notes=(
-            'FK/IK and relative Cartesian motion passed. New '
-            'collision-query/public full-pose surfaces have software '
-            'coverage; physical repeats are blocked.'
-        ),
-        evidence=[
-            'validation/2026-11-13.json',
-            'validation/2026-11-13-extended.json:ros2_extended_hardware',
-        ],
+        notes=('Model queries do not execute a Cartesian movement.'),
     ),
     'native_motion': feature(
         python_api=['move_native_joint_path', 'execute_native_trajectory'],
@@ -284,7 +248,7 @@ FEATURES = {
             '/motion/motion_command: intera_motion_msgs/MotionCommandAction'
         ],
         units='typed native trajectory; rad, m, seconds',
-        hardware='partial',
+        hardware='not_recorded',
         limits=(
             'joint order/bounds, first-waypoint continuity, frame/numeric '
             'validation; interaction requires experimental opt-in'
@@ -294,17 +258,9 @@ FEATURES = {
             'replay'
         ),
         notes=(
-            'Native START out/return and goal-specific '
-            'cancellation/recovery passed. GENERATE initially returned '
-            'CONTROLLER_NOT_FOLLOWING, then succeeded after explicit '
-            'native START with no measured motion. Controller-state '
-            'dependence remains; no automatic motion to initialize '
-            'planning.'
+            'Planning does not silently initialize control by moving the '
+            'arm.'
         ),
-        evidence=[
-            'validation/2026-11-13-continuation.json:native_start_recovery',
-            'validation/2026-11-13-continuation.json:native_generate_cancel',
-        ],
     ),
     'interaction': feature(
         python_api=[
@@ -319,7 +275,7 @@ FEATURES = {
         ],
         units='N/m, Nm/rad, Ns/m, Nms/rad, N, Nm',
         software='experimental',
-        hardware='partial',
+        hardware='not_recorded',
         limits=(
             'application stiffness/damping/wrench and displacement '
             'envelopes; compliant/force variants require '
@@ -329,26 +285,15 @@ FEATURES = {
             'confirmed inactive state then position hold while enabled; '
             'process-loss deactivation not proven'
         ),
-        notes=(
-            'Maximum-impedance zero-force hold passed. After restart, '
-            '100 ms compliant and 0.05 N force sessions confirmed '
-            'active/inactive within 3 mm/0.005 rad envelopes. '
-            'Experimental opt-in retained. Process-loss deactivation '
-            'and larger forces remain unqualified.'
-        ),
-        evidence=[
-            'validation/2026-11-13-extended.json:interaction_hold',
-            'validation/2026-11-13-continuation.json:modes_recovery',
-        ],
+        notes=('Experimental execution requires explicit opt-in.'),
     ),
     'gripper_read': feature(
         python_api=['gripper_state', 'devices.read_io'],
         ros2_endpoints=['gripper/state', 'gripper/config'],
         controller_interface=['/io/end_effector/right_gripper/state'],
         units='m, m/s, kg, N; negative force_response_n means unavailable',
-        hardware='verified',
+        hardware='not_recorded',
         limits='change-only state plus socket/receipt metadata',
-        evidence=['validation/2026-11-13-extended.json:peripheral_extended'],
     ),
     'gripper_motion': feature(
         python_api=[
@@ -369,16 +314,12 @@ FEATURES = {
             '/io/end_effector/right_gripper/command: IOComponentCommand'
         ],
         units='finger separation m',
-        hardware='verified',
+        hardware='not_recorded',
         limits=(
             '0..configured opening; explicit calibration; valid/idle '
             'device; command acknowledgement plus settling/grasp state'
         ),
         cancellation='cancel event requests go=false; no automatic opening',
-        evidence=[
-            'validation/2026-11-13.json',
-            'validation/2026-11-13-extended.json:peripheral_extended',
-        ],
     ),
     'gripper_settings': feature(
         python_api=['devices.configure_gripper'],
@@ -389,39 +330,21 @@ FEATURES = {
             'right_gripper_tip_object_kg',
         ],
         units='m/s, m, kg',
-        hardware='partial',
+        hardware='not_recorded',
         limits='published format/ranges and idle/error-free device',
-        notes=(
-            'Dead-zone and speed changes/restoration physically '
-            'verified. At slow speed with 0.002 m dead zone, opening '
-            'stopped just outside the 0.002 m arrival tolerance; using '
-            '0.001 m dead zone passed. Payload changes remain '
-            'unqualified.'
-        ),
-        evidence=[
-            'validation/2026-11-13-continuation.json:gripper_recovery',
-            'validation/2026-11-13-continuation.json:gripper_recovery_v2',
-        ],
+        notes=('Acknowledgement and measured settings are separate results.'),
     ),
     'gripper_recovery': feature(
         python_api=['start_gripper', 'reboot_gripper'],
         ros2_endpoints=['start_gripper', 'reboot_gripper'],
         controller_interface=['IO go/position_m or reboot'],
-        hardware='verified',
+        hardware='not_recorded',
         limits=(
             'idle device; start uses explicit reported target; reboot '
             'removes calibration'
         ),
         cancellation='cancel requests go=false; calibration never automatic',
-        notes=(
-            'Empty-tool cancellation/stop/start, reboot, loss of '
-            'calibration, explicit recalibration and opening passed. '
-            'Original speed/dead-zone settings restored.'
-        ),
-        evidence=[
-            'validation/2026-11-13-continuation.json:gripper_recovery',
-            'validation/2026-11-13-continuation.json:gripper_recovery_v2',
-        ],
+        notes=('Reboot and recalibration are separate explicit operations.'),
     ),
     'fixed_force': feature(
         availability='deprecated_fixed',
@@ -440,30 +363,28 @@ FEATURES = {
         python_api=['devices.read_io', 'devices.io_state', 'poll'],
         ros2_endpoints=['device state/config topics', 'io_health'],
         controller_interface=['IODeviceStatus', 'IODeviceConfiguration'],
-        hardware='verified',
+        hardware='not_recorded',
         units='published signal/port format and dimensions',
         limits=(
             'connection state and update age are distinct from sensor '
             'freshness'
         ),
-        evidence=['validation/2026-11-13-extended.json:extended_read'],
     ),
     'io_write': feature(
         python_api=['devices.write_io'],
         ros2_endpoints=['device set_parameters'],
         controller_interface=['IOComponentCommand'],
-        hardware='partial',
+        hardware='not_recorded',
         units='published format/units',
         limits=(
             'type, dimensions, ranges, role and matching command '
             'timestamp; motion signals use explicit gripper APIs'
         ),
         cancellation='bounded acknowledgement and cancel event',
-        notes=(
-            'Acknowledgement and measured value are reported separately. '
-            'Generic analog/port output hardware is not attached/qualified.'
-        ),
-        evidence=['tests/test_irobot/test_sawyer_extensions.py'],
+        notes=('Acknowledgement and measured values are reported separately.'),
+        evidence=[
+            'tests/test_irobot/test_sawyer_extensions.py',
+        ],
     ),
     'io_callbacks': feature(
         python_api=[
@@ -474,22 +395,12 @@ FEATURES = {
         ],
         ros2_endpoints=['io_events', 'device state topics'],
         controller_interface=['cuff/navigator IODeviceStatus'],
-        hardware='partial',
+        hardware='not_recorded',
         limits=(
             'bounded edge queues with drop counters; callbacks must be '
             'nonblocking'
         ),
-        notes=(
-            'Synthetic edges/callbacks pass. Operator confirmed first '
-            'input actions, but two live recordings captured unchanged '
-            'values on IO and legacy digital/analog interfaces; '
-            'operator unavailable for another repeat. Physical '
-            'transitions remain unverified.'
-        ),
-        evidence=[
-            'validation/2026-11-13-continuation.json:fault_inputs_readonly',
-            'validation/2026-11-13-continuation.json:inputs_live_comparison',
-        ],
+        notes=('Callbacks run while polling; event queues are bounded.'),
     ),
     'digital': feature(
         python_api=['devices.digital_state', 'devices.set_digital_output'],
@@ -502,10 +413,10 @@ FEATURES = {
             '/robot/digital_io/command: DigitalOutputCommand',
         ],
         units='boolean state; is_input_only is enforced',
-        hardware='partial',
+        hardware='not_recorded',
         notes=(
-            'Camera-power state/permission read. Output power cycling is '
-            'not physically qualified.'
+            'Writes require published device permissions and matching '
+            'acknowledgements.'
         ),
     ),
     'lights': feature(
@@ -513,17 +424,15 @@ FEATURES = {
         ros2_endpoints=['robot_io/set_parameters', 'robot_io/state'],
         controller_interface=['/io/robot/robot: six SDK light signals'],
         units='boolean',
-        hardware='verified',
+        hardware='not_recorded',
         limits=(
             'only the six SDK-defined lights override IO role=input; '
             'DigitalIO input-only permissions remain enforced'
         ),
         notes=(
-            'The public SDK documents these writes despite their direction '
-            'metadata. All six toggled, acknowledged, measured and '
-            'restored.'
+            'The public SDK documents these writes despite direction '
+            'metadata.'
         ),
-        evidence=['validation/2026-11-13-extended.json:lights_lifecycle'],
     ),
     'camera_frames': feature(
         python_api=[
@@ -539,17 +448,12 @@ FEATURES = {
         ],
         controller_interface=['sensor_msgs/Image', 'sensor_msgs/CameraInfo'],
         units='native pixels/encoding and calibrated camera model',
-        hardware='verified',
+        hardware='not_recorded',
         limits=(
             '16 MiB wire payload; advancing frame identities; raw CDR path '
             'and Fast DDS camera profile'
         ),
-        notes=(
-            'Both full-resolution streams passed a 60-second concurrent '
-            'command run. The new current-frame hand-camera gate also passed '
-            'a strictly guarded post-fault read-only check.'
-        ),
-        evidence=['validation/2026-11-13-extended.json:ros2_sustained'],
+        notes=('Reading a camera never implicitly starts its stream.'),
     ),
     'camera_settings': feature(
         python_api=[
@@ -567,53 +471,39 @@ FEATURES = {
             'published exposure/gain/offset units; boolean '
             'flip/mirror/streaming'
         ),
-        hardware='partial',
+        hardware='not_recorded',
         limits=(
             'only discovered configured writable signals; metadata '
             'type/range validation'
         ),
-        notes=(
-            'Streaming and hand flip/restoration verified. Other settings '
-            'are implemented with metadata validation, not individually '
-            'hardware-qualified.'
-        ),
-        evidence=['validation/2026-11-13-extended.json:peripheral_extended'],
+        notes=('Settings require published metadata and explicit execution.'),
     ),
     'display': feature(
         python_api=['devices.display_image'],
         ros2_endpoints=['display_image'],
         controller_interface=['/robot/head_display: sensor_msgs/Image'],
         units='rgb8/bgr8 image',
-        hardware='verified',
-        notes=(
-            'Test image published and operator confirmed panel visibility. '
-            'Button/wheel edges were not captured in the recording interval.'
-        ),
-        evidence=['validation/2026-11-13-extended.json:display_inputs'],
+        hardware='not_recorded',
+        notes=('Image publication is an explicit operation.'),
     ),
     'head_pan': feature(
         python_api=['devices.head_state', 'devices.move_head'],
         controller_interface=['HeadState', 'HeadPanCommand'],
         units='rad',
-        hardware='deferred_by_user',
+        hardware='not_recorded',
         software='implemented_not_qualified',
-        notes=(
-            'User explicitly deferred head-pan work; no new head-pan '
-            'testing or ROS 2 pan endpoint added.'
-        ),
-        evidence=['validation/2026-11-13.json'],
+        notes=('Head-pan testing is deferred by user request.'),
     ),
     'clicksmart': feature(
-        availability='unattached',
+        availability='discovery_only',
         software='not_applicable',
         hardware='not_applicable',
         python_api=['devices.inventory (discovery only)'],
         ros2_endpoints=['inventory'],
         controller_interface=['no ClickSmart tool attached'],
         notes=(
-            'The current tool is the standard electric gripper. ClickSmart '
-            'activation/persistent reconfiguration is not simulated or '
-            'sent to it.'
+            'Discovery is available; activation and persistent '
+            'configuration are not implemented.'
         ),
     ),
     'records': feature(
@@ -799,7 +689,7 @@ def build(inventory):
         'schema_version': 1,
         'target': 'Intera 5.3.1 / SDK 5.3.0 / standard electric gripper',
         'full_sdk_qualified': False,
-        'release_state': 'blocked: enable recovery fault; head pan deferred',
+        'release_state': ('unqualified: hardware records are not retained'),
         'scope': (
             'Supported public hardware operations. Helper methods are '
             'classified separately; advertised private types are not '
@@ -812,18 +702,18 @@ def build(inventory):
             'arm_calibration': {
                 'python_api': 'calibrate_arm',
                 'ros2_endpoint': 'calibrate_arm',
-                'availability': 'blocked by attached gripper',
-                'hardware': 'not_tested',
+                'availability': 'requires compatible tool configuration',
+                'hardware': 'not_recorded',
             },
             'tf': {
                 'python_api': 'devices.transforms / robot_description',
                 'ros2_endpoints': ['tf', 'tf_static', 'read_parameter'],
-                'hardware': 'verified',
+                'hardware': 'not_recorded',
             },
             'diagnostics': {
                 'python_api': 'devices.diagnostics',
                 'ros2_endpoint': 'diagnostics',
-                'hardware': 'verified',
+                'hardware': 'not_recorded',
             },
         },
     }

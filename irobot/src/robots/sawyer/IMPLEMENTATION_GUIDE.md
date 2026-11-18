@@ -1,21 +1,14 @@
-# Sawyer implementation guide: files, functions and unfinished work
+# Sawyer implementation guide: files and functions
 
-Snapshot: November 13, 2026, branch `sawyer_py`.
+This describes the driver, internal helpers, integration files, examples,
+installation assets, optional ROS 2 definitions and tests. Function links refer
+to the current source definitions. Generated third-party dependencies and local
+builds are not driver source.
 
-This describes the Sawyer implementation in the current working tree, including
-its internal helpers, integration files, examples, installation assets, optional
-ROS 2 definitions and tests. It does not inventory unrelated Crazyflie code,
-downloaded dependencies, generated build trees, or ignored local test scripts.
-Named Python functions/methods, including nested helpers and properties, are
-listed below. Lambdas, dataclass-generated methods and generated ROS type-support
-functions are represented by their owning file/class rather than individual rows.
-Source links include definition line numbers for this snapshot.
-
-**Implementation is ahead of physical qualification.** The last recorded physical
-state was disabled, software-stopped and in error after unexpected enable movement.
-That observation is historical, not a live robot-status query. Head pan is deferred.
-Use [unfinished work](UNFINISHED_WORK.md), the [original checklist](DIRECT_DRIVER_PLAN.md)
-and [validation evidence](VALIDATION.md) before interpreting an API as qualified.
+Recorded hardware data and fault reports are not retained. This map describes
+implementation responsibilities, not physical qualification. See the
+[topic map](TOPIC_MAP.md), [plan](DIRECT_DRIVER_PLAN.md),
+[remaining work](UNFINISHED_WORK.md) and [validation guidance](VALIDATION.md).
 
 ## Read the architecture first
 
@@ -90,8 +83,8 @@ No explicitly defined Python functions.
 | [`MotionOptions.__post_init__`](config.py#L41) | Validate motion timing, PID gains, rate and tolerances. | Reject invalid requests before execution. |
 | [`CartesianMotionOptions.__post_init__`](config.py#L81) | Validate Cartesian sampling, continuity and arrival limits. | Bound IK interpolation and pose tracking. |
 | [`StreamOptions.__post_init__`](config.py#L119) | Validate finite stream duration, mode, watchdog and displacement bounds. | Keep streamed commands explicitly bounded. |
-| [`SawyerConfig.__post_init__`](config.py#L220) | Validate robot settings, joint names, option types and device limits. | Keep construction offline while catching configuration errors early. |
-| [`SawyerConfig._validate_connection`](config.py#L288) | Validate master URI, advertised PC address, timeouts and runtime settings. | Make invalid network configuration actionable before opening sockets. |
+| [`SawyerConfig.__post_init__`](config.py#L221) | Validate robot settings, joint names, option types and device limits. | Keep construction offline while catching configuration errors early. |
+| [`SawyerConfig._validate_connection`](config.py#L289) | Validate master URI, advertised PC address, timeouts and runtime settings. | Make invalid network configuration actionable before opening sockets. |
 
 
 ### `core/__init__.py`
@@ -542,8 +535,8 @@ No explicitly defined Python functions.
 | [`RpcServer`](core/transport.py#L116) | Threaded XML-RPC callback server with nonblocking daemon-worker teardown. |
 | [`Publisher`](core/transport.py#L121) | Typed unlatched TCPROS publisher and its current subscriber sockets. |
 | [`Subscription`](core/transport.py#L172) | One shared TCPROS observation route with retained feedback and peer workers. |
-| [`ServiceClient`](core/transport.py#L356) | Typed bounded TCPROS service request/response client. |
-| [`DirectTransport`](core/transport.py#L412) | XML-RPC graph identity, TCPROS routes, resources and callback dispatch. |
+| [`ServiceClient`](core/transport.py#L362) | Typed bounded TCPROS service request/response client. |
+| [`DirectTransport`](core/transport.py#L418) | XML-RPC graph identity, TCPROS routes, resources and callback dispatch. |
 
 | Function / method | What it does | Why it exists |
 | --- | --- | --- |
@@ -569,41 +562,41 @@ No explicitly defined Python functions.
 | [`Subscription.connected`](core/transport.py#L238) | Report whether a subscription has live peer workers. | Expose route health to control checks. |
 | [`Subscription.update`](core/transport.py#L245) | Reconcile publisher URIs and start/stop peer workers. | Follow graph updates without duplicating connections. |
 | [`Subscription.receive`](core/transport.py#L262) | Manage one publisher connection and bounded reconnect attempts. | Recover feedback routes independently of command execution. |
-| [`Subscription.receive_stream`](core/transport.py#L284) | Negotiate and decode incoming frames with bounded queueing. | Keep network receipt separate from application callback execution. |
-| [`Subscription.close`](core/transport.py#L352) | Stop workers and close subscription sockets. | Terminate background observation cleanly. |
-| [`ServiceClient.__init__`](core/transport.py#L357) | Initialize ServiceClient state, validated inputs and its owned resources. | Keep setup with the object that owns these responsibilities; public driver construction remains offline. |
-| [`ServiceClient.wait_for_service`](core/transport.py#L360) | Poll service discovery within a timeout. | Avoid unbounded service startup waits. |
-| [`ServiceClient.call_async`](core/transport.py#L368) | Run a service call on the transport executor. | Support asynchronous waits without importing ROS clients. |
-| [`ServiceClient.call`](core/transport.py#L371) | Negotiate, send and decode one bounded TCPROS service exchange. | Provide FK/IK and other supported service access directly. |
-| [`DirectTransport.__init__`](core/transport.py#L415) | Initialize DirectTransport state, validated inputs and its owned resources. | Keep setup with the object that owns these responsibilities; public driver construction remains offline. |
-| [`DirectTransport.master`](core/transport.py#L483) | Invoke the configured master with this node's identity. | Keep graph calls consistent. |
-| [`DirectTransport.start_thread`](core/transport.py#L488) | Start and retain an owned background worker. | Make worker cleanup trackable. |
-| [`DirectTransport.track_socket`](core/transport.py#L497) | Register a socket for bounded global cleanup. | Close even partially initialized connections. |
-| [`DirectTransport.untrack_socket`](core/transport.py#L504) | Remove a no-longer-owned socket. | Keep resource accounting current. |
-| [`DirectTransport.create_subscription`](core/transport.py#L508) | Create/register a typed topic subscription. | Receive controller feedback through direct TCPROS. |
-| [`DirectTransport.create_publisher`](core/transport.py#L521) | Create/register an explicitly unlatched publisher. | Expose command routes without command retention. |
-| [`DirectTransport.observe`](core/transport.py#L531) | Add an in-process observer to a shared wire subscription. | Avoid duplicate subscriptions for arm, IO and ROS 2 consumers. |
-| [`DirectTransport.enqueue`](core/transport.py#L543) | Coalesce observations into a bounded pending queue and track drops. | Prevent slow consumers from growing memory indefinitely. |
-| [`DirectTransport.publisher_for`](core/transport.py#L551) | Reuse a compatible publisher for a topic. | Keep one local publication route per command type/topic. |
-| [`DirectTransport.remove_observer`](core/transport.py#L561) | Detach an observation callback. | Allow independent peripheral/telemetry cleanup. |
-| [`DirectTransport.refresh_registration`](core/transport.py#L570) | Restore graph registrations after master identity/availability changes. | Recover discovery without publishing or replaying commands. |
-| [`DirectTransport.check_command_owner`](core/transport.py#L605) | Check the graph for competing command publishers. | Reject detected ownership conflicts; ROS 1 cannot guarantee exclusive writers. |
-| [`DirectTransport.maintain_registration`](core/transport.py#L619) | Periodically check and refresh graph registration. | Detect master changes during polling. |
-| [`DirectTransport.get_publications`](core/transport.py#L629) | Return this node's published topic/type pairs for XML-RPC peers. | Implement the required ROS node graph contract. |
-| [`DirectTransport.get_subscriptions`](core/transport.py#L637) | Return subscribed topic/type pairs for XML-RPC peers. | Support peer and graph introspection. |
-| [`DirectTransport.get_bus_info`](core/transport.py#L648) | Describe active publisher/subscriber connections. | Support protocol-compatible diagnostics. |
-| [`DirectTransport.create_client`](core/transport.py#L684) | Create a typed direct service client. | Share supported service calls through this transport. |
-| [`DirectTransport.destroy_client`](core/transport.py#L687) | Release service-client compatibility resources. | Keep lifecycle API callers consistent. |
-| [`DirectTransport.publisher_update`](core/transport.py#L691) | Handle master publisher-list callbacks. | Connect subscriptions when publishers change. |
-| [`DirectTransport.request_topic`](core/transport.py#L697) | Negotiate TCPROS host/port with subscribers. | Let the controller connect to direct publishers. |
-| [`DirectTransport.remote_shutdown`](core/transport.py#L704) | Handle a remote node shutdown request. | Release local resources on protocol shutdown. |
-| [`DirectTransport.accept`](core/transport.py#L708) | Accept subscriber sockets and dispatch owned connection workers. | Serve published topics concurrently. |
-| [`DirectTransport.serve_subscriber`](core/transport.py#L723) | Check topic/type/hash headers and attach a subscriber without replay. | Prevent mismatched peers from receiving commands. |
-| [`DirectTransport.spin_once`](core/transport.py#L767) | Maintain registration and dispatch bounded queued callbacks. | Give synchronous applications explicit progress control. |
-| [`DirectTransport.get_logger`](core/transport.py#L779) | Return the module logger. | Reuse standard logging without ROS. |
-| [`DirectTransport.get_clock`](core/transport.py#L783) | Expose a small timestamp-producing compatibility adapter. | Build protocol messages without importing ROS clock classes. |
-| [`DirectTransport.get_clock.stamp`](core/transport.py#L784) | Produce a current wire timestamp. | Populate command identities while deadlines remain monotonic. |
-| [`DirectTransport.destroy_node`](core/transport.py#L790) | Unregister graph resources and close servers, workers and sockets. | Clean up both normal and partial-startup sessions. |
+| [`Subscription.receive_stream`](core/transport.py#L284) | Negotiate incoming frames, wait through quiet periods, then decode with a bounded frame deadline. | Keep latched/change-only topics connected without refreshing feedback timestamps or allowing partial frames to stall indefinitely. |
+| [`Subscription.close`](core/transport.py#L358) | Stop workers and close subscription sockets. | Terminate background observation cleanly. |
+| [`ServiceClient.__init__`](core/transport.py#L363) | Initialize ServiceClient state, validated inputs and its owned resources. | Keep setup with the object that owns these responsibilities; public driver construction remains offline. |
+| [`ServiceClient.wait_for_service`](core/transport.py#L366) | Poll service discovery within a timeout. | Avoid unbounded service startup waits. |
+| [`ServiceClient.call_async`](core/transport.py#L374) | Run a service call on the transport executor. | Support asynchronous waits without importing ROS clients. |
+| [`ServiceClient.call`](core/transport.py#L377) | Negotiate, send and decode one bounded TCPROS service exchange. | Provide FK/IK and other supported service access directly. |
+| [`DirectTransport.__init__`](core/transport.py#L421) | Initialize DirectTransport state, validated inputs and its owned resources. | Keep setup with the object that owns these responsibilities; public driver construction remains offline. |
+| [`DirectTransport.master`](core/transport.py#L489) | Invoke the configured master with this node's identity. | Keep graph calls consistent. |
+| [`DirectTransport.start_thread`](core/transport.py#L494) | Start and retain an owned background worker. | Make worker cleanup trackable. |
+| [`DirectTransport.track_socket`](core/transport.py#L503) | Register a socket for bounded global cleanup. | Close even partially initialized connections. |
+| [`DirectTransport.untrack_socket`](core/transport.py#L510) | Remove a no-longer-owned socket. | Keep resource accounting current. |
+| [`DirectTransport.create_subscription`](core/transport.py#L514) | Create/register a typed topic subscription. | Receive controller feedback through direct TCPROS. |
+| [`DirectTransport.create_publisher`](core/transport.py#L527) | Create/register an explicitly unlatched publisher. | Expose command routes without command retention. |
+| [`DirectTransport.observe`](core/transport.py#L537) | Add an in-process observer to a shared wire subscription. | Avoid duplicate subscriptions for arm, IO and ROS 2 consumers. |
+| [`DirectTransport.enqueue`](core/transport.py#L549) | Coalesce observations into a bounded pending queue and track drops. | Prevent slow consumers from growing memory indefinitely. |
+| [`DirectTransport.publisher_for`](core/transport.py#L557) | Reuse a compatible publisher for a topic. | Keep one local publication route per command type/topic. |
+| [`DirectTransport.remove_observer`](core/transport.py#L567) | Detach an observation callback. | Allow independent peripheral/telemetry cleanup. |
+| [`DirectTransport.refresh_registration`](core/transport.py#L576) | Restore graph registrations after master identity/availability changes. | Recover discovery without publishing or replaying commands. |
+| [`DirectTransport.check_command_owner`](core/transport.py#L611) | Check the graph for competing command publishers. | Reject detected ownership conflicts; ROS 1 cannot guarantee exclusive writers. |
+| [`DirectTransport.maintain_registration`](core/transport.py#L625) | Periodically check and refresh graph registration. | Detect master changes during polling. |
+| [`DirectTransport.get_publications`](core/transport.py#L635) | Return this node's published topic/type pairs for XML-RPC peers. | Implement the required ROS node graph contract. |
+| [`DirectTransport.get_subscriptions`](core/transport.py#L643) | Return subscribed topic/type pairs for XML-RPC peers. | Support peer and graph introspection. |
+| [`DirectTransport.get_bus_info`](core/transport.py#L654) | Describe active publisher/subscriber connections. | Support protocol-compatible diagnostics. |
+| [`DirectTransport.create_client`](core/transport.py#L690) | Create a typed direct service client. | Share supported service calls through this transport. |
+| [`DirectTransport.destroy_client`](core/transport.py#L693) | Release service-client compatibility resources. | Keep lifecycle API callers consistent. |
+| [`DirectTransport.publisher_update`](core/transport.py#L697) | Handle master publisher-list callbacks. | Connect subscriptions when publishers change. |
+| [`DirectTransport.request_topic`](core/transport.py#L703) | Negotiate TCPROS host/port with subscribers. | Let the controller connect to direct publishers. |
+| [`DirectTransport.remote_shutdown`](core/transport.py#L710) | Handle a remote node shutdown request. | Release local resources on protocol shutdown. |
+| [`DirectTransport.accept`](core/transport.py#L714) | Accept subscriber sockets and dispatch owned connection workers. | Serve published topics concurrently. |
+| [`DirectTransport.serve_subscriber`](core/transport.py#L729) | Check topic/type/hash headers and attach a subscriber without replay. | Prevent mismatched peers from receiving commands. |
+| [`DirectTransport.spin_once`](core/transport.py#L773) | Maintain registration and dispatch bounded queued callbacks. | Give synchronous applications explicit progress control. |
+| [`DirectTransport.get_logger`](core/transport.py#L785) | Return the module logger. | Reuse standard logging without ROS. |
+| [`DirectTransport.get_clock`](core/transport.py#L789) | Expose a small timestamp-producing compatibility adapter. | Build protocol messages without importing ROS clock classes. |
+| [`DirectTransport.get_clock.stamp`](core/transport.py#L790) | Produce a current wire timestamp. | Populate command identities while deadlines remain monotonic. |
+| [`DirectTransport.destroy_node`](core/transport.py#L796) | Unregister graph resources and close servers, workers and sockets. | Clean up both normal and partial-startup sessions. |
 
 
 ### `core/wire.py`
@@ -651,16 +644,17 @@ No explicitly defined Python functions.
 
 | Class / data type | Responsibility |
 | --- | --- |
-| [`DiagnosticRecording`](examples/diagnose_direct.py#L24) | Read-only aggregate diagnostics, joint ranges and bounded input transitions. |
+| [`DiagnosticRecording`](examples/diagnose_direct.py#L25) | Read-only aggregate diagnostics, joint ranges and bounded input transitions. |
 
 | Function / method | What it does | Why it exists |
 | --- | --- | --- |
-| [`DiagnosticRecording.__init__`](examples/diagnose_direct.py#L25) | Initialize DiagnosticRecording state, validated inputs and its owned resources. | Keep setup with the object that owns these responsibilities; public driver construction remains offline. |
-| [`DiagnosticRecording.receive`](examples/diagnose_direct.py#L37) | Aggregate sparse diagnostic/status observations by identity. | Retain names absent from later partial messages. |
-| [`DiagnosticRecording.receive_joints`](examples/diagnose_direct.py#L50) | Merge joint fields and observed ranges. | Measure state variation without moving hardware. |
-| [`DiagnosticRecording.receive_input`](examples/diagnose_direct.py#L66) | Merge IO/legacy inputs and retain bounded transition events. | Distinguish actual button/wheel edges from unchanged samples. |
-| [`record`](examples/diagnose_direct.py#L93) | Subscribe for a bounded duration and return state/counts/drops with no publishers. | Provide repeatable read-only fault and input evidence. |
-| [`main`](examples/diagnose_direct.py#L135) | Parse connection/duration/report arguments and write diagnostic JSON. | Make the recorder usable independently of a ROS runtime. |
+| [`DiagnosticRecording.__init__`](examples/diagnose_direct.py#L26) | Initialize DiagnosticRecording state, validated inputs and its owned resources. | Keep setup with the object that owns these responsibilities; public driver construction remains offline. |
+| [`DiagnosticRecording.write_trace`](examples/diagnose_direct.py#L43) | Flush an optional JSONL record of each dispatched message with original receipt time, dispatch time and sequence. | Preserve recovery evidence beyond the bounded summary without publishing commands. |
+| [`DiagnosticRecording.receive`](examples/diagnose_direct.py#L58) | Aggregate sparse diagnostics and per-joint homing state; reject mismatched homing arrays before cache changes. | Retain names absent from later partial messages. |
+| [`DiagnosticRecording.receive_joints`](examples/diagnose_direct.py#L79) | Merge joint fields and observed ranges. | Measure state variation without moving hardware. |
+| [`DiagnosticRecording.receive_input`](examples/diagnose_direct.py#L95) | Merge IO/legacy inputs and retain bounded transition events. | Distinguish actual button/wheel edges from unchanged samples. |
+| [`record`](examples/diagnose_direct.py#L122) | Subscribe for a bounded duration and return state/counts/drops with no publishers. | Provide repeatable read-only fault and input evidence. |
+| [`main`](examples/diagnose_direct.py#L182) | Parse connection/duration/report/trace arguments and write the summary plus an optional new JSONL trace. | Make the recorder usable independently of a ROS runtime. |
 
 
 ### `examples/move.py`
@@ -728,8 +722,8 @@ No explicitly defined Python functions.
 | Function / method | What it does | Why it exists |
 | --- | --- | --- |
 | [`feature`](installation/build_capability_ledger.py#L28) | Build a consistent feature record with interfaces, limits and evidence. | Keep ledger entries structured and comparable. |
-| [`build`](installation/build_capability_ledger.py#L772) | Combine the pinned SDK index with feature mappings into the operation ledger. | Account for all 226 indexed methods without claiming all are qualified. |
-| [`main`](installation/build_capability_ledger.py#L832) | Write the generated CAPABILITY_LEDGER.json. | Regenerate coverage without ROS or robot access. |
+| [`build`](installation/build_capability_ledger.py#L662) | Combine the pinned SDK index with feature mappings into the operation ledger. | Account for all 226 indexed methods without claiming all are qualified. |
+| [`main`](installation/build_capability_ledger.py#L722) | Write the generated CAPABILITY_LEDGER.json. | Regenerate coverage without ROS or robot access. |
 
 
 ### `installation/generate_ros2_interfaces.py`
@@ -1000,10 +994,11 @@ documentation role is the reason they are part of the implementation. The
 | --- | --- | --- |
 | [`README.md`](README.md) | Setup, Python/ROS 2 APIs and ownership/qualification contracts. | Start here to install and use the driver. |
 | [`IMPLEMENTATION_GUIDE.md`](IMPLEMENTATION_GUIDE.md) | This file and function map. | Explain responsibilities and design reasons without reading every module first. |
+| [`TOPIC_MAP.md`](TOPIC_MAP.md) | Native publications/subscriptions, message types, driver callbacks/senders and source lines. | Trace network interfaces to their actual implementation and distinguish handled topics from discovery-only entries. |
 | [`UNFINISHED_WORK.md`](UNFINISHED_WORK.md) | Prioritized remaining implementation/qualification work. | Keep blockers, deferred work and conditional hardware scope visible. |
 | [`DIRECT_DRIVER_PLAN.md`](DIRECT_DRIVER_PLAN.md) | The itemized original implementation and qualification checklist. | Retain explicit checked/unchecked completion criteria. |
-| [`CAPABILITIES.md`](CAPABILITIES.md) | Human-readable capability and physical-status summary. | Distinguish an implemented API from qualified hardware behavior. |
-| [`VALIDATION.md`](VALIDATION.md) | Environment, measured results, failures and practical limits. | Tie completion claims to evidence rather than API existence. |
+| [`CAPABILITIES.md`](CAPABILITIES.md) | Human-readable implementation capability summary. | Distinguish an implemented API from qualified hardware behavior. |
+| [`VALIDATION.md`](VALIDATION.md) | Verification guidance without retained hardware outcomes. | Separate verification requirements from API availability. |
 | [`SDK_INVENTORY.json`](SDK_INVENTORY.json) | Pinned index of 226 public methods across 28 SDK source files. | Provide the source baseline for coverage accounting. |
 | [`CAPABILITY_LEDGER.json`](CAPABILITY_LEDGER.json) | Per-operation Python/ROS 2/controller mapping, limits, evidence and status. | Account for each indexed SDK operation while retaining unavailable/unqualified cases. |
 | [`installation/wire_schema.json`](installation/wire_schema.json) | Pinned message/service definitions, hashes, fields and provenance. | Construct and serialize protocol types without ROS code generation at runtime. |
@@ -1016,9 +1011,6 @@ documentation role is the reason they are part of the implementation. The
 | [`installation/ros-sugar-release.json`](installation/ros-sugar-release.json) | ros_sugar 0.8.2 repository and exact source revision. | Pin the upstream framework implementation used for verification. |
 | [`installation/ros-sugar-linux-64.explicit.txt`](installation/ros-sugar-linux-64.explicit.txt) | Exact 201-package optional framework Conda baseline. | Reproduce the framework build including its ROS dependencies. |
 | [`installation/ros-sugar-requirements.txt`](installation/ros-sugar-requirements.txt) | Pinned additional Python framework dependencies. | Complete the tested optional runtime without unconstrained dependency drift. |
-| [`validation/2026-11-13.json`](validation/2026-11-13.json) | Original neutral/joint/Cartesian/gripper/ROS 2 milestone evidence. | Retain the initial observations as historical evidence. |
-| [`validation/2026-11-13-extended.json`](validation/2026-11-13-extended.json) | Later load, process-loss, peripheral and mode/fault observations. | Preserve failures and bounded successes rather than overwrite earlier results. |
-| [`validation/2026-11-13-continuation.json`](validation/2026-11-13-continuation.json) | Restart/retest, repeated enable failure, final state and software verification evidence. | Record the latest qualification boundary and final stopped state. |
 | [`../../../../README.md`](../../../../README.md) | Repository-level driver/template overview and Sawyer development status. | Explain where this hardware driver fits in irobot. |
 | [`../../../../pyproject.toml`](../../../../pyproject.toml) | Package exports/assets, NumPy 2 Sawyer extra, build and lint/test settings. | Ship schemas/licenses and keep optional driver dependencies explicit; cflib remains a declared package dependency. |
 | [`../../../../irobot/src/__init__.py`](../../__init__.py) | Parent Python package marker. | Allow the established irobot.src import layout. |
@@ -1079,10 +1071,8 @@ GripperCommand, Image and SetParameters come from the Humble dependencies.
 Test names describe the behavior asserted; they do not mean a physical robot was
 used. Each file's purpose explains why its checks exist. Class names organize
 related tests; nested helpers deliberately supply local peers, feedback or faults.
-The last recorded full suite passed 164 tests and 27 subtests in the clean optional
-framework runtime. That is previous verification, not a rerun for this documentation
-change; see VALIDATION.md for scope. Framework/DDS checks require their optional
-runtime, and framework tests use a fake hardware driver.
+Framework/DDS checks require their optional runtime, and framework tests use a
+fake hardware driver.
 
 
 ### [`tests/test_irobot/__init__.py`](../../../../tests/test_irobot/__init__.py)
@@ -1092,11 +1082,11 @@ Package marker for driver test imports; no functions.
 
 ### [`tests/test_irobot/smoke_sawyer_runtime.py`](../../../../tests/test_irobot/smoke_sawyer_runtime.py)
 
-**Historical utility, outside normal test discovery.** Its `main` builds a localhost DDS feedback simulation using `intera_core_msgs` and attempts a driver connection. It assumes the earlier DDS-based transport path; the current driver connects through XML-RPC/TCPROS. It is retained for reference and is **not current direct-driver validation**. Updating or removing it is noted in UNFINISHED_WORK.md.
+**Current localhost TCPROS/XML-RPC smoke runner, updated November 16.** Its `main` runs four existing synthetic transport tests for connection/neutral preview, service exchange, unlatched publication and master registration recovery without command replay. It requires pytest and no ROS or real robot. Run `python -m tests.test_irobot.smoke_sawyer_runtime` from the repository root.
 
 | Defined function / method | What / why in this test file |
 | --- | --- |
-| [`main`](../../../../tests/test_irobot/smoke_sawyer_runtime.py#L17) | Run the historical synthetic DDS scenario; not a current direct TCPROS check. |
+| [`main`](../../../../tests/test_irobot/smoke_sawyer_runtime.py#L14) | Run the four current localhost transport regressions without ROS or physical hardware; reuse their existing synthetic peers. |
 
 
 ### [`tests/test_irobot/test_sawyer_api.py`](../../../../tests/test_irobot/test_sawyer_api.py)
@@ -1174,12 +1164,17 @@ Package marker for driver test imports; no functions.
 
 ### [`tests/test_irobot/test_sawyer_diagnostics.py`](../../../../tests/test_irobot/test_sawyer_diagnostics.py)
 
-**What/why:** Sparse diagnostics/joint preservation and bounded change-only input events. Regress these contracts without relying on live robot movement.
+**What/why:** Sparse diagnostics/joint preservation, bounded change-only input events and atomic partial homing-state merges. Regress these contracts without relying on live robot movement.
 
 | Defined function / method | What / why in this test file |
 | --- | --- |
-| [`test_sparse_diagnostics_and_joint_fields_are_preserved`](../../../../tests/test_irobot/test_sawyer_diagnostics.py#L12) | Assert: sparse diagnostics and joint fields are preserved. Protect this behavior against regression. |
-| [`test_change_only_input_cache_and_events_are_bounded`](../../../../tests/test_irobot/test_sawyer_diagnostics.py#L37) | Assert: change only input cache and events are bounded. Protect this behavior against regression. |
+| [`test_trace_preserves_joint_fields_and_observed_command_order`](../../../../tests/test_irobot/test_sawyer_diagnostics.py#L106) | Verify raw joint velocity/effort, observed enable commands, original receipt times and dispatch sequence survive JSONL recording. |
+| [`test_collision_feedback_is_preserved_without_becoming_an_input`](../../../../tests/test_irobot/test_sawyer_diagnostics.py#L131) | Keep collision state distinct from cuff/navigator inputs. |
+| [`test_trace_write_failure_is_propagated`](../../../../tests/test_irobot/test_sawyer_diagnostics.py#L140) | Surface trace write errors rather than silently losing investigation evidence. |
+| [`test_sparse_diagnostics_and_joint_fields_are_preserved`](../../../../tests/test_irobot/test_sawyer_diagnostics.py#L17) | Assert: sparse diagnostics and joint fields are preserved. Protect this behavior against regression. |
+| [`test_change_only_input_cache_and_events_are_bounded`](../../../../tests/test_irobot/test_sawyer_diagnostics.py#L42) | Assert: change only input cache and events are bounded. Protect this behavior against regression. |
+| [`test_partial_homing_feedback_preserves_other_joints`](../../../../tests/test_irobot/test_sawyer_diagnostics.py#L69) | Assert named partial homing updates retain other joints without generating input events; protect read-only recovery diagnosis. |
+| [`test_mismatched_homing_fields_do_not_modify_the_cache`](../../../../tests/test_irobot/test_sawyer_diagnostics.py#L89) | Assert malformed homing arrays fail before any cache mutation. |
 
 
 ### [`tests/test_irobot/test_sawyer_extended_ros2.py`](../../../../tests/test_irobot/test_sawyer_extended_ros2.py)
@@ -1253,12 +1248,13 @@ Package marker for driver test imports; no functions.
 
 | Defined function / method | What / why in this test file |
 | --- | --- |
-| [`result`](../../../../tests/test_irobot/test_sawyer_neutral_example.py#L17) | Test fixture/support: result. Supplies controlled objects, feedback or peer behavior for this file's stated assertions. |
-| [`controller`](../../../../tests/test_irobot/test_sawyer_neutral_example.py#L29) | Test fixture/support: controller. Supplies controlled objects, feedback or peer behavior for this file's stated assertions. |
-| [`test_main_routes_to_the_sawyer_neutral_example`](../../../../tests/test_irobot/test_sawyer_neutral_example.py#L37) | Assert: main routes to the sawyer neutral example. Protect this behavior against regression. |
-| [`test_default_preview_uses_only_public_arm_api`](../../../../tests/test_irobot/test_sawyer_neutral_example.py#L41) | Assert: default preview uses only public arm api. Protect this behavior against regression. |
-| [`test_execution_replans_after_preview_and_reports_measurement`](../../../../tests/test_irobot/test_sawyer_neutral_example.py#L56) | Assert: execution replans after preview and reports measurement. Protect this behavior against regression. |
-| [`test_invalid_settings_fail_before_connecting`](../../../../tests/test_irobot/test_sawyer_neutral_example.py#L78) | Assert: invalid settings fail before connecting. Protect this behavior against regression. |
+| [`result`](../../../../tests/test_irobot/test_sawyer_neutral_example.py#L19) | Test fixture/support: result. Supplies controlled objects, feedback or peer behavior for this file's stated assertions. |
+| [`controller`](../../../../tests/test_irobot/test_sawyer_neutral_example.py#L31) | Test fixture/support: controller. Supplies controlled objects, feedback or peer behavior for this file's stated assertions. |
+| [`test_main_routes_to_the_sawyer_neutral_example`](../../../../tests/test_irobot/test_sawyer_neutral_example.py#L39) | Assert: main routes to the sawyer neutral example. Protect this behavior against regression. |
+| [`test_default_preview_uses_only_public_arm_api`](../../../../tests/test_irobot/test_sawyer_neutral_example.py#L43) | Assert: default preview uses only public arm api. Protect this behavior against regression. |
+| [`test_explicit_lower_speed_remains_available`](../../../../tests/test_irobot/test_sawyer_neutral_example.py#L60) | Assert that an explicit lower speed overrides the full-limit neutral default without executing the preview. |
+| [`test_execution_replans_after_preview_and_reports_measurement`](../../../../tests/test_irobot/test_sawyer_neutral_example.py#L70) | Assert: execution replans after preview and reports measurement. Protect this behavior against regression. |
+| [`test_invalid_settings_fail_before_connecting`](../../../../tests/test_irobot/test_sawyer_neutral_example.py#L92) | Assert: invalid settings fail before connecting. Protect this behavior against regression. |
 
 
 ### [`tests/test_irobot/test_sawyer_peripherals.py`](../../../../tests/test_irobot/test_sawyer_peripherals.py)
@@ -1423,21 +1419,22 @@ Package marker for driver test imports; no functions.
 | [`test_publisher_negotiates_and_never_replays_commands`](../../../../tests/test_irobot/test_sawyer_transport.py#L74) | Assert: publisher negotiates and never replays commands. Protect this behavior against regression. |
 | [`test_bad_subscriber_hash_is_rejected`](../../../../tests/test_irobot/test_sawyer_transport.py#L127) | Assert: bad subscriber hash is rejected. Protect this behavior against regression. |
 | [`PeerHandler.handle`](../../../../tests/test_irobot/test_sawyer_transport.py#L149) | Test fixture/support: handle. Supplies controlled objects, feedback or peer behavior for this file's stated assertions. |
-| [`robot_peer`](../../../../tests/test_irobot/test_sawyer_transport.py#L199) | Test fixture/support: robot peer. Supplies controlled objects, feedback or peer behavior for this file's stated assertions. |
-| [`test_direct_controller_connects_and_previews_neutral_without_ros`](../../../../tests/test_irobot/test_sawyer_transport.py#L236) | Assert: direct controller connects and previews neutral without ros. Protect this behavior against regression. |
-| [`test_direct_service_response_and_fragmented_reads`](../../../../tests/test_irobot/test_sawyer_transport.py#L270) | Assert: direct service response and fragmented reads. Protect this behavior against regression. |
-| [`test_service_failure_is_not_reported_as_success`](../../../../tests/test_irobot/test_sawyer_transport.py#L285) | Assert: service failure is not reported as success. Protect this behavior against regression. |
-| [`test_joint_subsets_and_fields_survive_delayed_polling`](../../../../tests/test_irobot/test_sawyer_transport.py#L297) | Assert: joint subsets and fields survive delayed polling. Protect this behavior against regression. |
-| [`test_delayed_callback_preserves_receive_time`](../../../../tests/test_irobot/test_sawyer_transport.py#L323) | Assert: delayed callback preserves receive time. Protect this behavior against regression. |
-| [`test_frame_limits_before_payload_allocation`](../../../../tests/test_irobot/test_sawyer_transport.py#L335) | Assert: frame limits before payload allocation. Protect this behavior against regression. |
-| [`test_mid_frame_disconnect_is_reported`](../../../../tests/test_irobot/test_sawyer_transport.py#L346) | Assert: mid frame disconnect is reported. Protect this behavior against regression. |
-| [`test_partial_transport_startup_closes_bound_server`](../../../../tests/test_irobot/test_sawyer_transport.py#L357) | Assert: partial transport startup closes bound server. Protect this behavior against regression. |
-| [`test_partial_transport_startup_closes_bound_server.fail_listener`](../../../../tests/test_irobot/test_sawyer_transport.py#L361) | Local `fail_listener` helper for `test_partial_transport_startup_closes_bound_server`; supplies that scenario's callback, peer behavior or injected condition. |
-| [`test_master_restart_restores_registration_without_command_replay`](../../../../tests/test_irobot/test_sawyer_transport.py#L375) | Assert: master restart restores registration without command replay. Protect this behavior against regression. |
-| [`test_master_restart_restores_registration_without_command_replay.get_pid`](../../../../tests/test_irobot/test_sawyer_transport.py#L379) | Local `get_pid` helper for `test_master_restart_restores_registration_without_command_replay`; supplies that scenario's callback, peer behavior or injected condition. |
-| [`test_master_restart_restores_registration_without_command_replay.register`](../../../../tests/test_irobot/test_sawyer_transport.py#L385) | Local `register` helper for `test_master_restart_restores_registration_without_command_replay`; supplies that scenario's callback, peer behavior or injected condition. |
-| [`test_shared_observers_and_late_publisher_connection`](../../../../tests/test_irobot/test_sawyer_transport.py#L441) | Assert: shared observers and late publisher connection. Protect this behavior against regression. |
-| [`test_late_io_observer_receives_merged_retained_state_without_new_packets`](../../../../tests/test_irobot/test_sawyer_transport.py#L464) | Assert: late io observer receives merged retained state without new packets. Protect this behavior against regression. |
+| [`robot_peer`](../../../../tests/test_irobot/test_sawyer_transport.py#L200) | Test fixture/support: robot peer. Supplies controlled objects, feedback or peer behavior for this file's stated assertions. |
+| [`test_quiet_subscription_stays_connected_without_refreshing_feedback`](../../../../tests/test_irobot/test_sawyer_transport.py#L239) | Keep a quiet subscription connected across idle deadlines without refreshing cached receipt time, then receive its next frame through the same connection. |
+| [`test_direct_controller_connects_and_previews_neutral_without_ros`](../../../../tests/test_irobot/test_sawyer_transport.py#L266) | Assert: direct controller connects and previews neutral without ros. Protect this behavior against regression. |
+| [`test_direct_service_response_and_fragmented_reads`](../../../../tests/test_irobot/test_sawyer_transport.py#L302) | Assert: direct service response and fragmented reads. Protect this behavior against regression. |
+| [`test_service_failure_is_not_reported_as_success`](../../../../tests/test_irobot/test_sawyer_transport.py#L317) | Assert: service failure is not reported as success. Protect this behavior against regression. |
+| [`test_joint_subsets_and_fields_survive_delayed_polling`](../../../../tests/test_irobot/test_sawyer_transport.py#L329) | Assert: joint subsets and fields survive delayed polling. Protect this behavior against regression. |
+| [`test_delayed_callback_preserves_receive_time`](../../../../tests/test_irobot/test_sawyer_transport.py#L355) | Assert: delayed callback preserves receive time. Protect this behavior against regression. |
+| [`test_frame_limits_before_payload_allocation`](../../../../tests/test_irobot/test_sawyer_transport.py#L367) | Assert: frame limits before payload allocation. Protect this behavior against regression. |
+| [`test_mid_frame_disconnect_is_reported`](../../../../tests/test_irobot/test_sawyer_transport.py#L378) | Assert: mid frame disconnect is reported. Protect this behavior against regression. |
+| [`test_partial_transport_startup_closes_bound_server`](../../../../tests/test_irobot/test_sawyer_transport.py#L389) | Assert: partial transport startup closes bound server. Protect this behavior against regression. |
+| [`test_partial_transport_startup_closes_bound_server.fail_listener`](../../../../tests/test_irobot/test_sawyer_transport.py#L393) | Local `fail_listener` helper for `test_partial_transport_startup_closes_bound_server`; supplies that scenario's callback, peer behavior or injected condition. |
+| [`test_master_restart_restores_registration_without_command_replay`](../../../../tests/test_irobot/test_sawyer_transport.py#L407) | Assert: master restart restores registration without command replay. Protect this behavior against regression. |
+| [`test_master_restart_restores_registration_without_command_replay.get_pid`](../../../../tests/test_irobot/test_sawyer_transport.py#L411) | Local `get_pid` helper for `test_master_restart_restores_registration_without_command_replay`; supplies that scenario's callback, peer behavior or injected condition. |
+| [`test_master_restart_restores_registration_without_command_replay.register`](../../../../tests/test_irobot/test_sawyer_transport.py#L417) | Local `register` helper for `test_master_restart_restores_registration_without_command_replay`; supplies that scenario's callback, peer behavior or injected condition. |
+| [`test_shared_observers_and_late_publisher_connection`](../../../../tests/test_irobot/test_sawyer_transport.py#L473) | Assert: shared observers and late publisher connection. Protect this behavior against regression. |
+| [`test_late_io_observer_receives_merged_retained_state_without_new_packets`](../../../../tests/test_irobot/test_sawyer_transport.py#L496) | Assert: late io observer receives merged retained state without new packets. Protect this behavior against regression. |
 
 
 ### [`tests/test_irobot/test_sawyer_wire.py`](../../../../tests/test_irobot/test_sawyer_wire.py)
@@ -1463,8 +1460,8 @@ Package marker for driver test imports; no functions.
 - `installation/bridge-release.json` was removed: the explicit installer uses the
   direct Humble dependency lock instead of a bridge release.
 - `.sawyer-runtime/` holds ignored local environments, generated builds, downloaded
-  framework sources, reports and logs. These are reproduction artifacts rather
-  than maintained driver source files. Versioned evidence is under `validation/`.
+  framework sources and build dependencies, separate from maintained driver
+  source files.
 - `/tmp/` experiment scripts and wheel builds are temporary local artifacts, not
   an additional supported public API. Downloaded upstream SDK/reference genpy
   trees are development inputs, not runtime dependencies.
@@ -1474,7 +1471,7 @@ Package marker for driver test imports; no functions.
 When changing a module, update its file/function explanation here. When changing
 capability scope, update CAPABILITIES.md, the original checklist and the generated
 operation ledger mapping; do not mark a hardware item complete from a unit test.
-Record new physical evidence separately, preserving earlier failures. Resolve the
-enable/homing blocker before any further automatic recovery or motion requalification.
+Hardware qualification requires a separate assessment; deleting records does
+not establish qualification.
 See [UNFINISHED_WORK.md](UNFINISHED_WORK.md) for the remaining work and acceptance
-criteria, including the legacy smoke-script mismatch found while writing this map.
+criteria.

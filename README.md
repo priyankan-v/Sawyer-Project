@@ -21,7 +21,7 @@ Drivers work standalone in Python or through optional ROS 2 components. Sawyer p
 - Python 3.11 or higher
 - The hardware SDK for your robot (see the robot's README for installation)
 - **ROS2 + ros_sugar** — only required if you are using ROS2-based components (optional)
-- **Sawyer (`sawyer_py`):** direct Python transport is in development; no ROS runtime or bridge is required for core operation. The optional ROS 2 Humble component uses the same driver. Motion, cameras and peripherals have partial physical evidence, but enable recovery produced unexpected movement and now blocks physical qualification. Sawyer is disabled/software-stopped; head pan is deferred. See the driver checklist.
+- **Sawyer (`sawyer_py`):** direct Python control through the irobot driver, with an optional ROS 2 Humble adapter using the same backend. No workstation ROS 1 runtime or bridge is required. See the driver implementation guide and qualification checklist.
 
 ---
 
@@ -57,6 +57,9 @@ The development `main.py` runs the Sawyer neutral example: `python main.py` prev
 
 Sawyer development references: [files and functions](irobot/src/robots/sawyer/IMPLEMENTATION_GUIDE.md)
 and [unfinished work](irobot/src/robots/sawyer/UNFINISHED_WORK.md).
+
+See the [API reference](API_REFERENCE.md) for existing Python methods,
+configuration fields, ROS 2 endpoints, and custom interface schemas.
 
 Each robot exports its classes at the top level of the `irobot` package. See the [Supported Robots](#-supported-robots) table above for links to robot-specific documentation.
 

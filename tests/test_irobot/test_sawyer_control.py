@@ -299,7 +299,7 @@ class ArmTests(unittest.TestCase):
     def test_neutral_parameter_is_reordered_and_missing_master_is_actionable(
         self,
     ):
-        robot = SawyerController()
+        robot = SawyerController(SawyerConfig(ros_master_uri=None))
         proxy = MagicMock()
         proxy.__enter__.return_value.getParam.return_value = (
             1,

@@ -160,9 +160,9 @@ class SawyerConfig:
     settle_confirmation: float = 0.2
     frame: str = 'base'
     tip: str | None = None
-    domain_id: int | None = None
-    ros_master_uri: str | None = None
-    ros_ip: str | None = None
+    domain_id: int | None = 0
+    ros_master_uri: str | None = 'http://169.254.121.3:11311'
+    ros_ip: str | None = '169.254.121.2'
     transport_timeout: float = 0.2
     transport_retry_interval: float = 0.2
     transport_idle_timeout: float = 5.0
@@ -176,12 +176,11 @@ class SawyerConfig:
     gripper_timeout: float = 10.0
     joint_state_topic: str = '/robot/joint_states'
     robot_state_topic: str = '/robot/state'
+    homing_state_topic: str = '/robot/homing_states'
     enable_topic: str = '/robot/set_super_enable'
     reset_topic: str = '/robot/set_super_reset'
     software_stop_topic: str = '/robot/set_super_stop'
-    version_parameter: str = (
-        '/manifest/robot_software/version/HLR_VERSION_STRING'
-    )
+    version_parameter: str = '/manifest/robot_software/version/HLR_VERSION_STRING'
     robot_description_parameter: str = '/robot_description'
     head_state_topic: str = '/robot/head/head_state'
     head_command_topic: str = '/robot/head/command_head_pan'
@@ -196,12 +195,8 @@ class SawyerConfig:
     joint_command_topic: str = '/robot/limb/right/joint_command'
     command_timeout_topic: str = '/robot/limb/right/joint_command_timeout'
     speed_ratio_topic: str = '/robot/limb/right/set_speed_ratio'
-    interaction_command_topic: str = (
-        '/robot/limb/right/interaction_control_command'
-    )
-    interaction_state_topic: str = (
-        '/robot/limb/right/interaction_controller/state'
-    )
+    interaction_command_topic: str = '/robot/limb/right/interaction_control_command'
+    interaction_state_topic: str = '/robot/limb/right/interaction_controller/state'
     diagnostics_topic: str = '/diagnostics'
     tf_topic: str = '/tf'
     tf_static_topic: str = '/tf_static'

@@ -1,5 +1,5 @@
 """
-Collect controller diagnostics and input edges without command publishers.
+Record diagnostics and optional feedback traces without command publishers.
 """
 
 # Standalone read-only operator utility with explicit JSON output.
@@ -10,6 +10,7 @@ import argparse
 import json
 import math
 import time
+from contextlib import nullcontext
 from dataclasses import asdict
 from datetime import UTC, datetime
 from pathlib import Path
@@ -22,23 +23,51 @@ MAX_EVENTS = 256
 
 
 class DiagnosticRecording:
-    def __init__(self):
+    def __init__(self, trace=None):
+        self.trace = trace
         self.report = {
             'date_utc': datetime.now(UTC).isoformat(),
             'counts': {},
             'assembly': None,
+            'homing': {},
+            'collision': None,
+            'commands': {},
             'diagnostics': {},
             'inputs': {},
             'input_events': [],
             'dropped_events': 0,
             'joints': {},
+            'trace_records': 0,
         }
 
+    def write_trace(self, label, message):
+        if self.trace is None:
+            return
+        entry = {
+            'sequence': self.report['trace_records'],
+            'label': label,
+            'type': message.ros_type,
+            'received_at_monotonic': message.received_at,
+            'dispatched_at_monotonic': time.monotonic(),
+            'message': asdict(message),
+        }
+        self.trace.write(json.dumps(entry, allow_nan=False) + '\n')
+        self.trace.flush()
+        self.report['trace_records'] += 1
+
     def receive(self, label, message):
+        self.write_trace(label, message)
         report = self.report
         report['counts'][label] = report['counts'].get(label, 0) + 1
         if label == 'assembly':
             report['assembly'] = asdict(message)
+        elif label == 'homing':
+            states = dict(zip(message.name, message.state, strict=True))
+            report['homing'].update(states)
+        elif label == 'collision':
+            report['collision'] = asdict(message)
+        elif label.endswith('_command'):
+            report['commands'][label] = asdict(message)
         elif label == 'diagnostics':
             for item in message.status:
                 report['diagnostics'][item.name] = asdict(item)
@@ -90,16 +119,32 @@ class DiagnosticRecording:
             cache[name] = value
 
 
-def record(config, duration=5.0):
+def record(config, duration=5.0, *, trace=None):
     """Subscribe only; never enable, reset, move or change an IO setting."""
     positive('duration', duration)
-    recording = DiagnosticRecording()
+    recording = DiagnosticRecording(trace)
     node = DirectTransport(config)
     try:
         for label, kind, topic in (
             ('assembly', wire.RobotAssemblyState, config.robot_state_topic),
+            ('homing', wire.HomingState, config.homing_state_topic),
             ('diagnostics', wire.DiagnosticArray, config.diagnostics_topic),
             ('joints', wire.JointState, config.joint_state_topic),
+            (
+                'collision',
+                wire.CollisionDetectionState,
+                config.collision_topic,
+            ),
+            ('enable_command', wire.Bool, config.enable_topic),
+            ('reset_command', wire.Empty, config.reset_topic),
+            ('stop_command', wire.Empty, config.software_stop_topic),
+            ('homing_command', wire.HomingCommand, '/robot/set_homing_mode'),
+            ('joint_command', wire.JointCommand, config.joint_command_topic),
+            (
+                'gripper_command',
+                wire.IOComponentCommand,
+                config.gripper_namespace + '/command',
+            ),
             ('cuff', wire.IODeviceStatus, config.io_namespace + '/cuff/state'),
             (
                 'navigator',
@@ -127,6 +172,8 @@ def record(config, duration=5.0):
             node.spin_once(timeout_sec=0.01)
         recording.report['no_publishers_created'] = not bool(node.publishers)
         recording.report['transport_dropped_messages'] = node.dropped_messages
+        recording.report['transport_generation'] = node.generation
+        recording.report['master_available'] = node.master_available
     finally:
         node.destroy_node()
     return recording.report
@@ -138,11 +185,20 @@ def main():
     parser.add_argument('--ip', required=True)
     parser.add_argument('--duration', type=float, default=5.0)
     parser.add_argument('--report', type=Path, required=True)
-    args = parser.parse_args()
-    report = record(
-        SawyerConfig(ros_master_uri=args.master, ros_ip=args.ip),
-        args.duration,
+    parser.add_argument(
+        '--trace',
+        type=Path,
+        help='New JSONL file for raw dispatched feedback/observed commands',
     )
+    args = parser.parse_args()
+    if args.trace and args.trace.resolve() == args.report.resolve():
+        parser.error('--trace and --report must be different files')
+    with args.trace.open('x') if args.trace else nullcontext() as trace:
+        report = record(
+            SawyerConfig(ros_master_uri=args.master, ros_ip=args.ip),
+            args.duration,
+            trace=trace,
+        )
     args.report.write_text(
         json.dumps(report, indent=2, allow_nan=False) + '\n'
     )

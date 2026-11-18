@@ -1,7 +1,7 @@
 # Optional ros_sugar lifecycle application
 
 The direct Python driver and standard Humble server do not require ros_sugar.
-Real lifecycle validation used Sugarcoat/ros_sugar 0.8.2, commit
+The optional integration targets Sugarcoat/ros_sugar 0.8.2, commit
 `5d64e015488fe9f0ca7b844028e7907f43785db0`, with Humble/Python 3.12.16 on
 Ubuntu 22.04 x86_64. The upstream source is
 [automatika-robotics/sugarcoat](https://github.com/automatika-robotics/sugarcoat).
@@ -73,9 +73,8 @@ finally:
 ```
 
 Select this application or SawyerNode as the hardware owner. Actual movement
-still needs explicit `execute=True` and a ready controller. The current enable
-recovery problem remains a hardware release blocker; framework activation does
-not fix it.
+still needs explicit `execute=True` and safe, ready operating conditions.
+Framework activation does not qualify physical motion.
 
 The real-framework regression uses a fake driver and actual ROS lifecycle/DDS:
 

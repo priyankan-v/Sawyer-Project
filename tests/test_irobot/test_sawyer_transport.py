@@ -168,6 +168,7 @@ class PeerHandler(socketserver.BaseRequestHandler):
                 self.request.sendall(bytes([byte]))
             return
         messages = self.server.messages[header['topic']]
+        self.server.topic_connections.append(header['topic'])
         if not isinstance(messages, list):
             messages = [messages]
         message = messages[0]
@@ -188,7 +189,7 @@ class PeerHandler(socketserver.BaseRequestHandler):
                 index += 1
             except OSError:
                 return
-            self.server.stopped.wait(0.02)
+            self.server.stopped.wait(self.server.publish_interval)
 
 
 class PeerServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
@@ -200,6 +201,8 @@ def robot_peer():
     with rpc_server() as (master, uri):
         peer = PeerServer(('127.0.0.1', 0), PeerHandler)
         peer.messages, peer.requests = {}, []
+        peer.topic_connections = []
+        peer.publish_interval = 0.02
         peer.service_error = None
         peer.stopped = threading.Event()
         thread = threading.Thread(target=peer.serve_forever, daemon=True)
@@ -233,11 +236,39 @@ def robot_peer():
             thread.join(timeout=1)
 
 
+def test_quiet_subscription_stays_connected_without_refreshing_feedback():
+    with robot_peer() as (peer, settings):
+        peer.publish_interval = 0.3
+        peer.messages['/quiet'] = wire.Bool(data=True)
+        transport = DirectTransport(
+            replace(settings, transport_idle_timeout=0.05)
+        )
+        received = []
+        try:
+            subscription = transport.create_subscription(
+                wire.Bool, '/quiet', received.append
+            )
+            wait_until(lambda: bool(transport.pending))
+            transport.spin_once(timeout_sec=0)
+            first_receipt = received[-1].received_at
+            time.sleep(0.12)
+            assert subscription.connected()
+            assert received[-1].received_at == first_receipt
+            wait_until(lambda: bool(transport.pending))
+            transport.spin_once(timeout_sec=0)
+            assert received[-1].received_at > first_receipt
+            assert peer.topic_connections == ['/quiet']
+        finally:
+            transport.destroy_node()
+        assert all(not thread.is_alive() for thread in transport.threads)
+
+
 def test_direct_controller_connects_and_previews_neutral_without_ros():
     with robot_peer() as (peer, settings):
         state = wire.EndpointState(valid=True)
         state.pose.orientation.w = 1.0
         names = list(JOINT_NAMES)
+        velocity_limits = (0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4)
         peer.messages = {
             settings.joint_state_topic: wire.JointState(
                 name=names, position=[0.0] * 7, velocity=[0.0] * 7
@@ -248,7 +279,7 @@ def test_direct_controller_connects_and_previews_neutral_without_ros():
                 joint_names=names,
                 position_lower=[-3.0] * 7,
                 position_upper=[3.0] * 7,
-                velocity=[1.0] * 7,
+                velocity=list(velocity_limits),
                 accel=[1.0] * 7,
             ),
             settings.endpoint_topic: state,
@@ -263,6 +294,7 @@ def test_direct_controller_connects_and_previews_neutral_without_ros():
             preview = robot.move_to_neutral(duration=2)
             assert preview.execution is None
             assert preview.plan.end == (0.2,) * 7
+            assert preview.plan.max_velocity == velocity_limits
             assert not peer.requests
         assert not robot.is_connected
 

@@ -3,6 +3,8 @@ Neutral example routing and preview/execute behavior without ROS
 initialization.
 """
 
+# Numeric values are the expected CLI defaults and explicit overrides.
+# ruff: noqa: PLR2004
 from __future__ import annotations
 
 from types import SimpleNamespace
@@ -47,10 +49,22 @@ def test_default_preview_uses_only_public_arm_api(capsys):
     config = factory.call_args.args[0]
     assert not config.enable_gripper
     assert not config.motion.execute
+    assert config.motion.speed == 1.0
+    assert config.motion.max_accel == 0.3
     robot.move_to_neutral.assert_called_once_with(duration=None)
     robot.open_gripper.assert_not_called()
     robot.__exit__.assert_called_once()
     assert 'Preview only' in capsys.readouterr().out
+
+
+def test_explicit_lower_speed_remains_available():
+    robot = controller()
+    with patch.object(
+        move_neutral, 'SawyerController', return_value=robot
+    ) as factory:
+        assert move_neutral.main(['--speed', '0.2']) == 0
+    assert factory.call_args.args[0].motion.speed == 0.2
+    robot.move_to_neutral.assert_called_once_with(duration=None)
 
 
 def test_execution_replans_after_preview_and_reports_measurement(capsys):

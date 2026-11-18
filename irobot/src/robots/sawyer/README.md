@@ -7,6 +7,8 @@ Sawyer's existing Intera controller continues to run its native software.
 
 See the [file and function guide](IMPLEMENTATION_GUIDE.md) for what each part
 does and why, and [unfinished work](UNFINISHED_WORK.md) for remaining requirements.
+The [native topic map](TOPIC_MAP.md) lists Sawyer publications/subscriptions,
+driver handlers with source lines.
 
 ```text
 Python application ──┐
@@ -14,15 +16,12 @@ Python application ──┐
 ROS 2 Humble node ───┘
 ```
 
-**Physical qualification is blocked.** Unexpected arm movement occurred during
-an enable/reset recovery test with `ready=false`; the operator confirmed the
-cuff was released. The robot was software-stopped and disabled and now reports
-an error. After an operator restart, a guarded disable/enable retest again
-exceeded a tightened 0.005 rad envelope and latched software stop. Disable
-cleared homed; the safe homing/recovery procedure is unresolved. Do not
-automatically reset or retry enable. Head pan is deferred at the user's request. See the
-[checklist](DIRECT_DRIVER_PLAN.md), [capabilities](CAPABILITIES.md) and
-[validation evidence](VALIDATION.md) for passed, failed and pending work.
+The selected application scope is Python and ROS 2 Humble with an electric
+gripper and cameras. Head-pan and disable/recovery tests are excluded by
+request. Recorded hardware results and fault reports are not retained;
+implementation availability is not a hardware qualification claim.
+See the [plan](DIRECT_DRIVER_PLAN.md), [capability map](CAPABILITIES.md) and
+[validation guidance](VALIDATION.md).
 
 ## Install plain Python
 
@@ -63,7 +62,7 @@ config = SawyerConfig(
 with SawyerController(config) as robot:
     print(robot.get_status())
     print(robot.devices.robot_state())
-    # Once the controller fault is resolved and the arm is ready:
+    # Preview from fresh feedback; execution requires safe, ready conditions:
     # preview = robot.move_to_neutral()  # no movement
     # result = robot.move_to_neutral(execute=True)
 ```
@@ -84,7 +83,7 @@ Readiness is distinct from receipt of an enable acknowledgement.
 | `forward_kinematics`, `inverse_kinematics`, `configuration_collisions` | Model queries; no external obstacle-avoidance guarantee |
 | `move_relative`, `move_to_pose` | Cartesian planning; relative offsets in cm, pose in m |
 | `stream_joint_commands` | Finite position/velocity/torque/trajectory session with StreamOptions |
-| `move_native_joint_path`, `execute_native_trajectory`, `calibrate_arm` | Typed native actions and tool preconditions; native planning currently fails qualification |
+| `move_native_joint_path`, `execute_native_trajectory`, `calibrate_arm` | Typed native actions and tool preconditions |
 | `run_interaction` | Timed typed interaction command; confirmed activation/deactivation |
 | `calibrate_gripper`, `open_gripper`, `close_gripper`, `move_gripper`, `stop_gripper`, `start_gripper`, `reboot_gripper` | Explicit electric-gripper commands, ACK and measured completion where available |
 | `devices.read_io`, `write_io`, `register_io_callback`, `io_events` | Metadata-checked signal/port values, bounded events and drop counters |
@@ -93,27 +92,42 @@ Readiness is distinct from receipt of an enable acknowledgement.
 | `devices.diagnostics`, `transforms`, `inventory` | Diagnostics, fresh dynamic/retained static TF, graph/tool discovery |
 
 See the [operation ledger](CAPABILITY_LEDGER.json) for exact APIs and limits.
-The actual named endpoint is `right_hand`; `right_gripper_tip` is not exposed
-by the tested named-tip feedback/FK interface. Neutral defaults to
+Select a named endpoint supported by the controller; `right_hand` is the
+configured default. Neutral defaults to
 `/named_poses/right`; use `neutral_joints` to override. Set
 `enable_gripper=False` if the matching electric tool is absent.
 
 Torque, SDK trajectory mode and force/compliant interaction require
 `SawyerConfig(allow_unvalidated_modes=True)` for execution. This is an explicit
 experimental opt-in, not a qualification claim. Preview validation is available
-without it. A new 50 ms torque pulse, small moving trajectory and 100 ms compliant/0.05 N
-sessions passed bounded tests. Earlier torque exit failed. Native START and
-cancellation passed; GENERATE succeeded only after native START. Planning does
-not silently initialize control by moving the arm.
+without it. Planning does not silently initialize control by moving the arm.
 
 `main.py` and the saved-pose utility keep their existing preview/execute
-interfaces. Physical examples require fault resolution before use:
+interfaces. Physical examples require safe, ready operating conditions:
 
 ```bash
 python main.py                      # neutral preview, requires usable feedback
 python sawyer_saved_pose.py save    # read current joints
 python sawyer_saved_pose.py restore # preview saved pose
 ```
+
+The neutral example now defaults to `--speed 1.0`: each joint's published
+velocity limit is used as its own ceiling. The existing acceleration cap of
+0.3 rad/s² is retained; synchronized quintic timing and acceleration bounds can
+keep actual reference peaks below those ceilings. `--speed 0.1` still explicitly
+requests a slower move. Plain Python's default motion speed was already 1.0;
+an explicitly configured lower speed remains respected. The ROS 2 server keeps
+its separate startup speed setting (`--speed`, default 0.05).
+
+For a robot-free transport smoke check, install the test dependencies and run:
+
+```bash
+python -m tests.test_irobot.smoke_sawyer_runtime
+```
+
+This uses localhost TCPROS/XML-RPC peers and checks connection/neutral preview,
+service exchange, no command replay and master registration recovery. It does
+not require ROS or a physical robot.
 
 Read-only validation also records a stopped controller without attempting
 motion planning:
@@ -132,8 +146,13 @@ python -m irobot.src.robots.sawyer.examples.diagnose_direct \
   --report direct-diagnostics.json
 ```
 
-`validate_direct --execute` adds neutral, Cartesian and empty-gripper tests; do not use it while
-the current fault remains open. It never automatically clears the fault.
+The report includes per-joint homing states from `/robot/homing_states` alongside
+assembly, diagnostics, measured joints and input changes. It sends no homing
+command.
+
+`validate_direct --execute` adds neutral, Cartesian and empty-gripper tests.
+It requires the appropriate operating conditions and never automatically clears
+controller faults.
 
 ## Optional ROS 2 Humble server
 
@@ -209,10 +228,8 @@ included 32 MiB shared-memory transport profile in **server and clients**:
 export FASTRTPS_DEFAULT_PROFILES_FILE="$PWD/irobot/src/robots/sawyer/installation/fastdds-cameras.xml"
 ```
 
-The measured head frame is 4,096,000 bytes; Fast DDS's default segment is
-512 KiB. See the [Fast DDS shared-memory documentation](https://fast-dds.docs.eprosima.com/en/v2.6.11/fastdds/transport/shared_memory/shared_memory.html).
-One 60-second dual-camera/control run passed with this profile; indefinite
-memory stability and hard real-time scheduling are not established.
+The configured shared-memory segment must accommodate the selected image
+sizes and workload. See the [Fast DDS shared-memory documentation](https://fast-dds.docs.eprosima.com/en/v2.6.11/fastdds/transport/shared_memory/shared_memory.html).
 
 ## irobot / ros_sugar application template
 
@@ -220,7 +237,6 @@ memory stability and hard real-time scheduling are not established.
 and when to run them. `ros2.SawyerNode` exposes the driver to ROS 2 clients.
 `ros_sugar_component.SawyerComponent` is an optional application example with
 lifecycle connect/activate/cancel/cleanup; activation itself starts no motion.
-Choose one hardware owner. The adapter now passes real ros_sugar 0.8.2 configure/activate/timer/cancel/cleanup
-checks with a fake driver and real Humble DDS. It also has a task-handoff race
-regression. See [pinned optional installation and example](installation/ROS_SUGAR.md).
+Choose one hardware owner. The adapter has lifecycle, cancellation, cleanup
+and task-handoff regression tests using a fake driver and Humble DDS. See [pinned optional installation and example](installation/ROS_SUGAR.md).
 These framework checks are separate from physical motion qualification.

@@ -2,7 +2,7 @@
   "schema_version": 1,
   "target": "Intera 5.3.1 / SDK 5.3.0 / standard electric gripper",
   "full_sdk_qualified": false,
-  "release_state": "blocked: enable recovery fault; head pan deferred",
+  "release_state": "unqualified: hardware records are not retained",
   "scope": "Supported public hardware operations. Helper methods are classified separately; advertised private types are not assumed supported.",
   "source_files_sha256": {
     "intera_interface/src/intera_interface/__init__.py": "0ab4b24904b23d70b77f15cc74daca13ef728ca97b53bb4c100cdc63dda2f380",
@@ -45,7 +45,7 @@
       "feature": "identity",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.inventory",
         "get_parameter",
@@ -64,7 +64,6 @@
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
       "evidence": [
-        "validation/2026-11-13.json",
         "tests/test_irobot/test_sawyer_transport.py"
       ],
       "notes": ""
@@ -78,7 +77,7 @@
       "feature": "identity",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.inventory",
         "get_parameter",
@@ -97,7 +96,6 @@
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
       "evidence": [
-        "validation/2026-11-13.json",
         "tests/test_irobot/test_sawyer_transport.py"
       ],
       "notes": ""
@@ -111,7 +109,7 @@
       "feature": "camera_settings",
       "availability": "available",
       "software": "implemented",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.camera_state",
         "devices.configure_camera",
@@ -130,10 +128,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:peripheral_extended"
-      ],
-      "notes": "Streaming and hand flip/restoration verified. Other settings are implemented with metadata validation, not individually hardware-qualified."
+      "evidence": [],
+      "notes": "Settings require published metadata and explicit execution."
     },
     {
       "operation": "intera_interface.camera.Cameras.set_callback",
@@ -144,7 +140,7 @@
       "feature": "camera_frames",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.camera_frame",
         "devices.register_camera_callback",
@@ -165,10 +161,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:ros2_sustained"
-      ],
-      "notes": "Both full-resolution streams passed a 60-second concurrent command run. The new current-frame hand-camera gate also passed a strictly guarded post-fault read-only check."
+      "evidence": [],
+      "notes": "Reading a camera never implicitly starts its stream."
     },
     {
       "operation": "intera_interface.camera.Cameras.start_streaming",
@@ -179,7 +173,7 @@
       "feature": "camera_settings",
       "availability": "available",
       "software": "implemented",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.camera_state",
         "devices.configure_camera",
@@ -198,10 +192,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:peripheral_extended"
-      ],
-      "notes": "Streaming and hand flip/restoration verified. Other settings are implemented with metadata validation, not individually hardware-qualified."
+      "evidence": [],
+      "notes": "Settings require published metadata and explicit execution."
     },
     {
       "operation": "intera_interface.camera.Cameras.stop_streaming",
@@ -212,7 +204,7 @@
       "feature": "camera_settings",
       "availability": "available",
       "software": "implemented",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.camera_state",
         "devices.configure_camera",
@@ -231,10 +223,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:peripheral_extended"
-      ],
-      "notes": "Streaming and hand flip/restoration verified. Other settings are implemented with metadata validation, not individually hardware-qualified."
+      "evidence": [],
+      "notes": "Settings require published metadata and explicit execution."
     },
     {
       "operation": "intera_interface.camera.Cameras.get_exposure",
@@ -245,7 +235,7 @@
       "feature": "camera_settings",
       "availability": "available",
       "software": "implemented",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.camera_state",
         "devices.configure_camera",
@@ -264,10 +254,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:peripheral_extended"
-      ],
-      "notes": "Streaming and hand flip/restoration verified. Other settings are implemented with metadata validation, not individually hardware-qualified."
+      "evidence": [],
+      "notes": "Settings require published metadata and explicit execution."
     },
     {
       "operation": "intera_interface.camera.Cameras.get_gain",
@@ -278,7 +266,7 @@
       "feature": "camera_settings",
       "availability": "available",
       "software": "implemented",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.camera_state",
         "devices.configure_camera",
@@ -297,10 +285,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:peripheral_extended"
-      ],
-      "notes": "Streaming and hand flip/restoration verified. Other settings are implemented with metadata validation, not individually hardware-qualified."
+      "evidence": [],
+      "notes": "Settings require published metadata and explicit execution."
     },
     {
       "operation": "intera_interface.camera.Cameras.set_exposure",
@@ -311,7 +297,7 @@
       "feature": "camera_settings",
       "availability": "available",
       "software": "implemented",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.camera_state",
         "devices.configure_camera",
@@ -330,10 +316,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:peripheral_extended"
-      ],
-      "notes": "Streaming and hand flip/restoration verified. Other settings are implemented with metadata validation, not individually hardware-qualified."
+      "evidence": [],
+      "notes": "Settings require published metadata and explicit execution."
     },
     {
       "operation": "intera_interface.camera.Cameras.set_gain",
@@ -344,7 +328,7 @@
       "feature": "camera_settings",
       "availability": "available",
       "software": "implemented",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.camera_state",
         "devices.configure_camera",
@@ -363,10 +347,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:peripheral_extended"
-      ],
-      "notes": "Streaming and hand flip/restoration verified. Other settings are implemented with metadata validation, not individually hardware-qualified."
+      "evidence": [],
+      "notes": "Settings require published metadata and explicit execution."
     },
     {
       "operation": "intera_interface.camera.Cameras.set_cognex_strobe",
@@ -377,7 +359,7 @@
       "feature": "camera_settings",
       "availability": "available",
       "software": "implemented",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.camera_state",
         "devices.configure_camera",
@@ -396,10 +378,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:peripheral_extended"
-      ],
-      "notes": "Streaming and hand flip/restoration verified. Other settings are implemented with metadata validation, not individually hardware-qualified."
+      "evidence": [],
+      "notes": "Settings require published metadata and explicit execution."
     },
     {
       "operation": "intera_interface.clicksmart_plate.SimpleClickSmartGripper.is_ready",
@@ -408,7 +388,7 @@
       "line": 81,
       "id": "intera_interface.clicksmart_plate.SimpleClickSmartGripper.is_ready@81",
       "feature": "clicksmart",
-      "availability": "unattached",
+      "availability": "discovery_only",
       "software": "not_applicable",
       "hardware": "not_applicable",
       "python_api": [
@@ -426,7 +406,7 @@
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
       "evidence": [],
-      "notes": "The current tool is the standard electric gripper. ClickSmart activation/persistent reconfiguration is not simulated or sent to it."
+      "notes": "Discovery is available; activation and persistent configuration are not implemented."
     },
     {
       "operation": "intera_interface.clicksmart_plate.SimpleClickSmartGripper.needs_init",
@@ -435,7 +415,7 @@
       "line": 92,
       "id": "intera_interface.clicksmart_plate.SimpleClickSmartGripper.needs_init@92",
       "feature": "clicksmart",
-      "availability": "unattached",
+      "availability": "discovery_only",
       "software": "not_applicable",
       "hardware": "not_applicable",
       "python_api": [
@@ -453,7 +433,7 @@
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
       "evidence": [],
-      "notes": "The current tool is the standard electric gripper. ClickSmart activation/persistent reconfiguration is not simulated or sent to it."
+      "notes": "Discovery is available; activation and persistent configuration are not implemented."
     },
     {
       "operation": "intera_interface.clicksmart_plate.SimpleClickSmartGripper.initialize",
@@ -462,7 +442,7 @@
       "line": 103,
       "id": "intera_interface.clicksmart_plate.SimpleClickSmartGripper.initialize@103",
       "feature": "clicksmart",
-      "availability": "unattached",
+      "availability": "discovery_only",
       "software": "not_applicable",
       "hardware": "not_applicable",
       "python_api": [
@@ -480,7 +460,7 @@
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
       "evidence": [],
-      "notes": "The current tool is the standard electric gripper. ClickSmart activation/persistent reconfiguration is not simulated or sent to it."
+      "notes": "Discovery is available; activation and persistent configuration are not implemented."
     },
     {
       "operation": "intera_interface.clicksmart_plate.SimpleClickSmartGripper.get_ee_signal_value",
@@ -489,7 +469,7 @@
       "line": 122,
       "id": "intera_interface.clicksmart_plate.SimpleClickSmartGripper.get_ee_signal_value@122",
       "feature": "clicksmart",
-      "availability": "unattached",
+      "availability": "discovery_only",
       "software": "not_applicable",
       "hardware": "not_applicable",
       "python_api": [
@@ -507,7 +487,7 @@
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
       "evidence": [],
-      "notes": "The current tool is the standard electric gripper. ClickSmart activation/persistent reconfiguration is not simulated or sent to it."
+      "notes": "Discovery is available; activation and persistent configuration are not implemented."
     },
     {
       "operation": "intera_interface.clicksmart_plate.SimpleClickSmartGripper.set_ee_signal_value",
@@ -516,7 +496,7 @@
       "line": 143,
       "id": "intera_interface.clicksmart_plate.SimpleClickSmartGripper.set_ee_signal_value@143",
       "feature": "clicksmart",
-      "availability": "unattached",
+      "availability": "discovery_only",
       "software": "not_applicable",
       "hardware": "not_applicable",
       "python_api": [
@@ -534,7 +514,7 @@
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
       "evidence": [],
-      "notes": "The current tool is the standard electric gripper. ClickSmart activation/persistent reconfiguration is not simulated or sent to it."
+      "notes": "Discovery is available; activation and persistent configuration are not implemented."
     },
     {
       "operation": "intera_interface.clicksmart_plate.SimpleClickSmartGripper.get_ee_signals",
@@ -543,7 +523,7 @@
       "line": 165,
       "id": "intera_interface.clicksmart_plate.SimpleClickSmartGripper.get_ee_signals@165",
       "feature": "clicksmart",
-      "availability": "unattached",
+      "availability": "discovery_only",
       "software": "not_applicable",
       "hardware": "not_applicable",
       "python_api": [
@@ -561,7 +541,7 @@
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
       "evidence": [],
-      "notes": "The current tool is the standard electric gripper. ClickSmart activation/persistent reconfiguration is not simulated or sent to it."
+      "notes": "Discovery is available; activation and persistent configuration are not implemented."
     },
     {
       "operation": "intera_interface.clicksmart_plate.SimpleClickSmartGripper.get_all_ee_signals",
@@ -570,7 +550,7 @@
       "line": 185,
       "id": "intera_interface.clicksmart_plate.SimpleClickSmartGripper.get_all_ee_signals@185",
       "feature": "clicksmart",
-      "availability": "unattached",
+      "availability": "discovery_only",
       "software": "not_applicable",
       "hardware": "not_applicable",
       "python_api": [
@@ -588,7 +568,7 @@
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
       "evidence": [],
-      "notes": "The current tool is the standard electric gripper. ClickSmart activation/persistent reconfiguration is not simulated or sent to it."
+      "notes": "Discovery is available; activation and persistent configuration are not implemented."
     },
     {
       "operation": "intera_interface.clicksmart_plate.SimpleClickSmartGripper.get_all_signals",
@@ -597,7 +577,7 @@
       "line": 207,
       "id": "intera_interface.clicksmart_plate.SimpleClickSmartGripper.get_all_signals@207",
       "feature": "clicksmart",
-      "availability": "unattached",
+      "availability": "discovery_only",
       "software": "not_applicable",
       "hardware": "not_applicable",
       "python_api": [
@@ -615,7 +595,7 @@
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
       "evidence": [],
-      "notes": "The current tool is the standard electric gripper. ClickSmart activation/persistent reconfiguration is not simulated or sent to it."
+      "notes": "Discovery is available; activation and persistent configuration are not implemented."
     },
     {
       "operation": "intera_interface.clicksmart_plate.SimpleClickSmartGripper.list_endpoint_names",
@@ -624,7 +604,7 @@
       "line": 216,
       "id": "intera_interface.clicksmart_plate.SimpleClickSmartGripper.list_endpoint_names@216",
       "feature": "clicksmart",
-      "availability": "unattached",
+      "availability": "discovery_only",
       "software": "not_applicable",
       "hardware": "not_applicable",
       "python_api": [
@@ -642,7 +622,7 @@
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
       "evidence": [],
-      "notes": "The current tool is the standard electric gripper. ClickSmart activation/persistent reconfiguration is not simulated or sent to it."
+      "notes": "Discovery is available; activation and persistent configuration are not implemented."
     },
     {
       "operation": "intera_interface.clicksmart_plate.SimpleClickSmartGripper.get_endpoint_info",
@@ -651,7 +631,7 @@
       "line": 228,
       "id": "intera_interface.clicksmart_plate.SimpleClickSmartGripper.get_endpoint_info@228",
       "feature": "clicksmart",
-      "availability": "unattached",
+      "availability": "discovery_only",
       "software": "not_applicable",
       "hardware": "not_applicable",
       "python_api": [
@@ -669,7 +649,7 @@
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
       "evidence": [],
-      "notes": "The current tool is the standard electric gripper. ClickSmart activation/persistent reconfiguration is not simulated or sent to it."
+      "notes": "Discovery is available; activation and persistent configuration are not implemented."
     },
     {
       "operation": "intera_interface.clicksmart_plate.SimpleClickSmartGripper.send_configuration",
@@ -678,7 +658,7 @@
       "line": 250,
       "id": "intera_interface.clicksmart_plate.SimpleClickSmartGripper.send_configuration@250",
       "feature": "clicksmart",
-      "availability": "unattached",
+      "availability": "discovery_only",
       "software": "not_applicable",
       "hardware": "not_applicable",
       "python_api": [
@@ -696,7 +676,7 @@
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
       "evidence": [],
-      "notes": "The current tool is the standard electric gripper. ClickSmart activation/persistent reconfiguration is not simulated or sent to it."
+      "notes": "Discovery is available; activation and persistent configuration are not implemented."
     },
     {
       "operation": "intera_interface.cuff.Cuff.lower_button",
@@ -707,7 +687,7 @@
       "feature": "io_read",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.read_io",
         "devices.io_state",
@@ -726,9 +706,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:extended_read"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -740,7 +718,7 @@
       "feature": "io_read",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.read_io",
         "devices.io_state",
@@ -759,9 +737,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:extended_read"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -773,7 +749,7 @@
       "feature": "io_read",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.read_io",
         "devices.io_state",
@@ -792,9 +768,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:extended_read"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -806,7 +780,7 @@
       "feature": "io_callbacks",
       "availability": "available",
       "software": "implemented",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.register_io_callback",
         "devices.deregister_io_callback",
@@ -825,11 +799,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-continuation.json:fault_inputs_readonly",
-        "validation/2026-11-13-continuation.json:inputs_live_comparison"
-      ],
-      "notes": "Synthetic edges/callbacks pass. Operator confirmed first input actions, but two live recordings captured unchanged values on IO and legacy digital/analog interfaces; operator unavailable for another repeat. Physical transitions remain unverified."
+      "evidence": [],
+      "notes": "Callbacks run while polling; event queues are bounded."
     },
     {
       "operation": "intera_interface.cuff.Cuff.deregister_callback",
@@ -840,7 +811,7 @@
       "feature": "io_callbacks",
       "availability": "available",
       "software": "implemented",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.register_io_callback",
         "devices.deregister_io_callback",
@@ -859,11 +830,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-continuation.json:fault_inputs_readonly",
-        "validation/2026-11-13-continuation.json:inputs_live_comparison"
-      ],
-      "notes": "Synthetic edges/callbacks pass. Operator confirmed first input actions, but two live recordings captured unchanged values on IO and legacy digital/analog interfaces; operator unavailable for another repeat. Physical transitions remain unverified."
+      "evidence": [],
+      "notes": "Callbacks run while polling; event queues are bounded."
     },
     {
       "operation": "intera_interface.digital_io.DigitalIO.is_output",
@@ -874,7 +842,7 @@
       "feature": "digital",
       "availability": "available",
       "software": "implemented",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.digital_state",
         "devices.set_digital_output"
@@ -893,7 +861,7 @@
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
       "evidence": [],
-      "notes": "Camera-power state/permission read. Output power cycling is not physically qualified."
+      "notes": "Writes require published device permissions and matching acknowledgements."
     },
     {
       "operation": "intera_interface.digital_io.DigitalIO.state",
@@ -904,7 +872,7 @@
       "feature": "digital",
       "availability": "available",
       "software": "implemented",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.digital_state",
         "devices.set_digital_output"
@@ -923,7 +891,7 @@
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
       "evidence": [],
-      "notes": "Camera-power state/permission read. Output power cycling is not physically qualified."
+      "notes": "Writes require published device permissions and matching acknowledgements."
     },
     {
       "operation": "intera_interface.digital_io.DigitalIO.state",
@@ -934,7 +902,7 @@
       "feature": "digital",
       "availability": "available",
       "software": "implemented",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.digital_state",
         "devices.set_digital_output"
@@ -953,7 +921,7 @@
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
       "evidence": [],
-      "notes": "Camera-power state/permission read. Output power cycling is not physically qualified."
+      "notes": "Writes require published device permissions and matching acknowledgements."
     },
     {
       "operation": "intera_interface.digital_io.DigitalIO.set_output",
@@ -964,7 +932,7 @@
       "feature": "digital",
       "availability": "available",
       "software": "implemented",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.digital_state",
         "devices.set_digital_output"
@@ -983,7 +951,7 @@
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
       "evidence": [],
-      "notes": "Camera-power state/permission read. Output power cycling is not physically qualified."
+      "notes": "Writes require published device permissions and matching acknowledgements."
     },
     {
       "operation": "intera_interface.gripper.Gripper.reboot",
@@ -994,7 +962,7 @@
       "feature": "gripper_recovery",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "start_gripper",
         "reboot_gripper"
@@ -1011,11 +979,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "cancel requests go=false; calibration never automatic",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-continuation.json:gripper_recovery",
-        "validation/2026-11-13-continuation.json:gripper_recovery_v2"
-      ],
-      "notes": "Empty-tool cancellation/stop/start, reboot, loss of calibration, explicit recalibration and opening passed. Original speed/dead-zone settings restored."
+      "evidence": [],
+      "notes": "Reboot and recalibration are separate explicit operations."
     },
     {
       "operation": "intera_interface.gripper.Gripper.stop",
@@ -1026,7 +991,7 @@
       "feature": "gripper_motion",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "move_gripper",
         "open_gripper",
@@ -1049,10 +1014,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "cancel event requests go=false; no automatic opening",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13.json",
-        "validation/2026-11-13-extended.json:peripheral_extended"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -1064,7 +1026,7 @@
       "feature": "gripper_recovery",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "start_gripper",
         "reboot_gripper"
@@ -1081,11 +1043,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "cancel requests go=false; calibration never automatic",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-continuation.json:gripper_recovery",
-        "validation/2026-11-13-continuation.json:gripper_recovery_v2"
-      ],
-      "notes": "Empty-tool cancellation/stop/start, reboot, loss of calibration, explicit recalibration and opening passed. Original speed/dead-zone settings restored."
+      "evidence": [],
+      "notes": "Reboot and recalibration are separate explicit operations."
     },
     {
       "operation": "intera_interface.gripper.Gripper.open",
@@ -1096,7 +1055,7 @@
       "feature": "gripper_motion",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "move_gripper",
         "open_gripper",
@@ -1119,10 +1078,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "cancel event requests go=false; no automatic opening",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13.json",
-        "validation/2026-11-13-extended.json:peripheral_extended"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -1134,7 +1090,7 @@
       "feature": "gripper_motion",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "move_gripper",
         "open_gripper",
@@ -1157,10 +1113,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "cancel event requests go=false; no automatic opening",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13.json",
-        "validation/2026-11-13-extended.json:peripheral_extended"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -1172,7 +1125,7 @@
       "feature": "gripper_read",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "gripper_state",
         "devices.read_io"
@@ -1189,9 +1142,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:peripheral_extended"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -1203,7 +1154,7 @@
       "feature": "gripper_read",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "gripper_state",
         "devices.read_io"
@@ -1220,9 +1171,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:peripheral_extended"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -1234,7 +1183,7 @@
       "feature": "gripper_read",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "gripper_state",
         "devices.read_io"
@@ -1251,9 +1200,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:peripheral_extended"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -1265,7 +1212,7 @@
       "feature": "gripper_read",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "gripper_state",
         "devices.read_io"
@@ -1282,9 +1229,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:peripheral_extended"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -1296,7 +1241,7 @@
       "feature": "gripper_read",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "gripper_state",
         "devices.read_io"
@@ -1313,9 +1258,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:peripheral_extended"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -1327,7 +1270,7 @@
       "feature": "gripper_motion",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "move_gripper",
         "open_gripper",
@@ -1350,10 +1293,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "cancel event requests go=false; no automatic opening",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13.json",
-        "validation/2026-11-13-extended.json:peripheral_extended"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -1365,7 +1305,7 @@
       "feature": "gripper_read",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "gripper_state",
         "devices.read_io"
@@ -1382,9 +1322,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:peripheral_extended"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -1396,7 +1334,7 @@
       "feature": "gripper_motion",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "move_gripper",
         "open_gripper",
@@ -1419,10 +1357,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "cancel event requests go=false; no automatic opening",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13.json",
-        "validation/2026-11-13-extended.json:peripheral_extended"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -1434,7 +1369,7 @@
       "feature": "gripper_settings",
       "availability": "available",
       "software": "implemented",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.configure_gripper"
       ],
@@ -1451,11 +1386,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-continuation.json:gripper_recovery",
-        "validation/2026-11-13-continuation.json:gripper_recovery_v2"
-      ],
-      "notes": "Dead-zone and speed changes/restoration physically verified. At slow speed with 0.002 m dead zone, opening stopped just outside the 0.002 m arrival tolerance; using 0.001 m dead zone passed. Payload changes remain unqualified."
+      "evidence": [],
+      "notes": "Acknowledgement and measured settings are separate results."
     },
     {
       "operation": "intera_interface.gripper.Gripper.set_cmd_velocity",
@@ -1466,7 +1398,7 @@
       "feature": "gripper_settings",
       "availability": "available",
       "software": "implemented",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.configure_gripper"
       ],
@@ -1483,11 +1415,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-continuation.json:gripper_recovery",
-        "validation/2026-11-13-continuation.json:gripper_recovery_v2"
-      ],
-      "notes": "Dead-zone and speed changes/restoration physically verified. At slow speed with 0.002 m dead zone, opening stopped just outside the 0.002 m arrival tolerance; using 0.001 m dead zone passed. Payload changes remain unqualified."
+      "evidence": [],
+      "notes": "Acknowledgement and measured settings are separate results."
     },
     {
       "operation": "intera_interface.gripper.Gripper.get_cmd_velocity",
@@ -1498,7 +1427,7 @@
       "feature": "gripper_read",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "gripper_state",
         "devices.read_io"
@@ -1515,9 +1444,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:peripheral_extended"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -1529,7 +1456,7 @@
       "feature": "gripper_read",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "gripper_state",
         "devices.read_io"
@@ -1546,9 +1473,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:peripheral_extended"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -1560,7 +1485,7 @@
       "feature": "gripper_settings",
       "availability": "available",
       "software": "implemented",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.configure_gripper"
       ],
@@ -1577,11 +1502,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-continuation.json:gripper_recovery",
-        "validation/2026-11-13-continuation.json:gripper_recovery_v2"
-      ],
-      "notes": "Dead-zone and speed changes/restoration physically verified. At slow speed with 0.002 m dead zone, opening stopped just outside the 0.002 m arrival tolerance; using 0.001 m dead zone passed. Payload changes remain unqualified."
+      "evidence": [],
+      "notes": "Acknowledgement and measured settings are separate results."
     },
     {
       "operation": "intera_interface.gripper.Gripper.get_object_weight",
@@ -1592,7 +1514,7 @@
       "feature": "gripper_read",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "gripper_state",
         "devices.read_io"
@@ -1609,9 +1531,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:peripheral_extended"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -1623,7 +1543,7 @@
       "feature": "gripper_settings",
       "availability": "available",
       "software": "implemented",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.configure_gripper"
       ],
@@ -1640,11 +1560,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-continuation.json:gripper_recovery",
-        "validation/2026-11-13-continuation.json:gripper_recovery_v2"
-      ],
-      "notes": "Dead-zone and speed changes/restoration physically verified. At slow speed with 0.002 m dead zone, opening stopped just outside the 0.002 m arrival tolerance; using 0.001 m dead zone passed. Payload changes remain unqualified."
+      "evidence": [],
+      "notes": "Acknowledgement and measured settings are separate results."
     },
     {
       "operation": "intera_interface.gripper.Gripper.get_dead_zone",
@@ -1655,7 +1572,7 @@
       "feature": "gripper_read",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "gripper_state",
         "devices.read_io"
@@ -1672,9 +1589,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:peripheral_extended"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -1713,7 +1628,7 @@
       "feature": "identity",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.inventory",
         "get_parameter",
@@ -1732,7 +1647,6 @@
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
       "evidence": [
-        "validation/2026-11-13.json",
         "tests/test_irobot/test_sawyer_transport.py"
       ],
       "notes": ""
@@ -1746,7 +1660,7 @@
       "feature": "head_pan",
       "availability": "available",
       "software": "implemented_not_qualified",
-      "hardware": "deferred_by_user",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.head_state",
         "devices.move_head"
@@ -1761,10 +1675,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13.json"
-      ],
-      "notes": "User explicitly deferred head-pan work; no new head-pan testing or ROS 2 pan endpoint added."
+      "evidence": [],
+      "notes": "Head-pan testing is deferred by user request."
     },
     {
       "operation": "intera_interface.head.Head.pan_mode",
@@ -1775,7 +1687,7 @@
       "feature": "head_pan",
       "availability": "available",
       "software": "implemented_not_qualified",
-      "hardware": "deferred_by_user",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.head_state",
         "devices.move_head"
@@ -1790,10 +1702,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13.json"
-      ],
-      "notes": "User explicitly deferred head-pan work; no new head-pan testing or ROS 2 pan endpoint added."
+      "evidence": [],
+      "notes": "Head-pan testing is deferred by user request."
     },
     {
       "operation": "intera_interface.head.Head.pan",
@@ -1804,7 +1714,7 @@
       "feature": "head_pan",
       "availability": "available",
       "software": "implemented_not_qualified",
-      "hardware": "deferred_by_user",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.head_state",
         "devices.move_head"
@@ -1819,10 +1729,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13.json"
-      ],
-      "notes": "User explicitly deferred head-pan work; no new head-pan testing or ROS 2 pan endpoint added."
+      "evidence": [],
+      "notes": "Head-pan testing is deferred by user request."
     },
     {
       "operation": "intera_interface.head.Head.panning",
@@ -1833,7 +1741,7 @@
       "feature": "head_pan",
       "availability": "available",
       "software": "implemented_not_qualified",
-      "hardware": "deferred_by_user",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.head_state",
         "devices.move_head"
@@ -1848,10 +1756,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13.json"
-      ],
-      "notes": "User explicitly deferred head-pan work; no new head-pan testing or ROS 2 pan endpoint added."
+      "evidence": [],
+      "notes": "Head-pan testing is deferred by user request."
     },
     {
       "operation": "intera_interface.head.Head.set_pan",
@@ -1862,7 +1768,7 @@
       "feature": "head_pan",
       "availability": "available",
       "software": "implemented_not_qualified",
-      "hardware": "deferred_by_user",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.head_state",
         "devices.move_head"
@@ -1877,10 +1783,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13.json"
-      ],
-      "notes": "User explicitly deferred head-pan work; no new head-pan testing or ROS 2 pan endpoint added."
+      "evidence": [],
+      "notes": "Head-pan testing is deferred by user request."
     },
     {
       "operation": "intera_interface.head_display.HeadDisplay.display_image",
@@ -1891,7 +1795,7 @@
       "feature": "display",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.display_image"
       ],
@@ -1906,10 +1810,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:display_inputs"
-      ],
-      "notes": "Test image published and operator confirmed panel visibility. Button/wheel edges were not captured in the recording interval."
+      "evidence": [],
+      "notes": "Image publication is an explicit operation."
     },
     {
       "operation": "intera_interface.joint_limits.JointLimits.joint_position_lower_limits",
@@ -1920,7 +1822,7 @@
       "feature": "limits",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "joint_limits",
         "joint_effort_limits",
@@ -1939,9 +1841,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:extended_read"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -1953,7 +1853,7 @@
       "feature": "limits",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "joint_limits",
         "joint_effort_limits",
@@ -1972,9 +1872,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:extended_read"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -1986,7 +1884,7 @@
       "feature": "limits",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "joint_limits",
         "joint_effort_limits",
@@ -2005,9 +1903,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:extended_read"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -2019,7 +1915,7 @@
       "feature": "limits",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "joint_limits",
         "joint_effort_limits",
@@ -2038,9 +1934,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:extended_read"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -2052,7 +1946,7 @@
       "feature": "limits",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "joint_limits",
         "joint_effort_limits",
@@ -2071,9 +1965,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:extended_read"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -2085,7 +1977,7 @@
       "feature": "limits",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "joint_limits",
         "joint_effort_limits",
@@ -2104,9 +1996,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:extended_read"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -2118,7 +2008,7 @@
       "feature": "limits",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "joint_limits",
         "joint_effort_limits",
@@ -2137,9 +2027,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:extended_read"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -2151,7 +2039,7 @@
       "feature": "limits",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "joint_limits",
         "joint_effort_limits",
@@ -2170,9 +2058,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:extended_read"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -2184,7 +2070,7 @@
       "feature": "limits",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "joint_limits",
         "joint_effort_limits",
@@ -2203,9 +2089,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:extended_read"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -2217,7 +2101,7 @@
       "feature": "limits",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "joint_limits",
         "joint_effort_limits",
@@ -2236,9 +2120,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:extended_read"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -2250,7 +2132,7 @@
       "feature": "limits",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "joint_limits",
         "joint_effort_limits",
@@ -2269,9 +2151,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:extended_read"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -2283,7 +2163,7 @@
       "feature": "limits",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "joint_limits",
         "joint_effort_limits",
@@ -2302,9 +2182,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:extended_read"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -2316,7 +2194,7 @@
       "feature": "limits",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "joint_limits",
         "joint_effort_limits",
@@ -2335,9 +2213,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:extended_read"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -2349,7 +2225,7 @@
       "feature": "limits",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "joint_limits",
         "joint_effort_limits",
@@ -2368,9 +2244,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:extended_read"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -2382,7 +2256,7 @@
       "feature": "limits",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "joint_limits",
         "joint_effort_limits",
@@ -2401,9 +2275,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:extended_read"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -2415,7 +2287,7 @@
       "feature": "lights",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.set_light",
         "devices.read_io"
@@ -2432,10 +2304,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:lights_lifecycle"
-      ],
-      "notes": "The public SDK documents these writes despite their direction metadata. All six toggled, acknowledged, measured and restored."
+      "evidence": [],
+      "notes": "The public SDK documents these writes despite direction metadata."
     },
     {
       "operation": "intera_interface.lights.Lights.set_light_state",
@@ -2446,7 +2316,7 @@
       "feature": "lights",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.set_light",
         "devices.read_io"
@@ -2463,10 +2333,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:lights_lifecycle"
-      ],
-      "notes": "The public SDK documents these writes despite their direction metadata. All six toggled, acknowledged, measured and restored."
+      "evidence": [],
+      "notes": "The public SDK documents these writes despite direction metadata."
     },
     {
       "operation": "intera_interface.lights.Lights.get_light_state",
@@ -2477,7 +2345,7 @@
       "feature": "lights",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.set_light",
         "devices.read_io"
@@ -2494,10 +2362,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:lights_lifecycle"
-      ],
-      "notes": "The public SDK documents these writes despite their direction metadata. All six toggled, acknowledged, measured and restored."
+      "evidence": [],
+      "notes": "The public SDK documents these writes despite direction metadata."
     },
     {
       "operation": "intera_interface.limb.Limb.has_collided",
@@ -2508,7 +2374,7 @@
       "feature": "robot_state",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "get_status",
         "devices.robot_state"
@@ -2525,9 +2391,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:stopped_diagnostic"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -2539,7 +2403,7 @@
       "feature": "identity",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.inventory",
         "get_parameter",
@@ -2558,7 +2422,6 @@
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
       "evidence": [
-        "validation/2026-11-13.json",
         "tests/test_irobot/test_sawyer_transport.py"
       ],
       "notes": ""
@@ -2572,7 +2435,7 @@
       "feature": "joints",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "joint_positions",
         "joint_velocities",
@@ -2589,9 +2452,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:extended_read"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -2603,7 +2464,7 @@
       "feature": "joints",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "joint_positions",
         "joint_velocities",
@@ -2620,9 +2481,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:extended_read"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -2634,7 +2493,7 @@
       "feature": "joints",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "joint_positions",
         "joint_velocities",
@@ -2651,9 +2510,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:extended_read"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -2665,7 +2522,7 @@
       "feature": "joints",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "joint_positions",
         "joint_velocities",
@@ -2682,9 +2539,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:extended_read"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -2696,7 +2551,7 @@
       "feature": "joints",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "joint_positions",
         "joint_velocities",
@@ -2713,9 +2568,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:extended_read"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -2727,7 +2580,7 @@
       "feature": "joints",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "joint_positions",
         "joint_velocities",
@@ -2744,9 +2597,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:extended_read"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -2758,7 +2609,7 @@
       "feature": "joints",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "joint_positions",
         "joint_velocities",
@@ -2775,9 +2626,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:extended_read"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -2789,7 +2638,7 @@
       "feature": "endpoint",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "endpoint_pose",
         "endpoint_velocity",
@@ -2812,9 +2661,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:extended_read"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -2826,7 +2673,7 @@
       "feature": "endpoint",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "endpoint_pose",
         "endpoint_velocity",
@@ -2849,9 +2696,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:extended_read"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -2863,7 +2708,7 @@
       "feature": "endpoint",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "endpoint_pose",
         "endpoint_velocity",
@@ -2886,9 +2731,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:extended_read"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -2900,7 +2743,7 @@
       "feature": "endpoint",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "endpoint_pose",
         "endpoint_velocity",
@@ -2923,9 +2766,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:extended_read"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -2937,7 +2778,7 @@
       "feature": "joint_stream",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "stream_joint_commands (position/velocity)",
         "StreamOptions"
@@ -2955,10 +2796,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "session cancellation, ROS 2 source-age/sequence lease, robot-side watchdog",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:process_watchdog",
-        "validation/2026-11-13-extended.json:ros2_sustained"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -2970,7 +2808,7 @@
       "feature": "joint_stream",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "stream_joint_commands (position/velocity)",
         "StreamOptions"
@@ -2988,10 +2826,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "session cancellation, ROS 2 source-age/sequence lease, robot-side watchdog",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:process_watchdog",
-        "validation/2026-11-13-extended.json:ros2_sustained"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -3003,7 +2838,7 @@
       "feature": "joint_stream",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "stream_joint_commands (position/velocity)",
         "StreamOptions"
@@ -3021,10 +2856,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "session cancellation, ROS 2 source-age/sequence lease, robot-side watchdog",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:process_watchdog",
-        "validation/2026-11-13-extended.json:ros2_sustained"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -3036,7 +2868,7 @@
       "feature": "advanced_trajectory",
       "availability": "available",
       "software": "experimental",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "stream_joint_commands (trajectory)"
       ],
@@ -3051,10 +2883,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "direct measured-position hold",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-continuation.json:modes_recovery"
-      ],
-      "notes": "A 0.8 s, 0.001 rad moving cycle passed with 79 commands and a 0.005 rad envelope. Earlier stationary speed-envelope abort retained. Reduced vendor collision handling and broader motion remain unqualified; experimental opt-in retained."
+      "evidence": [],
+      "notes": "Experimental execution requires explicit opt-in."
     },
     {
       "operation": "intera_interface.limb.Limb.set_joint_positions",
@@ -3065,7 +2895,7 @@
       "feature": "joint_stream",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "stream_joint_commands (position/velocity)",
         "StreamOptions"
@@ -3083,10 +2913,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "session cancellation, ROS 2 source-age/sequence lease, robot-side watchdog",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:process_watchdog",
-        "validation/2026-11-13-extended.json:ros2_sustained"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -3098,7 +2925,7 @@
       "feature": "joint_stream",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "stream_joint_commands (position/velocity)",
         "StreamOptions"
@@ -3116,10 +2943,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "session cancellation, ROS 2 source-age/sequence lease, robot-side watchdog",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:process_watchdog",
-        "validation/2026-11-13-extended.json:ros2_sustained"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -3131,7 +2955,7 @@
       "feature": "torque",
       "availability": "available",
       "software": "experimental",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "stream_joint_commands (torque)"
       ],
@@ -3146,11 +2970,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "direct measured-position exit; no command after stopped/disabled state",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:torque_position_exit",
-        "validation/2026-11-13-continuation.json:modes_recovery"
-      ],
-      "notes": "Earlier 150 ms test exceeded the 0.01 rad exit envelope. After controller restart, a 50 ms 0.02 Nm damped pulse passed a 0.005 rad envelope (0.003466 rad observed after exit). Remains experimental; broader torque operation is not qualified."
+      "evidence": [],
+      "notes": "Experimental execution requires explicit opt-in."
     },
     {
       "operation": "intera_interface.limb.Limb.move_to_neutral",
@@ -3161,7 +2982,7 @@
       "feature": "joint_motion",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "move_to_neutral",
         "move_to_joints",
@@ -3180,10 +3001,11 @@
       "cancellation": "cancel event or stop(); zero velocity then fresh measured-position hold while enabled",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
       "evidence": [
-        "validation/2026-11-13.json",
-        "tests/test_irobot/test_sawyer_control.py"
+        "tests/test_irobot/test_sawyer_control.py",
+        "tests/test_irobot/test_sawyer_neutral_example.py",
+        "tests/test_irobot/test_sawyer_transport.py"
       ],
-      "notes": ""
+      "notes": "Neutral velocity ceilings and acceleration bounds remain configurable."
     },
     {
       "operation": "intera_interface.limb.Limb.move_to_joint_positions",
@@ -3194,7 +3016,7 @@
       "feature": "joint_motion",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "move_to_neutral",
         "move_to_joints",
@@ -3213,10 +3035,11 @@
       "cancellation": "cancel event or stop(); zero velocity then fresh measured-position hold while enabled",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
       "evidence": [
-        "validation/2026-11-13.json",
-        "tests/test_irobot/test_sawyer_control.py"
+        "tests/test_irobot/test_sawyer_control.py",
+        "tests/test_irobot/test_sawyer_neutral_example.py",
+        "tests/test_irobot/test_sawyer_transport.py"
       ],
-      "notes": ""
+      "notes": "Neutral velocity ceilings and acceleration bounds remain configurable."
     },
     {
       "operation": "intera_interface.limb.Limb.ik_request",
@@ -3227,7 +3050,7 @@
       "feature": "kinematics",
       "availability": "available",
       "software": "implemented",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "forward_kinematics",
         "inverse_kinematics",
@@ -3250,11 +3073,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "motion stop/cancel; bounded model-service calls",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13.json",
-        "validation/2026-11-13-extended.json:ros2_extended_hardware"
-      ],
-      "notes": "FK/IK and relative Cartesian motion passed. New collision-query/public full-pose surfaces have software coverage; physical repeats are blocked."
+      "evidence": [],
+      "notes": "Model queries do not execute a Cartesian movement."
     },
     {
       "operation": "intera_interface.limb.Limb.fk_request",
@@ -3265,7 +3085,7 @@
       "feature": "kinematics",
       "availability": "available",
       "software": "implemented",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "forward_kinematics",
         "inverse_kinematics",
@@ -3288,11 +3108,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "motion stop/cancel; bounded model-service calls",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13.json",
-        "validation/2026-11-13-extended.json:ros2_extended_hardware"
-      ],
-      "notes": "FK/IK and relative Cartesian motion passed. New collision-query/public full-pose surfaces have software coverage; physical repeats are blocked."
+      "evidence": [],
+      "notes": "Model queries do not execute a Cartesian movement."
     },
     {
       "operation": "intera_interface.limb.Limb.joint_angles_to_cartesian_pose",
@@ -3303,7 +3120,7 @@
       "feature": "kinematics",
       "availability": "available",
       "software": "implemented",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "forward_kinematics",
         "inverse_kinematics",
@@ -3326,11 +3143,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "motion stop/cancel; bounded model-service calls",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13.json",
-        "validation/2026-11-13-extended.json:ros2_extended_hardware"
-      ],
-      "notes": "FK/IK and relative Cartesian motion passed. New collision-query/public full-pose surfaces have software coverage; physical repeats are blocked."
+      "evidence": [],
+      "notes": "Model queries do not execute a Cartesian movement."
     },
     {
       "operation": "intera_interface.limb.Limb.fk_request_in_collision",
@@ -3341,7 +3155,7 @@
       "feature": "kinematics",
       "availability": "available",
       "software": "implemented",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "forward_kinematics",
         "inverse_kinematics",
@@ -3364,11 +3178,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "motion stop/cancel; bounded model-service calls",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13.json",
-        "validation/2026-11-13-extended.json:ros2_extended_hardware"
-      ],
-      "notes": "FK/IK and relative Cartesian motion passed. New collision-query/public full-pose surfaces have software coverage; physical repeats are blocked."
+      "evidence": [],
+      "notes": "Model queries do not execute a Cartesian movement."
     },
     {
       "operation": "intera_interface.navigator.Navigator.list_all_items",
@@ -3379,7 +3190,7 @@
       "feature": "io_read",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.read_io",
         "devices.io_state",
@@ -3398,9 +3209,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:extended_read"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -3412,7 +3221,7 @@
       "feature": "io_read",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.read_io",
         "devices.io_state",
@@ -3431,9 +3240,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:extended_read"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -3445,7 +3252,7 @@
       "feature": "io_read",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.read_io",
         "devices.io_state",
@@ -3464,9 +3271,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:extended_read"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -3501,7 +3306,7 @@
       "feature": "io_callbacks",
       "availability": "available",
       "software": "implemented",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.register_io_callback",
         "devices.deregister_io_callback",
@@ -3520,11 +3325,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-continuation.json:fault_inputs_readonly",
-        "validation/2026-11-13-continuation.json:inputs_live_comparison"
-      ],
-      "notes": "Synthetic edges/callbacks pass. Operator confirmed first input actions, but two live recordings captured unchanged values on IO and legacy digital/analog interfaces; operator unavailable for another repeat. Physical transitions remain unverified."
+      "evidence": [],
+      "notes": "Callbacks run while polling; event queues are bounded."
     },
     {
       "operation": "intera_interface.navigator.Navigator.deregister_callback",
@@ -3535,7 +3337,7 @@
       "feature": "io_callbacks",
       "availability": "available",
       "software": "implemented",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.register_io_callback",
         "devices.deregister_io_callback",
@@ -3554,11 +3356,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-continuation.json:fault_inputs_readonly",
-        "validation/2026-11-13-continuation.json:inputs_live_comparison"
-      ],
-      "notes": "Synthetic edges/callbacks pass. Operator confirmed first input actions, but two live recordings captured unchanged values on IO and legacy digital/analog interfaces; operator unavailable for another repeat. Physical transitions remain unverified."
+      "evidence": [],
+      "notes": "Callbacks run while polling; event queues are bounded."
     },
     {
       "operation": "intera_interface.robot_enable.RobotEnable.state",
@@ -3569,7 +3368,7 @@
       "feature": "robot_state",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "get_status",
         "devices.robot_state"
@@ -3586,9 +3385,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:stopped_diagnostic"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -3600,7 +3397,7 @@
       "feature": "enable",
       "availability": "available",
       "software": "implemented",
-      "hardware": "failed",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.set_enabled"
       ],
@@ -3616,11 +3413,9 @@
       "cancellation": "enable failure requests a latched software stop",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
       "evidence": [
-        "validation/2026-11-13-continuation.json:enable_guard_recovery",
-        "validation/2026-11-13-continuation.json:enable_fault_diagnostics",
         "tests/test_irobot/test_sawyer_peripherals.py"
       ],
-      "notes": "After restart, disable cleared homed. Enable movement again exceeded the tightened 0.005 rad envelope and the guard latched software stop. Initial cause/homing procedure unresolved."
+      "notes": "Enabling requires fresh feedback and preserves the displacement guard."
     },
     {
       "operation": "intera_interface.robot_enable.RobotEnable.disable",
@@ -3631,7 +3426,7 @@
       "feature": "enable",
       "availability": "available",
       "software": "implemented",
-      "hardware": "failed",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.set_enabled"
       ],
@@ -3647,11 +3442,9 @@
       "cancellation": "enable failure requests a latched software stop",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
       "evidence": [
-        "validation/2026-11-13-continuation.json:enable_guard_recovery",
-        "validation/2026-11-13-continuation.json:enable_fault_diagnostics",
         "tests/test_irobot/test_sawyer_peripherals.py"
       ],
-      "notes": "After restart, disable cleared homed. Enable movement again exceeded the tightened 0.005 rad envelope and the guard latched software stop. Initial cause/homing procedure unresolved."
+      "notes": "Enabling requires fresh feedback and preserves the displacement guard."
     },
     {
       "operation": "intera_interface.robot_enable.RobotEnable.reset",
@@ -3662,7 +3455,7 @@
       "feature": "stop_reset",
       "availability": "available",
       "software": "implemented",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.software_stop",
         "devices.reset_faults"
@@ -3681,11 +3474,10 @@
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
       "evidence": [
-        "validation/2026-11-13-continuation.json:enable_fault_diagnostics",
         "tests/test_irobot/test_sawyer_peripherals.py",
         "tests/test_irobot/test_sawyer_ros2.py"
       ],
-      "notes": "Software stop physically confirmed after the enable guard tripped. Fresh-feedback confirmation and stop requests during stale feedback/busy ROS 2 jobs are regression-tested. Automatic reset remains forbidden."
+      "notes": "Stop and reset are explicit operations; reset is never automatic."
     },
     {
       "operation": "intera_interface.robot_enable.RobotEnable.stop",
@@ -3696,7 +3488,7 @@
       "feature": "stop_reset",
       "availability": "available",
       "software": "implemented",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.software_stop",
         "devices.reset_faults"
@@ -3715,11 +3507,10 @@
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
       "evidence": [
-        "validation/2026-11-13-continuation.json:enable_fault_diagnostics",
         "tests/test_irobot/test_sawyer_peripherals.py",
         "tests/test_irobot/test_sawyer_ros2.py"
       ],
-      "notes": "Software stop physically confirmed after the enable guard tripped. Fresh-feedback confirmation and stop requests during stale feedback/busy ROS 2 jobs are regression-tested. Automatic reset remains forbidden."
+      "notes": "Stop and reset are explicit operations; reset is never automatic."
     },
     {
       "operation": "intera_interface.robot_enable.RobotEnable.version_check",
@@ -3730,7 +3521,7 @@
       "feature": "identity",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.inventory",
         "get_parameter",
@@ -3749,7 +3540,6 @@
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
       "evidence": [
-        "validation/2026-11-13.json",
         "tests/test_irobot/test_sawyer_transport.py"
       ],
       "notes": ""
@@ -3763,7 +3553,7 @@
       "feature": "identity",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.inventory",
         "get_parameter",
@@ -3782,7 +3572,6 @@
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
       "evidence": [
-        "validation/2026-11-13.json",
         "tests/test_irobot/test_sawyer_transport.py"
       ],
       "notes": ""
@@ -3796,7 +3585,7 @@
       "feature": "identity",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.inventory",
         "get_parameter",
@@ -3815,7 +3604,6 @@
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
       "evidence": [
-        "validation/2026-11-13.json",
         "tests/test_irobot/test_sawyer_transport.py"
       ],
       "notes": ""
@@ -3829,7 +3617,7 @@
       "feature": "identity",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.inventory",
         "get_parameter",
@@ -3848,7 +3636,6 @@
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
       "evidence": [
-        "validation/2026-11-13.json",
         "tests/test_irobot/test_sawyer_transport.py"
       ],
       "notes": ""
@@ -3862,7 +3649,7 @@
       "feature": "identity",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.inventory",
         "get_parameter",
@@ -3881,7 +3668,6 @@
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
       "evidence": [
-        "validation/2026-11-13.json",
         "tests/test_irobot/test_sawyer_transport.py"
       ],
       "notes": ""
@@ -3895,7 +3681,7 @@
       "feature": "identity",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.inventory",
         "get_parameter",
@@ -3914,7 +3700,6 @@
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
       "evidence": [
-        "validation/2026-11-13.json",
         "tests/test_irobot/test_sawyer_transport.py"
       ],
       "notes": ""
@@ -3928,7 +3713,7 @@
       "feature": "identity",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.inventory",
         "get_parameter",
@@ -3947,7 +3732,6 @@
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
       "evidence": [
-        "validation/2026-11-13.json",
         "tests/test_irobot/test_sawyer_transport.py"
       ],
       "notes": ""
@@ -4376,7 +4160,7 @@
       "feature": "io_read",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.read_io",
         "devices.io_state",
@@ -4395,9 +4179,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:extended_read"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -4409,7 +4191,7 @@
       "feature": "io_read",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.read_io",
         "devices.io_state",
@@ -4428,9 +4210,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:extended_read"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -4442,7 +4222,7 @@
       "feature": "io_read",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.read_io",
         "devices.io_state",
@@ -4461,9 +4241,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:extended_read"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -4475,7 +4253,7 @@
       "feature": "io_write",
       "availability": "available",
       "software": "implemented",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.write_io"
       ],
@@ -4493,7 +4271,7 @@
       "evidence": [
         "tests/test_irobot/test_sawyer_extensions.py"
       ],
-      "notes": "Acknowledgement and measured value are reported separately. Generic analog/port output hardware is not attached/qualified."
+      "notes": "Acknowledgement and measured values are reported separately."
     },
     {
       "operation": "intera_io.io_interface.IODeviceInterface.list_port_names",
@@ -4504,7 +4282,7 @@
       "feature": "io_read",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.read_io",
         "devices.io_state",
@@ -4523,9 +4301,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:extended_read"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -4537,7 +4313,7 @@
       "feature": "io_read",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.read_io",
         "devices.io_state",
@@ -4556,9 +4332,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:extended_read"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -4570,7 +4344,7 @@
       "feature": "io_read",
       "availability": "available",
       "software": "implemented",
-      "hardware": "verified",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.read_io",
         "devices.io_state",
@@ -4589,9 +4363,7 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:extended_read"
-      ],
+      "evidence": [],
       "notes": ""
     },
     {
@@ -4603,7 +4375,7 @@
       "feature": "io_write",
       "availability": "available",
       "software": "implemented",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.write_io"
       ],
@@ -4621,7 +4393,7 @@
       "evidence": [
         "tests/test_irobot/test_sawyer_extensions.py"
       ],
-      "notes": "Acknowledgement and measured value are reported separately. Generic analog/port output hardware is not attached/qualified."
+      "notes": "Acknowledgement and measured values are reported separately."
     },
     {
       "operation": "intera_io.io_interface.IODeviceInterface.register_callback",
@@ -4632,7 +4404,7 @@
       "feature": "io_callbacks",
       "availability": "available",
       "software": "implemented",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.register_io_callback",
         "devices.deregister_io_callback",
@@ -4651,11 +4423,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-continuation.json:fault_inputs_readonly",
-        "validation/2026-11-13-continuation.json:inputs_live_comparison"
-      ],
-      "notes": "Synthetic edges/callbacks pass. Operator confirmed first input actions, but two live recordings captured unchanged values on IO and legacy digital/analog interfaces; operator unavailable for another repeat. Physical transitions remain unverified."
+      "evidence": [],
+      "notes": "Callbacks run while polling; event queues are bounded."
     },
     {
       "operation": "intera_io.io_interface.IODeviceInterface.deregister_callback",
@@ -4666,7 +4435,7 @@
       "feature": "io_callbacks",
       "availability": "available",
       "software": "implemented",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "devices.register_io_callback",
         "devices.deregister_io_callback",
@@ -4685,11 +4454,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "not applicable to reads",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-continuation.json:fault_inputs_readonly",
-        "validation/2026-11-13-continuation.json:inputs_live_comparison"
-      ],
-      "notes": "Synthetic edges/callbacks pass. Operator confirmed first input actions, but two live recordings captured unchanged values on IO and legacy digital/analog interfaces; operator unavailable for another repeat. Physical transitions remain unverified."
+      "evidence": [],
+      "notes": "Callbacks run while polling; event queues are bounded."
     },
     {
       "operation": "intera_motion_interface.interaction_options.InteractionOptions.set_header",
@@ -5258,7 +5024,7 @@
       "feature": "interaction",
       "availability": "available",
       "software": "experimental",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "run_interaction",
         "interaction_command",
@@ -5276,11 +5042,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "confirmed inactive state then position hold while enabled; process-loss deactivation not proven",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:interaction_hold",
-        "validation/2026-11-13-continuation.json:modes_recovery"
-      ],
-      "notes": "Maximum-impedance zero-force hold passed. After restart, 100 ms compliant and 0.05 N force sessions confirmed active/inactive within 3 mm/0.005 rad envelopes. Experimental opt-in retained. Process-loss deactivation and larger forces remain unqualified."
+      "evidence": [],
+      "notes": "Experimental execution requires explicit opt-in."
     },
     {
       "operation": "intera_motion_interface.interaction_publisher.InteractionPublisher.send_position_mode_cmd",
@@ -5291,7 +5054,7 @@
       "feature": "interaction",
       "availability": "available",
       "software": "experimental",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "run_interaction",
         "interaction_command",
@@ -5309,11 +5072,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "confirmed inactive state then position hold while enabled; process-loss deactivation not proven",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-extended.json:interaction_hold",
-        "validation/2026-11-13-continuation.json:modes_recovery"
-      ],
-      "notes": "Maximum-impedance zero-force hold passed. After restart, 100 ms compliant and 0.05 N force sessions confirmed active/inactive within 3 mm/0.005 rad envelopes. Experimental opt-in retained. Process-loss deactivation and larger forces remain unqualified."
+      "evidence": [],
+      "notes": "Experimental execution requires explicit opt-in."
     },
     {
       "operation": "intera_motion_interface.motion_controller_action_client.MotionControllerActionClient.stop_trajectory",
@@ -5324,7 +5084,7 @@
       "feature": "native_motion",
       "availability": "available",
       "software": "implemented",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "move_native_joint_path",
         "execute_native_trajectory"
@@ -5340,11 +5100,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "cancel this goal ID only; heartbeat/result timeout; no goal replay",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-continuation.json:native_start_recovery",
-        "validation/2026-11-13-continuation.json:native_generate_cancel"
-      ],
-      "notes": "Native START out/return and goal-specific cancellation/recovery passed. GENERATE initially returned CONTROLLER_NOT_FOLLOWING, then succeeded after explicit native START with no measured motion. Controller-state dependence remains; no automatic motion to initialize planning."
+      "evidence": [],
+      "notes": "Planning does not silently initialize control by moving the arm."
     },
     {
       "operation": "intera_motion_interface.motion_controller_action_client.MotionControllerActionClient.send_trajectory",
@@ -5355,7 +5112,7 @@
       "feature": "native_motion",
       "availability": "available",
       "software": "implemented",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "move_native_joint_path",
         "execute_native_trajectory"
@@ -5371,11 +5128,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "cancel this goal ID only; heartbeat/result timeout; no goal replay",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-continuation.json:native_start_recovery",
-        "validation/2026-11-13-continuation.json:native_generate_cancel"
-      ],
-      "notes": "Native START out/return and goal-specific cancellation/recovery passed. GENERATE initially returned CONTROLLER_NOT_FOLLOWING, then succeeded after explicit native START with no measured motion. Controller-state dependence remains; no automatic motion to initialize planning."
+      "evidence": [],
+      "notes": "Planning does not silently initialize control by moving the arm."
     },
     {
       "operation": "intera_motion_interface.motion_controller_action_client.MotionControllerActionClient.wait_for_result",
@@ -5386,7 +5140,7 @@
       "feature": "native_motion",
       "availability": "available",
       "software": "implemented",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "move_native_joint_path",
         "execute_native_trajectory"
@@ -5402,11 +5156,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "cancel this goal ID only; heartbeat/result timeout; no goal replay",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-continuation.json:native_start_recovery",
-        "validation/2026-11-13-continuation.json:native_generate_cancel"
-      ],
-      "notes": "Native START out/return and goal-specific cancellation/recovery passed. GENERATE initially returned CONTROLLER_NOT_FOLLOWING, then succeeded after explicit native START with no measured motion. Controller-state dependence remains; no automatic motion to initialize planning."
+      "evidence": [],
+      "notes": "Planning does not silently initialize control by moving the arm."
     },
     {
       "operation": "intera_motion_interface.motion_controller_action_client.MotionControllerActionClient.get_state",
@@ -5417,7 +5168,7 @@
       "feature": "native_motion",
       "availability": "available",
       "software": "implemented",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "move_native_joint_path",
         "execute_native_trajectory"
@@ -5433,11 +5184,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "cancel this goal ID only; heartbeat/result timeout; no goal replay",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-continuation.json:native_start_recovery",
-        "validation/2026-11-13-continuation.json:native_generate_cancel"
-      ],
-      "notes": "Native START out/return and goal-specific cancellation/recovery passed. GENERATE initially returned CONTROLLER_NOT_FOLLOWING, then succeeded after explicit native START with no measured motion. Controller-state dependence remains; no automatic motion to initialize planning."
+      "evidence": [],
+      "notes": "Planning does not silently initialize control by moving the arm."
     },
     {
       "operation": "intera_motion_interface.motion_trajectory.MotionTrajectory.stop_trajectory",
@@ -5448,7 +5196,7 @@
       "feature": "native_motion",
       "availability": "available",
       "software": "implemented",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "move_native_joint_path",
         "execute_native_trajectory"
@@ -5464,11 +5212,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "cancel this goal ID only; heartbeat/result timeout; no goal replay",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-continuation.json:native_start_recovery",
-        "validation/2026-11-13-continuation.json:native_generate_cancel"
-      ],
-      "notes": "Native START out/return and goal-specific cancellation/recovery passed. GENERATE initially returned CONTROLLER_NOT_FOLLOWING, then succeeded after explicit native START with no measured motion. Controller-state dependence remains; no automatic motion to initialize planning."
+      "evidence": [],
+      "notes": "Planning does not silently initialize control by moving the arm."
     },
     {
       "operation": "intera_motion_interface.motion_trajectory.MotionTrajectory.send_trajectory",
@@ -5479,7 +5224,7 @@
       "feature": "native_motion",
       "availability": "available",
       "software": "implemented",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "move_native_joint_path",
         "execute_native_trajectory"
@@ -5495,11 +5240,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "cancel this goal ID only; heartbeat/result timeout; no goal replay",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-continuation.json:native_start_recovery",
-        "validation/2026-11-13-continuation.json:native_generate_cancel"
-      ],
-      "notes": "Native START out/return and goal-specific cancellation/recovery passed. GENERATE initially returned CONTROLLER_NOT_FOLLOWING, then succeeded after explicit native START with no measured motion. Controller-state dependence remains; no automatic motion to initialize planning."
+      "evidence": [],
+      "notes": "Planning does not silently initialize control by moving the arm."
     },
     {
       "operation": "intera_motion_interface.motion_trajectory.MotionTrajectory.get_state",
@@ -5510,7 +5252,7 @@
       "feature": "native_motion",
       "availability": "available",
       "software": "implemented",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "move_native_joint_path",
         "execute_native_trajectory"
@@ -5526,11 +5268,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "cancel this goal ID only; heartbeat/result timeout; no goal replay",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-continuation.json:native_start_recovery",
-        "validation/2026-11-13-continuation.json:native_generate_cancel"
-      ],
-      "notes": "Native START out/return and goal-specific cancellation/recovery passed. GENERATE initially returned CONTROLLER_NOT_FOLLOWING, then succeeded after explicit native START with no measured motion. Controller-state dependence remains; no automatic motion to initialize planning."
+      "evidence": [],
+      "notes": "Planning does not silently initialize control by moving the arm."
     },
     {
       "operation": "intera_motion_interface.motion_trajectory.MotionTrajectory.wait_for_result",
@@ -5541,7 +5280,7 @@
       "feature": "native_motion",
       "availability": "available",
       "software": "implemented",
-      "hardware": "partial",
+      "hardware": "not_recorded",
       "python_api": [
         "move_native_joint_path",
         "execute_native_trajectory"
@@ -5557,11 +5296,8 @@
       "side_effects": "read/preview is inert; writes need explicit execution",
       "cancellation": "cancel this goal ID only; heartbeat/result timeout; no goal replay",
       "schema_source": "installation/wire_schema.json and SDK_INVENTORY.json",
-      "evidence": [
-        "validation/2026-11-13-continuation.json:native_start_recovery",
-        "validation/2026-11-13-continuation.json:native_generate_cancel"
-      ],
-      "notes": "Native START out/return and goal-specific cancellation/recovery passed. GENERATE initially returned CONTROLLER_NOT_FOLLOWING, then succeeded after explicit native START with no measured motion. Controller-state dependence remains; no automatic motion to initialize planning."
+      "evidence": [],
+      "notes": "Planning does not silently initialize control by moving the arm."
     },
     {
       "operation": "intera_motion_interface.motion_trajectory.MotionTrajectory.set_data",
@@ -7065,8 +6801,8 @@
     "arm_calibration": {
       "python_api": "calibrate_arm",
       "ros2_endpoint": "calibrate_arm",
-      "availability": "blocked by attached gripper",
-      "hardware": "not_tested"
+      "availability": "requires compatible tool configuration",
+      "hardware": "not_recorded"
     },
     "tf": {
       "python_api": "devices.transforms / robot_description",
@@ -7075,12 +6811,12 @@
         "tf_static",
         "read_parameter"
       ],
-      "hardware": "verified"
+      "hardware": "not_recorded"
     },
     "diagnostics": {
       "python_api": "devices.diagnostics",
       "ros2_endpoint": "diagnostics",
-      "hardware": "verified"
+      "hardware": "not_recorded"
     }
   }
 }

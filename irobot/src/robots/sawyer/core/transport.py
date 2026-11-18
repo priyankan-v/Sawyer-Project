@@ -323,6 +323,12 @@ class Subscription:
             message = f'Incompatible type on {self.topic}'
             raise ValueError(message)
         while not stopped.is_set() and not self.transport.closed.is_set():
+            # Change-only and latched topics can remain silent indefinitely.
+            readable, _, _ = select.select(
+                [connection], [], [], self.transport.timeout
+            )
+            if not readable:
+                continue
             payload = receive_frame(
                 connection, time.monotonic() + self.transport.idle_timeout
             )

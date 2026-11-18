@@ -215,12 +215,12 @@ def test_stream_client_loss_requires_new_goal():  # noqa: PLR0915
         closing.set()
         sender.join(timeout=2)
         driver.release_read.set()
+        executor.shutdown(timeout_sec=3)
+        worker.join(timeout=3)
         server.destroy_node()
         client.destroy()
         native.destroy()
         client_node.destroy_node()
-        executor.shutdown(timeout_sec=3)
-        worker.join(timeout=3)
         context.shutdown()
 
 
