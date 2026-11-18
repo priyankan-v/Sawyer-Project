@@ -3772,7 +3772,7 @@
       "python_api": [
         "devices.read_io",
         "poll",
-        "core.io.IODevice lifecycle"
+        "core.hardware.io.IODevice lifecycle"
       ],
       "ros2_endpoints": [],
       "controller_interface": [],
@@ -3800,7 +3800,7 @@
       "python_api": [
         "devices.read_io",
         "poll",
-        "core.io.IODevice lifecycle"
+        "core.hardware.io.IODevice lifecycle"
       ],
       "ros2_endpoints": [],
       "controller_interface": [],
@@ -3828,7 +3828,7 @@
       "python_api": [
         "devices.read_io",
         "poll",
-        "core.io.IODevice lifecycle"
+        "core.hardware.io.IODevice lifecycle"
       ],
       "ros2_endpoints": [],
       "controller_interface": [],
@@ -3856,7 +3856,7 @@
       "python_api": [
         "devices.read_io",
         "poll",
-        "core.io.IODevice lifecycle"
+        "core.hardware.io.IODevice lifecycle"
       ],
       "ros2_endpoints": [],
       "controller_interface": [],
@@ -3884,7 +3884,7 @@
       "python_api": [
         "devices.read_io",
         "poll",
-        "core.io.IODevice lifecycle"
+        "core.hardware.io.IODevice lifecycle"
       ],
       "ros2_endpoints": [],
       "controller_interface": [],
@@ -3912,7 +3912,7 @@
       "python_api": [
         "devices.read_io",
         "poll",
-        "core.io.IODevice lifecycle"
+        "core.hardware.io.IODevice lifecycle"
       ],
       "ros2_endpoints": [],
       "controller_interface": [],
@@ -3940,7 +3940,7 @@
       "python_api": [
         "devices.read_io",
         "poll",
-        "core.io.IODevice lifecycle"
+        "core.hardware.io.IODevice lifecycle"
       ],
       "ros2_endpoints": [],
       "controller_interface": [],
@@ -3968,7 +3968,7 @@
       "python_api": [
         "devices.read_io",
         "poll",
-        "core.io.IODevice lifecycle"
+        "core.hardware.io.IODevice lifecycle"
       ],
       "ros2_endpoints": [],
       "controller_interface": [],
@@ -3996,7 +3996,7 @@
       "python_api": [
         "devices.read_io",
         "poll",
-        "core.io.IODevice lifecycle"
+        "core.hardware.io.IODevice lifecycle"
       ],
       "ros2_endpoints": [],
       "controller_interface": [],
@@ -4024,7 +4024,7 @@
       "python_api": [
         "devices.read_io",
         "poll",
-        "core.io.IODevice lifecycle"
+        "core.hardware.io.IODevice lifecycle"
       ],
       "ros2_endpoints": [],
       "controller_interface": [],
@@ -4052,7 +4052,7 @@
       "python_api": [
         "devices.read_io",
         "poll",
-        "core.io.IODevice lifecycle"
+        "core.hardware.io.IODevice lifecycle"
       ],
       "ros2_endpoints": [],
       "controller_interface": [],
@@ -4080,7 +4080,7 @@
       "python_api": [
         "devices.read_io",
         "poll",
-        "core.io.IODevice lifecycle"
+        "core.hardware.io.IODevice lifecycle"
       ],
       "ros2_endpoints": [],
       "controller_interface": [],
@@ -4108,7 +4108,7 @@
       "python_api": [
         "devices.read_io",
         "poll",
-        "core.io.IODevice lifecycle"
+        "core.hardware.io.IODevice lifecycle"
       ],
       "ros2_endpoints": [],
       "controller_interface": [],
@@ -4136,7 +4136,7 @@
       "python_api": [
         "devices.read_io",
         "poll",
-        "core.io.IODevice lifecycle"
+        "core.hardware.io.IODevice lifecycle"
       ],
       "ros2_endpoints": [],
       "controller_interface": [],
@@ -4468,7 +4468,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -4500,7 +4500,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -4532,7 +4532,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -4564,7 +4564,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -4596,7 +4596,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -4628,7 +4628,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -4660,7 +4660,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -4692,7 +4692,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -4724,7 +4724,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -4756,7 +4756,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -4788,7 +4788,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -4820,7 +4820,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -4852,7 +4852,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -4884,7 +4884,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -4916,7 +4916,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -4948,7 +4948,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -5310,7 +5310,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -5342,7 +5342,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -5374,7 +5374,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -5406,7 +5406,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -5438,7 +5438,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -5470,7 +5470,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -5502,7 +5502,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -5534,7 +5534,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -5566,7 +5566,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -5598,7 +5598,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -5630,7 +5630,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -5662,7 +5662,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -5786,7 +5786,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -5818,7 +5818,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -5850,7 +5850,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -5882,7 +5882,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -5914,7 +5914,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -5946,7 +5946,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -5978,7 +5978,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -6010,7 +6010,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -6042,7 +6042,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -6074,7 +6074,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -6152,7 +6152,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -6184,7 +6184,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -6216,7 +6216,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -6248,7 +6248,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -6280,7 +6280,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -6312,7 +6312,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -6344,7 +6344,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -6376,7 +6376,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -6408,7 +6408,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -6440,7 +6440,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -6472,7 +6472,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -6504,7 +6504,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -6536,7 +6536,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],
@@ -6568,7 +6568,7 @@
       "software": "implemented",
       "hardware": "not_applicable",
       "python_api": [
-        "core.wire typed dataclasses",
+        "core.communication.wire typed dataclasses",
         "wire.from_dict",
         "dataclasses.asdict"
       ],

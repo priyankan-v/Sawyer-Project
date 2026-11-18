@@ -11,8 +11,8 @@ from unittest.mock import MagicMock
 import pytest
 
 from irobot import SawyerConfig, SawyerController
-from irobot.src.robots.sawyer.core import wire
-from irobot.src.robots.sawyer.core.peripherals import SawyerDevices
+from irobot.src.robots.sawyer.core.communication import wire
+from irobot.src.robots.sawyer.core.hardware.peripherals import SawyerDevices
 
 
 def camera_message(enabled, commands=()):

@@ -27,7 +27,7 @@ from sensor_msgs.msg import Image
 from unique_identifier_msgs.msg import UUID
 
 from irobot.src.robots.sawyer.config import JOINT_NAMES
-from irobot.src.robots.sawyer.core import wire
+from irobot.src.robots.sawyer.core.communication import wire
 from irobot.src.robots.sawyer.ros2 import SawyerNode
 from irobot.src.robots.sawyer.ros2_images import (
     deserialize_image,

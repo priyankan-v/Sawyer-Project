@@ -110,8 +110,9 @@ Application calls controller
 - Keep all current motion, gripper, IO, camera, telemetry, and adapter features.
   Existing readiness checks, limits, cancellation, watchdogs, and stop behavior
   move with their code; this proposal adds no extra checking layers.
-- Preserve existing public imports, method behavior, and ROS entry points.
-  Re-export moved public names from old locations where callers need them.
+- Preserve top-level `irobot` driver imports, method behavior, and ROS entry
+  points. Import internal helpers directly from their layer; remove the old
+  forwarding modules to keep the structure clear.
 - When moving `wire.py`, keep its bundled schema accessible from an installed
   package as well as a checkout.
 
@@ -149,7 +150,7 @@ existing algorithms, features, and public names while moving code.
 2. **Organize Sawyer into the proposed layers.** Extract shared types, then
    planning and execution from the current large files. Group hardware and
    communication helpers afterward. Keep the public base/controller files
-   small, reuse existing classes, and preserve old public import paths.
+   small, reuse existing classes, and update internal imports to the new paths.
 
 3. **Keep the explicit connection lifecycle.** Retain Sawyer's explicit
    `connect()` / `disconnect()` and context-manager cleanup. Constructors stay

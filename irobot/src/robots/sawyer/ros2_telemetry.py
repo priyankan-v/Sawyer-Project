@@ -19,7 +19,7 @@ from sensor_msgs.msg import CameraInfo, Image
 from std_msgs.msg import String
 from tf2_msgs.msg import TFMessage
 
-from .core import wire
+from .core.communication import wire
 from .ros2_images import serialize_image
 
 

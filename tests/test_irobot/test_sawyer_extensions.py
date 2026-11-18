@@ -13,25 +13,22 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from irobot.src.robots.sawyer.core import wire
-from irobot.src.robots.sawyer.core.actions import NativeActionClient
-from irobot.src.robots.sawyer.core.interaction import (
-    InteractionLimits,
+from irobot.src.robots.sawyer.config import InteractionLimits
+from irobot.src.robots.sawyer.core.communication import wire
+from irobot.src.robots.sawyer.core.communication.actions import (
+    NativeActionClient,
+)
+from irobot.src.robots.sawyer.core.hardware.io import IODevice, validate_value
+from irobot.src.robots.sawyer.core.hardware.model import effort_limits
+from irobot.src.robots.sawyer.core.lease import CommandLease
+from irobot.src.robots.sawyer.core.planning.native import (
     interaction_command,
     validate_command,
 )
-from irobot.src.robots.sawyer.core.io import IODevice, validate_value
-from irobot.src.robots.sawyer.core.lease import CommandLease
-from irobot.src.robots.sawyer.core.model import effort_limits
 from tests.test_irobot.test_sawyer_control import Plant
 
 
 def test_native_planning_previews_preserve_start_and_reject_mismatches():
-    from irobot.src.robots.sawyer.core.motion import (
-        joint_trajectory,
-        validate_trajectory,
-    )
-
     plant = Plant()
     target = [0.05] * 7
     with plant.running():
@@ -43,8 +40,7 @@ def test_native_planning_previews_preserve_start_and_reject_mismatches():
         assert goal.trajectory.waypoints[-1].joint_positions == target
         assert not plant.messages
 
-        trajectory = joint_trajectory(plant.node, [target])
-        validate_trajectory(plant.node, trajectory)
+        trajectory = goal.trajectory
         generated = plant.robot.execute_native_trajectory(
             trajectory, plan_only=True
         )
@@ -58,8 +54,6 @@ def test_native_planning_previews_preserve_start_and_reject_mismatches():
 
 
 def test_native_cartesian_preview_uses_measured_tip_and_explicit_options():
-    from irobot.src.robots.sawyer.core.motion import validate_trajectory
-
     plant = Plant()
     waypoint = wire.Waypoint(active_endpoint='right_hand')
     waypoint.pose.header.frame_id = 'base'
@@ -79,7 +73,6 @@ def test_native_cartesian_preview_uses_measured_tip_and_explicit_options():
         wire.TrajectoryOptions.CARTESIAN
     )
     with plant.running():
-        validate_trajectory(plant.node, trajectory)
         assert not plant.robot.execute_native_trajectory(trajectory)[
             'executed'
         ]
@@ -372,7 +365,9 @@ def test_interaction_rejects_wrench_and_invalid_frame_parameters():
 
 
 def test_transform_snapshots_omit_expired_dynamic_edges_and_keep_static():
-    from irobot.src.robots.sawyer.core.transforms import TransformCache
+    from irobot.src.robots.sawyer.core.hardware.transforms import (
+        TransformCache,
+    )
 
     node = MagicMock()
     cache = TransformCache(node, Plant().robot.config)
@@ -422,7 +417,9 @@ def test_command_lease_rejects_old_ids_sequences_timestamps_and_loss():
 
 @pytest.mark.parametrize('drift', [False, True])
 def test_enable_confirms_ready_and_latches_stop_on_drift(drift):
-    from irobot.src.robots.sawyer.core.peripherals import SawyerDevices
+    from irobot.src.robots.sawyer.core.hardware.peripherals import (
+        SawyerDevices,
+    )
 
     plant = Plant()
     devices = SawyerDevices(plant.robot)

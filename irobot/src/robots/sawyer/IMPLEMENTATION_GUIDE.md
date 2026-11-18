@@ -49,16 +49,17 @@ Application / ROS adapter → SawyerController
 | [ros2_images.py](ros2_images.py) | Efficient image CDR conversion |
 | [ros_sugar_component.py](ros_sugar_component.py) | Optional lifecycle application adapter |
 
-## Public API and compatibility
+## Public API and internal imports
 
 Import SawyerConfig, SawyerBase, and SawyerController from `irobot`.
 The controller inherits the base connection/state API and coordinates the
 planner and executor. Construction is offline; connect explicitly or use a
 context manager. Preview/execution defaults and endpoint names are unchanged.
 
-Older `core/base.py`, `core/controller.py`, and helper module imports continue
-to expose moved classes/functions. These compatibility paths delegate to the same
-implementations. New implementation imports use the layered modules.
+Import internal helpers directly from their layered modules. For example,
+use `core.communication.transport.DirectTransport` and
+`core.planning.cartesian.CartesianPlanner`. The top-level `irobot` driver
+exports and existing controller methods remain available.
 
 The planner receives poses, joint configurations, limits, and IK/FK callables.
 The executor uses the owned session for commands and measured feedback.

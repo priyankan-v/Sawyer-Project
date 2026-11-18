@@ -18,12 +18,8 @@ import pytest
 
 from irobot import SawyerConfig, SawyerController
 from irobot.src.robots.sawyer.config import JOINT_NAMES
-from irobot.src.robots.sawyer.core import wire
-from irobot.src.robots.sawyer.core.base import (
-    JointFeedback,
-    _ArmSession,
-)
-from irobot.src.robots.sawyer.core.transport import (
+from irobot.src.robots.sawyer.core.communication import wire
+from irobot.src.robots.sawyer.core.communication.transport import (
     DirectTransport,
     frame,
     receive_exact,
@@ -32,6 +28,8 @@ from irobot.src.robots.sawyer.core.transport import (
     rpc,
     send_header,
 )
+from irobot.src.robots.sawyer.core.hardware.feedback import JointFeedback
+from irobot.src.robots.sawyer.core.hardware.session import ArmSession
 
 
 class RpcServer(socketserver.ThreadingMixIn, SimpleXMLRPCServer):
@@ -353,7 +351,7 @@ def test_joint_subsets_and_fields_survive_delayed_polling():
 
 
 def test_delayed_callback_preserves_receive_time():
-    session = _ArmSession.__new__(_ArmSession)
+    session = ArmSession.__new__(ArmSession)
     session.feedback = JointFeedback(JOINT_NAMES)
     message = wire.JointState(
         name=list(JOINT_NAMES), position=[0.0] * 7, velocity=[0.0] * 7
@@ -496,7 +494,9 @@ def test_shared_observers_and_late_publisher_connection():
 def test_late_io_observer_receives_merged_retained_state_without_new_packets():
     from unittest.mock import MagicMock
 
-    from irobot.src.robots.sawyer.core.transport import Subscription
+    from irobot.src.robots.sawyer.core.communication.transport import (
+        Subscription,
+    )
 
     transport = MagicMock()
     received = []

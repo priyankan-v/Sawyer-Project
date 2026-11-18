@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import struct
 
-from .core import wire
+from .core.communication import wire
 
 CDR_LITTLE_ENDIAN = b'\x00\x01\x00\x00'
 

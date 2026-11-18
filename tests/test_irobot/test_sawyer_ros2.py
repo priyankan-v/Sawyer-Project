@@ -21,7 +21,7 @@ from rclpy.node import Node
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 
 from irobot.src.robots.sawyer.config import JOINT_NAMES, SawyerConfig
-from irobot.src.robots.sawyer.core.base import CartesianPose
+from irobot.src.robots.sawyer.core.types import CartesianPose
 from irobot.src.robots.sawyer.ros2 import SawyerNode, trajectory_points
 
 

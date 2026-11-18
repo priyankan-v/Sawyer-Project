@@ -7,7 +7,7 @@ from io import StringIO
 
 import pytest
 
-from irobot.src.robots.sawyer.core import wire
+from irobot.src.robots.sawyer.core.communication import wire
 from irobot.src.robots.sawyer.examples.diagnose_direct import (
     MAX_EVENTS,
     DiagnosticRecording,

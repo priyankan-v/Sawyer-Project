@@ -81,11 +81,10 @@ from irobot import (
 from irobot.src.robots.sawyer.config import (
     JOINT_NAMES, MotionOptions, CartesianMotionOptions, StreamOptions,
 )
-from irobot.src.robots.sawyer.core.base import CartesianPose
-from irobot.src.robots.sawyer.core.interaction import (
-    InteractionLimits, interaction_command,
-)
-from irobot.src.robots.sawyer.core import wire
+from irobot.src.robots.sawyer.core.types import CartesianPose
+from irobot.src.robots.sawyer.config import InteractionLimits
+from irobot.src.robots.sawyer.core.planning.native import interaction_command
+from irobot.src.robots.sawyer.core.communication import wire
 ```
 
 The three driver/configuration classes are exported at `irobot`'s top level.
@@ -469,7 +468,7 @@ every sample. Commands are not retained for later replay.
 
 ```python
 from irobot import SawyerConfig, SawyerController
-from irobot.src.robots.sawyer.core.base import CartesianPose
+from irobot.src.robots.sawyer.core.types import CartesianPose
 
 config = SawyerConfig(ros_master_uri='http://ROBOT_IP:11311', ros_ip='PC_IP')
 with SawyerController(config) as robot:
@@ -962,7 +961,7 @@ Source: [irobot/src/robots/sawyer/core/communication/actions.py](irobot/src/robo
 interaction_command(*, endpoint='right_hand')
 ```
 
-Defined in core/interaction.py. Returns a typed wire.InteractionControlCommand
+Defined in core/planning/native.py. Returns a typed wire.InteractionControlCommand
 with active interaction, maximum impedance flags, zero requested force, base
 frame, and an identity interaction-frame quaternion. Call
 `robot.run_interaction(message, duration, ...)` to preview or run it.
@@ -1854,7 +1853,7 @@ readers and registration maintenance run on background threads.
 
 ### Wire API
 
-Source: [wire.py](irobot/src/robots/sawyer/core/wire.py).
+Source: [wire.py](irobot/src/robots/sawyer/core/communication/wire.py).
 
 | Callable | Contract |
 | --- | --- |
@@ -1874,8 +1873,8 @@ bundled schema, including fields, constants, type names, and MD5s, is
 ## Supporting Python callable inventory
 
 Implementation definitions are grouped by responsibility below. Public base
-and controller methods are documented above; old module paths re-export moved
-public names for compatibility.
+and controller methods are documented above. Import internal helpers directly
+from their planning, execution, hardware, or communication module.
 
 ### `core/communication/actions.py`
 

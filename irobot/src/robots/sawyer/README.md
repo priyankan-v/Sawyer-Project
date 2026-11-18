@@ -36,9 +36,9 @@ See the [plan](DIRECT_DRIVER_PLAN.md), [capability map](CAPABILITIES.md) and
 | `core/communication/` | XML-RPC/TCPROS, wire messages, native action protocol |
 | `ros2*.py`, `ros_sugar_component.py` | Optional adapters using the same driver |
 
-Older `core` module paths remain available as compatibility exports. Imports
-and driver construction are offline; connect explicitly or use the context
-manager shown below.
+Import internal helpers from their planning, execution, hardware, or
+communication module. Driver imports and construction are offline; connect
+explicitly or use the context manager shown below.
 
 ## Install plain Python
 

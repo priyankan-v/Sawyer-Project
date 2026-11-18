@@ -8,10 +8,8 @@ import unittest
 
 import pytest
 
-from irobot.src.robots.sawyer.core.controller import (
-    JointPIDController,
-    QuinticTrajectory,
-)
+from irobot.src.robots.sawyer.core.execution.pid import JointPIDController
+from irobot.src.robots.sawyer.core.planning.joint import QuinticTrajectory
 
 
 class PIDTests(unittest.TestCase):

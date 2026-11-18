@@ -8,7 +8,7 @@ import unittest
 
 import pytest
 
-from irobot.src.robots.sawyer.core.base import JointFeedback
+from irobot.src.robots.sawyer.core.hardware.feedback import JointFeedback
 
 
 class FeedbackTests(unittest.TestCase):

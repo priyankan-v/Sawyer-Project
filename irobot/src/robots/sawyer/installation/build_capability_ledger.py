@@ -82,8 +82,7 @@ FEATURES = {
         hardware='not_recorded',
         limits='reset requires stopped state and released physical E-stop',
         notes=(
-            'Stop and reset are explicit operations; reset is never '
-            'automatic.'
+            'Stop and reset are explicit operations; reset is never automatic.'
         ),
         evidence=[
             'tests/test_irobot/test_sawyer_peripherals.py',
@@ -97,8 +96,7 @@ FEATURES = {
         units='radians, rad/s, Nm',
         hardware='not_recorded',
         limits=(
-            'seven canonical arm joints; per-field monotonic receipt '
-            'freshness'
+            'seven canonical arm joints; per-field monotonic receipt freshness'
         ),
     ),
     'limits': feature(
@@ -132,13 +130,11 @@ FEATURES = {
             '/robot/limb/right/endpoint_state',
         ],
         units=(
-            'm, quaternion xyzw, m/s, rad/s, N, Nm; declared reference '
-            'frame'
+            'm, quaternion xyzw, m/s, rad/s, N, Nm; declared reference frame'
         ),
         hardware='not_recorded',
         limits=(
-            'valid named tip and current data; no invented tool-frame '
-            'fallback'
+            'valid named tip and current data; no invented tool-frame fallback'
         ),
     ),
     'joint_motion': feature(
@@ -258,8 +254,7 @@ FEATURES = {
             'replay'
         ),
         notes=(
-            'Planning does not silently initialize control by moving the '
-            'arm.'
+            'Planning does not silently initialize control by moving the arm.'
         ),
     ),
     'interaction': feature(
@@ -430,8 +425,7 @@ FEATURES = {
             'DigitalIO input-only permissions remain enforced'
         ),
         notes=(
-            'The public SDK documents these writes despite direction '
-            'metadata.'
+            'The public SDK documents these writes despite direction metadata.'
         ),
     ),
     'camera_frames': feature(
@@ -510,7 +504,7 @@ FEATURES = {
         availability='data_model',
         hardware='not_applicable',
         python_api=[
-            'core.wire typed dataclasses',
+            'core.communication.wire typed dataclasses',
             'wire.from_dict',
             'dataclasses.asdict',
         ],
@@ -546,7 +540,11 @@ FEATURES = {
     'cache': feature(
         availability='sdk_internal_helper',
         hardware='not_applicable',
-        python_api=['devices.read_io', 'poll', 'core.io.IODevice lifecycle'],
+        python_api=[
+            'devices.read_io',
+            'poll',
+            'core.hardware.io.IODevice lifecycle',
+        ],
         notes=(
             'SDK cache/command-builder helpers are replaced by automatic '
             'direct subscription caching and typed acknowledged writes; '

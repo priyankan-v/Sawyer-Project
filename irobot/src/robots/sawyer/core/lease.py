@@ -6,7 +6,7 @@ import threading
 import time
 
 from ..config import JOINT_NAMES, positive
-from .control import MODES
+from .execution.streaming import MODES
 
 MAX_FUTURE_AGE = 0.01
 

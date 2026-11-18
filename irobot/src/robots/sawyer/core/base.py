@@ -15,52 +15,15 @@ from ..config import (
     MotionOptions,
     SawyerConfig,
 )
-from .hardware.feedback import (
-    EndpointFeedback,
-    JointFeedback,
-    from_pose,
-    receipt_time,
-)
 from .hardware.gripper import SawyerGripper
-from .hardware.io import (
-    Signal,
-    command_args,
-    read_signals,
-    signal_value,
-    time_key,
-)
 from .hardware.kinematics import InteraKinematics
-from .hardware.session import ArmSession as _ArmSession
+from .hardware.session import ArmSession
 from .types import (
     CartesianPose,
-    JointBounds,
-    MotionResult,
-    ordered_values,
-    pose_error,
     vector,
 )
 
-__all__ = [
-    'CartesianPose',
-    'EndpointFeedback',
-    'InteraKinematics',
-    'JointBounds',
-    'JointFeedback',
-    'MotionResult',
-    'SawyerBase',
-    'SawyerGripper',
-    'Signal',
-    '_ArmSession',
-    'command_args',
-    'from_pose',
-    'ordered_values',
-    'pose_error',
-    'read_signals',
-    'receipt_time',
-    'signal_value',
-    'time_key',
-    'vector',
-]
+__all__ = ['SawyerBase']
 
 
 class SawyerBase:
@@ -105,7 +68,7 @@ class SawyerBase:
         from .hardware.peripherals import SawyerDevices
 
         self._transport = DirectTransport(self.config)
-        self._node = _ArmSession(self.config, self._transport)
+        self._node = ArmSession(self.config, self._transport)
         if self.config.enable_gripper:
             self._gripper = SawyerGripper(self._node, self.config)
         self._devices = SawyerDevices(self)

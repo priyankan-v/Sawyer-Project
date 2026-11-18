@@ -6,7 +6,7 @@ import struct
 
 import pytest
 
-from irobot.src.robots.sawyer.core import wire
+from irobot.src.robots.sawyer.core.communication import wire
 
 
 def test_joint_state_matches_known_ros1_layout():

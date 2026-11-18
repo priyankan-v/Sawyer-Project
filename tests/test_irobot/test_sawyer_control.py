@@ -16,16 +16,7 @@ import pytest
 
 from irobot import SawyerConfig, SawyerController
 from irobot.src.robots.sawyer.config import JOINT_NAMES
-from irobot.src.robots.sawyer.core.base import (
-    CartesianPose,
-    EndpointFeedback,
-    InteraKinematics,
-    JointBounds,
-    JointFeedback,
-    SawyerGripper,
-    _ArmSession,
-)
-from irobot.src.robots.sawyer.core.wire import (
+from irobot.src.robots.sawyer.core.communication.wire import (
     EndpointState,
     EndpointStates,
     IOComponentStatus,
@@ -37,6 +28,14 @@ from irobot.src.robots.sawyer.core.wire import (
     RobotAssemblyState,
     Time,
 )
+from irobot.src.robots.sawyer.core.hardware.feedback import (
+    EndpointFeedback,
+    JointFeedback,
+)
+from irobot.src.robots.sawyer.core.hardware.gripper import SawyerGripper
+from irobot.src.robots.sawyer.core.hardware.kinematics import InteraKinematics
+from irobot.src.robots.sawyer.core.hardware.session import ArmSession
+from irobot.src.robots.sawyer.core.types import CartesianPose, JointBounds
 
 
 def gripper_message(calibrated=True):  # noqa: FBT002
@@ -80,7 +79,7 @@ class Plant:
         self.robot = SawyerController(
             SawyerConfig(enable_gripper=False, neutral_joints=(0.2,) * 7)
         )
-        node = self.node = _ArmSession.__new__(_ArmSession)
+        node = self.node = ArmSession.__new__(ArmSession)
         self.robot._node, self.robot._connected = node, True
         node.config = self.robot.config
         node.joints, node.velocity = tuple(self.q), tuple(self.velocity)
@@ -258,7 +257,9 @@ class ArmTests(unittest.TestCase):
             assert len(zeros) >= 5
 
     def test_cancellation_during_planning_never_starts_commands(self):
-        from irobot.src.robots.sawyer.core.controller import QuinticTrajectory
+        from irobot.src.robots.sawyer.core.planning.joint import (
+            QuinticTrajectory,
+        )
 
         plant = Plant()
 

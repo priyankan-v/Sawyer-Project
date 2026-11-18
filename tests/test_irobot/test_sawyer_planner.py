@@ -11,14 +11,16 @@ from unittest.mock import MagicMock
 import numpy as np
 import pytest
 
-from irobot.src.robots.sawyer.core.base import CartesianPose, pose_error
-from irobot.src.robots.sawyer.core.controller import (
+from irobot.src.robots.sawyer.core.planning.cartesian import (
     CartesianLine,
     CartesianPlanner,
+)
+from irobot.src.robots.sawyer.core.planning.joint import (
     JointPath,
     QuinticTrajectory,
-    TimedJointPath,
 )
+from irobot.src.robots.sawyer.core.planning.timing import TimedJointPath
+from irobot.src.robots.sawyer.core.types import CartesianPose, pose_error
 
 IDENTITY = (0, 0, 0, 1)
 

@@ -16,8 +16,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from ..config import JOINT_NAMES, SawyerConfig, positive
-from ..core import wire
-from ..core.transport import DirectTransport
+from ..core.communication import wire
+from ..core.communication.transport import DirectTransport
 
 MAX_EVENTS = 256
 

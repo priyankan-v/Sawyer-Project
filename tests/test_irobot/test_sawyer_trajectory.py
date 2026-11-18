@@ -10,7 +10,7 @@ import unittest
 
 import pytest
 
-from irobot.src.robots.sawyer.core.controller import QuinticTrajectory
+from irobot.src.robots.sawyer.core.planning.joint import QuinticTrajectory
 
 
 class QuinticTests(unittest.TestCase):

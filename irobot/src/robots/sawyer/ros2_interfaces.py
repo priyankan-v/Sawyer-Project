@@ -38,9 +38,9 @@ from .config import (
     StreamOptions,
     positive,
 )
-from .core import wire
 from .core.base import CartesianPose
-from .core.control import MODES
+from .core.communication import wire
+from .core.execution.streaming import MODES
 from .core.lease import CommandLease
 from .ros2_telemetry import to_ros, to_wire
 
@@ -423,7 +423,8 @@ class ExtendedInterfaces:
 
     @staticmethod
     def validate_interaction(request):
-        from .core.interaction import InteractionLimits, validate_command
+        from .config import InteractionLimits
+        from .core.planning.native import validate_command
 
         positive('duration', request.duration)
         validate_command(
