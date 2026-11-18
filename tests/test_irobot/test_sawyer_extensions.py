@@ -26,6 +26,69 @@ from irobot.src.robots.sawyer.core.model import effort_limits
 from tests.test_irobot.test_sawyer_control import Plant
 
 
+def test_native_planning_previews_preserve_start_and_reject_mismatches():
+    from irobot.src.robots.sawyer.core.motion import (
+        joint_trajectory,
+        validate_trajectory,
+    )
+
+    plant = Plant()
+    target = [0.05] * 7
+    with plant.running():
+        preview = plant.robot.move_native_joint_path([target])
+        goal = wire.from_dict(wire.MotionCommandGoal, preview['goal'])
+        assert not preview['executed']
+        assert goal.command == 'start'
+        assert goal.trajectory.waypoints[0].joint_positions == list(plant.q)
+        assert goal.trajectory.waypoints[-1].joint_positions == target
+        assert not plant.messages
+
+        trajectory = joint_trajectory(plant.node, [target])
+        validate_trajectory(plant.node, trajectory)
+        generated = plant.robot.execute_native_trajectory(
+            trajectory, plan_only=True
+        )
+        assert generated['goal']['command'] == 'generate'
+        assert not generated['executed']
+        assert not plant.messages
+
+        trajectory.waypoints[0].joint_positions = [0.1] * 7
+        with pytest.raises(ValueError, match='measured start'):
+            plant.robot.execute_native_trajectory(trajectory)
+
+
+def test_native_cartesian_preview_uses_measured_tip_and_explicit_options():
+    from irobot.src.robots.sawyer.core.motion import validate_trajectory
+
+    plant = Plant()
+    waypoint = wire.Waypoint(active_endpoint='right_hand')
+    waypoint.pose.header.frame_id = 'base'
+    waypoint.pose.pose.orientation.w = 1.0
+    waypoint.options.max_joint_speed_ratio = 0.05
+    for name in (
+        'max_linear_speed',
+        'max_linear_accel',
+        'max_rotational_speed',
+        'max_rotational_accel',
+    ):
+        setattr(waypoint.options, name, 0.1)
+    trajectory = wire.Trajectory(
+        joint_names=[f'right_j{i}' for i in range(7)], waypoints=[waypoint]
+    )
+    trajectory.trajectory_options.interpolation_type = (
+        wire.TrajectoryOptions.CARTESIAN
+    )
+    with plant.running():
+        validate_trajectory(plant.node, trajectory)
+        assert not plant.robot.execute_native_trajectory(trajectory)[
+            'executed'
+        ]
+        assert not plant.messages
+        waypoint.pose.pose.position.x = 0.1
+        with pytest.raises(ValueError, match='measured start'):
+            plant.robot.execute_native_trajectory(trajectory)
+
+
 def test_stream_modes_preview_bounds_and_exit():
     plant = Plant()
     plant.robot.config = plant.node.config = replace(

@@ -1,7 +1,7 @@
 # Existing API reference
 
 This reference describes the APIs implemented in the current working tree.
-It covers both robot drivers, Sawyer configuration and result types, ROS 2
+It covers Sawyer, its configuration and result types, ROS 2
 services/actions/topics, optional ros_sugar adapters, and the custom interface
 schemas. Source links are relative to this repository.
 
@@ -20,7 +20,6 @@ hardware qualification; see [Sawyer validation](irobot/src/robots/sawyer/VALIDAT
 - [Sawyer configuration and data types](#sawyer-configuration-and-data-types)
 - [Sawyer ROS 2 API](#sawyer-ros-2-api)
 - [ros_sugar adapters](#ros_sugar-adapters)
-- [Crazyflie Python API](#crazyflie-python-api)
 - [Custom ROS 2 schemas](#custom-ros-2-schemas)
 - [Native Intera protocol](#native-intera-protocol)
 - [Supporting Python callable inventory](#supporting-python-callable-inventory)
@@ -43,7 +42,7 @@ ros_sugar application → SawyerComponent ─┤
 
 Sawyer uses XML-RPC discovery/parameters and native TCPROS messages, services,
 and actions without a workstation ROS 1 runtime. ROS 2 is an optional adapter
-around the same backend. Crazyflie delegates hardware communication to `cflib`.
+around the same backend.
 
 Sawyer contracts:
 
@@ -78,7 +77,6 @@ Sawyer contracts:
 ```python
 from irobot import (
     SawyerBase, SawyerConfig, SawyerController,
-    CrazyflieBase, CrazyflieConfig, CrazyflieController,
 )
 from irobot.src.robots.sawyer.config import (
     JOINT_NAMES, MotionOptions, CartesianMotionOptions, StreamOptions,
@@ -90,8 +88,7 @@ from irobot.src.robots.sawyer.core.interaction import (
 from irobot.src.robots.sawyer.core import wire
 ```
 
-Only the six driver/configuration classes above are exported at `irobot`'s top
-level. Crazyflie imports are lazy; importing Sawyer does not load `cflib`.
+The three driver/configuration classes are exported at `irobot`'s top level.
 
 ## Sawyer Python API
 
@@ -491,7 +488,7 @@ hardware owner. Camera selectors are exactly `'head'` and `'hand'`.
 
 ### `SawyerDevices`
 
-Source: [irobot/src/robots/sawyer/core/peripherals.py](irobot/src/robots/sawyer/core/peripherals.py).
+Source: [irobot/src/robots/sawyer/core/hardware/peripherals.py](irobot/src/robots/sawyer/core/hardware/peripherals.py).
 
 ```python
 SawyerDevices(driver)
@@ -725,7 +722,7 @@ whether motion runs.
 
 ### `MotionOptions` fields
 
-Source: [irobot/src/robots/sawyer/config.py](irobot/src/robots/sawyer/config.py#L28).
+Source: [irobot/src/robots/sawyer/config.py](irobot/src/robots/sawyer/config.py#L50).
 
 | Field | Type | Default |
 | --- | --- | --- |
@@ -743,7 +740,7 @@ Source: [irobot/src/robots/sawyer/config.py](irobot/src/robots/sawyer/config.py#
 
 ### `CartesianMotionOptions` fields
 
-Source: [irobot/src/robots/sawyer/config.py](irobot/src/robots/sawyer/config.py#L65).
+Source: [irobot/src/robots/sawyer/config.py](irobot/src/robots/sawyer/config.py#L87).
 
 | Field | Type | Default |
 | --- | --- | --- |
@@ -764,7 +761,7 @@ Source: [irobot/src/robots/sawyer/config.py](irobot/src/robots/sawyer/config.py#
 
 ### `StreamOptions` fields
 
-Source: [irobot/src/robots/sawyer/config.py](irobot/src/robots/sawyer/config.py#L109).
+Source: [irobot/src/robots/sawyer/config.py](irobot/src/robots/sawyer/config.py#L131).
 
 | Field | Type | Default |
 | --- | --- | --- |
@@ -777,7 +774,7 @@ Source: [irobot/src/robots/sawyer/config.py](irobot/src/robots/sawyer/config.py#
 
 ### `SawyerConfig` fields
 
-Source: [irobot/src/robots/sawyer/config.py](irobot/src/robots/sawyer/config.py#L131).
+Source: [irobot/src/robots/sawyer/config.py](irobot/src/robots/sawyer/config.py#L153).
 
 | Field | Type | Default |
 | --- | --- | --- |
@@ -858,7 +855,7 @@ Source: [irobot/src/robots/sawyer/config.py](irobot/src/robots/sawyer/config.py#
 
 ### `InteractionLimits` fields
 
-Source: [irobot/src/robots/sawyer/core/interaction.py](irobot/src/robots/sawyer/core/interaction.py#L18). Application envelopes for interaction; vectors are XYZ/rotation axes or seven joints as appropriate, not controller-certified limits.
+Source: [irobot/src/robots/sawyer/config.py](irobot/src/robots/sawyer/config.py#L326). Application envelopes for interaction; vectors are XYZ/rotation axes or seven joints as appropriate, not controller-certified limits.
 
 | Field | Type | Default |
 | --- | --- | --- |
@@ -878,7 +875,7 @@ these motion calls do not perform arbitrary TF frame conversion.
 
 ### `CartesianPose` fields
 
-Source: [irobot/src/robots/sawyer/core/base.py](irobot/src/robots/sawyer/core/base.py#L50).
+Source: [irobot/src/robots/sawyer/core/types.py](irobot/src/robots/sawyer/core/types.py#L35).
 
 | Field | Type | Default |
 | --- | --- | --- |
@@ -888,7 +885,7 @@ Source: [irobot/src/robots/sawyer/core/base.py](irobot/src/robots/sawyer/core/ba
 
 ### `MotionResult` fields
 
-Source: [irobot/src/robots/sawyer/core/base.py](irobot/src/robots/sawyer/core/base.py#L200).
+Source: [irobot/src/robots/sawyer/core/types.py](irobot/src/robots/sawyer/core/types.py#L81).
 
 | Field | Type | Default |
 | --- | --- | --- |
@@ -898,7 +895,7 @@ Source: [irobot/src/robots/sawyer/core/base.py](irobot/src/robots/sawyer/core/ba
 
 ### `JointBounds` fields
 
-Source: [irobot/src/robots/sawyer/core/base.py](irobot/src/robots/sawyer/core/base.py#L218).
+Source: [irobot/src/robots/sawyer/core/types.py](irobot/src/robots/sawyer/core/types.py#L99).
 
 | Field | Type | Default |
 | --- | --- | --- |
@@ -909,7 +906,7 @@ Source: [irobot/src/robots/sawyer/core/base.py](irobot/src/robots/sawyer/core/ba
 
 ### `TrajectorySample` fields
 
-Source: [irobot/src/robots/sawyer/core/controller.py](irobot/src/robots/sawyer/core/controller.py#L40).
+Source: [irobot/src/robots/sawyer/core/types.py](irobot/src/robots/sawyer/core/types.py#L144).
 
 | Field | Type | Default |
 | --- | --- | --- |
@@ -920,7 +917,7 @@ Source: [irobot/src/robots/sawyer/core/controller.py](irobot/src/robots/sawyer/c
 
 ### `CartesianPlan` fields
 
-Source: [irobot/src/robots/sawyer/core/controller.py](irobot/src/robots/sawyer/core/controller.py#L645).
+Source: [irobot/src/robots/sawyer/core/types.py](irobot/src/robots/sawyer/core/types.py#L152).
 
 | Field | Type | Default |
 | --- | --- | --- |
@@ -932,7 +929,7 @@ Source: [irobot/src/robots/sawyer/core/controller.py](irobot/src/robots/sawyer/c
 
 ### `CartesianMoveResult` fields
 
-Source: [irobot/src/robots/sawyer/core/controller.py](irobot/src/robots/sawyer/core/controller.py#L921).
+Source: [irobot/src/robots/sawyer/core/types.py](irobot/src/robots/sawyer/core/types.py#L161).
 
 | Field | Type | Default |
 | --- | --- | --- |
@@ -941,7 +938,7 @@ Source: [irobot/src/robots/sawyer/core/controller.py](irobot/src/robots/sawyer/c
 
 ### `JointMoveResult` fields
 
-Source: [irobot/src/robots/sawyer/core/controller.py](irobot/src/robots/sawyer/core/controller.py#L927).
+Source: [irobot/src/robots/sawyer/core/types.py](irobot/src/robots/sawyer/core/types.py#L167).
 
 | Field | Type | Default |
 | --- | --- | --- |
@@ -950,7 +947,7 @@ Source: [irobot/src/robots/sawyer/core/controller.py](irobot/src/robots/sawyer/c
 
 ### `ActionResult` fields
 
-Source: [irobot/src/robots/sawyer/core/actions.py](irobot/src/robots/sawyer/core/actions.py#L17). Internal native-action result wrapper; succeeded is a property checking status == SUCCEEDED.
+Source: [irobot/src/robots/sawyer/core/communication/actions.py](irobot/src/robots/sawyer/core/communication/actions.py#L17). Internal native-action result wrapper; succeeded is a property checking status == SUCCEEDED.
 
 | Field | Type | Default |
 | --- | --- | --- |
@@ -1217,161 +1214,6 @@ SawyerComponent.custom_on_error()
 ```
 
 Request cancellation and driver stop.
-
-### CrazyflieDemo
-
-Source: [crazyflie_ros_component.py](irobot/src/robots/crazyflie/examples/crazyflie_ros_component.py).
-
-```python
-CrazyflieDemo(*, component_name: str, config: CrazyflieConfig, **kwargs)
-```
-
-Example ros_sugar BaseComponent. Owns a CrazyflieController and a cflib
-PositionHlCommander; its internal execute-once hook flies a fixed four-waypoint
-path and lands. It defines no additional general-purpose public command methods.
-
-## Crazyflie Python API
-
-CrazyflieController inherits CrazyflieBase and its LighthouseLogging mixin.
-Unlike Sawyer, CrazyflieBase construction initializes cflib radio drivers and
-calls connect(); the connection callback also sends an arming request and starts
-Lighthouse logging. These APIs do not implement Sawyer's execute=False preview
-contract. State fields reflect the latest logged sample rather than Sawyer's
-per-field freshness model.
-
-### `CrazyflieBase`
-
-Source: [irobot/src/robots/crazyflie/core/base.py](irobot/src/robots/crazyflie/core/base.py).
-
-```python
-CrazyflieBase(config: CrazyflieConfig | None=None) -> None
-```
-
-#### `CrazyflieBase.connect`
-
-```python
-CrazyflieBase.connect() -> bool
-```
-
-Open the configured cflib radio link, attach callbacks, and wait up to connect_timeout. Return the connection boolean; exceptions are logged and return False.
-
-#### `CrazyflieBase.disconnect`
-
-```python
-CrazyflieBase.disconnect() -> None
-```
-
-Close the cflib link and clear is_connected. Return None.
-
-#### `CrazyflieBase.arm`
-
-```python
-CrazyflieBase.arm() -> None
-```
-
-Send an explicit arming request when connected. Return None.
-
-#### `CrazyflieBase.disarm`
-
-```python
-CrazyflieBase.disarm() -> None
-```
-
-Send an explicit disarming request when connected. Return None.
-
-#### `CrazyflieBase.get_status`
-
-```python
-CrazyflieBase.get_status() -> dict[str, Any]
-```
-
-Return a dictionary with uri, connected, and a wall-clock timestamp.
-
-### Crazyflie state attributes
-
-| Attribute | Meaning |
-| --- | --- |
-| `config` | CrazyflieConfig instance |
-| `cf` | Underlying cflib Crazyflie object, or None |
-| `is_connected` | Connection boolean attribute, not a method |
-| `current_x`, `current_y`, `current_z` | Latest Lighthouse position, metres |
-| `current_vx`, `current_vy` | Latest velocity, m/s |
-| `current_yaw` | Latest stateEstimate.yaw value in the SDK's units |
-| `state_ready` | True after a Lighthouse state callback has run |
-
-LighthouseLogging._publish_state() is an intentionally empty subclass extension
-hook called after each state update. It is not a public command API.
-
-### `CrazyflieController`
-
-Source: [irobot/src/robots/crazyflie/core/controller.py](irobot/src/robots/crazyflie/core/controller.py). Inherits CrazyflieBase(config=None); construction connects automatically. These methods send commands directly and do not return trajectory/result objects.
-
-#### `CrazyflieController.send_setpoint`
-
-```python
-CrazyflieController.send_setpoint(roll: float, pitch: float, yaw_rate: float, thrust: int) -> None
-```
-
-Delegate raw roll, pitch, yaw-rate, and thrust to cflib.commander.send_setpoint. Preserve SDK units. Logs a warning when disconnected; return None.
-
-#### `CrazyflieController.send_velocity_setpoint`
-
-```python
-CrazyflieController.send_velocity_setpoint(vx: float, vy: float, yaw_rate: float, z_hold: float) -> None
-```
-
-Send vx/vy in m/s at fixed z_hold metres using send_hover_setpoint; yaw_rate follows SDK units. Logs a warning when disconnected; return None.
-
-#### `CrazyflieController.ramp_motors`
-
-```python
-CrazyflieController.ramp_motors() -> None
-```
-
-Run the built-in blocking thrust-ramp demonstration, then send zero thrust. No preview. Return None.
-
-#### `CrazyflieController.fly_to`
-
-```python
-CrazyflieController.fly_to(x: float, y: float, z: float, yaw: float=0.0, duration: float=2.0) -> None
-```
-
-Linearly interpolate from latest measured XYZ to the target in metres using position setpoints at approximately 20 Hz, then send the endpoint. duration is seconds; yaw follows SDK units. Return None.
-
-#### `CrazyflieController.fly_from_to`
-
-```python
-CrazyflieController.fly_from_to(start: tuple[float, float, float], end: tuple[float, float, float], travel_time: float=6.0, hover_time: float=3.0) -> None
-```
-
-Run the blocking built-in takeoff, hover, start-to-end flight, hover, and landing sequence. start/end are XYZ tuples in metres; travel_time/hover_time are seconds. Return None.
-
-#### `CrazyflieController.takeoff`
-
-```python
-CrazyflieController.takeoff(z_hold: float=0.5, duration: float=3.0) -> None
-```
-
-Repeatedly send a hover-height setpoint at approximately 10 Hz for duration seconds. z_hold is metres. Return None.
-
-#### `CrazyflieController.land`
-
-```python
-CrazyflieController.land(z_hold: float=0.5, duration: float=2.5) -> None
-```
-
-Ramp requested hover height down toward 0.05 m over duration seconds, then send zero thrust. Return None.
-
-### `CrazyflieConfig` fields
-
-Source: [irobot/src/robots/crazyflie/config.py](irobot/src/robots/crazyflie/config.py#L7). Mutable dataclass; cflib is required for this driver.
-
-| Field | Type | Default |
-| --- | --- | --- |
-| `uri` | `str` | `'radio://0/80/2M/E7E7E7E781'` |
-| `log_rate_ms` | `int` | `50` |
-| `connect_timeout` | `float` | `10.0` |
-| `hover_z` | `float` | `0.3` |
 
 ## Custom ROS 2 schemas
 
@@ -2031,330 +1873,333 @@ bundled schema, including fields, constants, type names, and MD5s, is
 
 ## Supporting Python callable inventory
 
-These are implementation-level entry points, not additional hardware endpoints.
-The inventory includes locally defined non-underscore functions and methods,
-plus explicit constructors, outside the main classes already documented above.
-It includes planning, feedback, transport, leases, conversion, and adapter
-handlers. Private underscore helpers and inherited external methods are omitted.
-Use the linked implementation when extending the driver; prefer the public
-controller/device APIs for applications.
+Implementation definitions are grouped by responsibility below. Public base
+and controller methods are documented above; old module paths re-export moved
+public names for compatibility.
 
-### `irobot/src/robots/sawyer/core/actions.py`
+### `core/communication/actions.py`
 
 | Signature | Source | Purpose |
 | --- | --- | --- |
-| `ActionResult.succeeded()` | [line 24](irobot/src/robots/sawyer/core/actions.py#L24) | Implementation helper; see linked source for behavior. |
-| `NativeActionClient(node, namespace, action_type, *, server_timeout=2.0)` | [line 37](irobot/src/robots/sawyer/core/actions.py#L37) | Implementation helper; see linked source for behavior. |
-| `NativeActionClient.on_status(message)` | [line 64](irobot/src/robots/sawyer/core/actions.py#L64) | Implementation helper; see linked source for behavior. |
-| `NativeActionClient.on_result(message)` | [line 72](irobot/src/robots/sawyer/core/actions.py#L72) | Implementation helper; see linked source for behavior. |
-| `NativeActionClient.on_feedback(message)` | [line 85](irobot/src/robots/sawyer/core/actions.py#L85) | Implementation helper; see linked source for behavior. |
-| `NativeActionClient.wait_ready(timeout)` | [line 89](irobot/src/robots/sawyer/core/actions.py#L89) | Implementation helper; see linked source for behavior. |
-| `NativeActionClient.cancel()` | [line 104](irobot/src/robots/sawyer/core/actions.py#L104) | Cancel this goal only; an empty ID must never cancel other clients. |
-| `NativeActionClient.run(goal, *, timeout, cancel_event=None, on_feedback=None, health_check=None, cancel_timeout=2.0)` | [line 166](irobot/src/robots/sawyer/core/actions.py#L166) | Implementation helper; see linked source for behavior. |
+| `ActionResult.succeeded()` | [line 24](irobot/src/robots/sawyer/core/communication/actions.py#L24) | See source. |
+| `NativeActionClient.__init__(node, namespace, action_type, *, server_timeout=2.0)` | [line 37](irobot/src/robots/sawyer/core/communication/actions.py#L37) | See source. |
+| `NativeActionClient.on_status(message)` | [line 64](irobot/src/robots/sawyer/core/communication/actions.py#L64) | See source. |
+| `NativeActionClient.on_result(message)` | [line 72](irobot/src/robots/sawyer/core/communication/actions.py#L72) | See source. |
+| `NativeActionClient.on_feedback(message)` | [line 85](irobot/src/robots/sawyer/core/communication/actions.py#L85) | See source. |
+| `NativeActionClient.wait_ready(timeout)` | [line 89](irobot/src/robots/sawyer/core/communication/actions.py#L89) | See source. |
+| `NativeActionClient.cancel()` | [line 104](irobot/src/robots/sawyer/core/communication/actions.py#L104) | Cancel this goal only; an empty ID must never cancel other clients. |
+| `NativeActionClient.run(goal, *, timeout, cancel_event=None, on_feedback=None, health_check=None, cancel_timeout=2.0)` | [line 166](irobot/src/robots/sawyer/core/communication/actions.py#L166) | See source. |
 
-### `irobot/src/robots/sawyer/core/base.py`
-
-| Signature | Source | Purpose |
-| --- | --- | --- |
-| `receipt_time(message)` | [line 23](irobot/src/robots/sawyer/core/base.py#L23) | Implementation helper; see linked source for behavior. |
-| `vector(values, size, name, *, positive=False, nonnegative=False)` | [line 27](irobot/src/robots/sawyer/core/base.py#L27) | Implementation helper; see linked source for behavior. |
-| `pose_error(actual, desired)` | [line 78](irobot/src/robots/sawyer/core/base.py#L78) | Implementation helper; see linked source for behavior. |
-| `JointFeedback(names)` | [line 104](irobot/src/robots/sawyer/core/base.py#L104) | Implementation helper; see linked source for behavior. |
-| `JointFeedback.update(names, positions, velocities, now, efforts=())` | [line 115](irobot/src/robots/sawyer/core/base.py#L115) | Implementation helper; see linked source for behavior. |
-| `JointFeedback.snapshot()` | [line 154](irobot/src/robots/sawyer/core/base.py#L154) | Implementation helper; see linked source for behavior. |
-| `JointFeedback.fresh_positions(now, timeout)` | [line 166](irobot/src/robots/sawyer/core/base.py#L166) | Position hold needs fresh positions even if velocity feedback expired. |
-| `JointFeedback.issues(now, timeout)` | [line 178](irobot/src/robots/sawyer/core/base.py#L178) | Implementation helper; see linked source for behavior. |
-| `ordered_values(names, values, label)` | [line 206](irobot/src/robots/sawyer/core/base.py#L206) | Implementation helper; see linked source for behavior. |
-| `JointBounds.from_message(message)` | [line 225](irobot/src/robots/sawyer/core/base.py#L225) | Implementation helper; see linked source for behavior. |
-| `JointBounds.check_position(positions, label, tolerance=0.0)` | [line 249](irobot/src/robots/sawyer/core/base.py#L249) | Implementation helper; see linked source for behavior. |
-| `from_pose(pose, frame)` | [line 262](irobot/src/robots/sawyer/core/base.py#L262) | Implementation helper; see linked source for behavior. |
-| `EndpointFeedback(fallback_frame, feedback_timeout, config=None)` | [line 281](irobot/src/robots/sawyer/core/base.py#L281) | Implementation helper; see linked source for behavior. |
-| `EndpointFeedback.on_endpoint(message)` | [line 290](irobot/src/robots/sawyer/core/base.py#L290) | Implementation helper; see linked source for behavior. |
-| `EndpointFeedback.on_tips(message)` | [line 303](irobot/src/robots/sawyer/core/base.py#L303) | Implementation helper; see linked source for behavior. |
-| `EndpointFeedback.read(tip)` | [line 345](irobot/src/robots/sawyer/core/base.py#L345) | Implementation helper; see linked source for behavior. |
-| `EndpointFeedback.select(requested=None)` | [line 361](irobot/src/robots/sawyer/core/base.py#L361) | Implementation helper; see linked source for behavior. |
-| `InteraKinematics(node, tip, frame, request_timeout=None, planning_timeout=None, health_check=None)` | [line 395](irobot/src/robots/sawyer/core/base.py#L395) | Implementation helper; see linked source for behavior. |
-| `InteraKinematics.close()` | [line 421](irobot/src/robots/sawyer/core/base.py#L421) | Implementation helper; see linked source for behavior. |
-| `InteraKinematics.wait_ready(timeout=None)` | [line 425](irobot/src/robots/sawyer/core/base.py#L425) | Implementation helper; see linked source for behavior. |
-| `InteraKinematics.call(client, request, label)` | [line 449](irobot/src/robots/sawyer/core/base.py#L449) | Implementation helper; see linked source for behavior. |
-| `InteraKinematics.inverse(pose, seed)` | [line 474](irobot/src/robots/sawyer/core/base.py#L474) | Implementation helper; see linked source for behavior. |
-| `InteraKinematics.forward_results(configurations)` | [line 525](irobot/src/robots/sawyer/core/base.py#L525) | Implementation helper; see linked source for behavior. |
-| `InteraKinematics.forward(configurations)` | [line 572](irobot/src/robots/sawyer/core/base.py#L572) | Implementation helper; see linked source for behavior. |
-| `read_signals(message)` | [line 588](irobot/src/robots/sawyer/core/base.py#L588) | Implementation helper; see linked source for behavior. |
-| `signal_value(signals, name, kind=None)` | [line 608](irobot/src/robots/sawyer/core/base.py#L608) | Implementation helper; see linked source for behavior. |
-| `command_args(signals, values)` | [line 635](irobot/src/robots/sawyer/core/base.py#L635) | Implementation helper; see linked source for behavior. |
-| `time_key(stamp)` | [line 651](irobot/src/robots/sawyer/core/base.py#L651) | Implementation helper; see linked source for behavior. |
-| `SawyerGripper(node, config)` | [line 656](irobot/src/robots/sawyer/core/base.py#L656) | Implementation helper; see linked source for behavior. |
-| `SawyerGripper.on_state(message)` | [line 671](irobot/src/robots/sawyer/core/base.py#L671) | Implementation helper; see linked source for behavior. |
-| `SawyerGripper.wait_for(predicate, timeout, description)` | [line 681](irobot/src/robots/sawyer/core/base.py#L681) | Implementation helper; see linked source for behavior. |
-| `SawyerGripper.wait_for_state(timeout)` | [line 692](irobot/src/robots/sawyer/core/base.py#L692) | Implementation helper; see linked source for behavior. |
-| `SawyerGripper.require_ready(action)` | [line 699](irobot/src/robots/sawyer/core/base.py#L699) | Implementation helper; see linked source for behavior. |
-| `SawyerGripper.make_message(values)` | [line 733](irobot/src/robots/sawyer/core/base.py#L733) | Implementation helper; see linked source for behavior. |
-| `SawyerGripper.send(values)` | [line 742](irobot/src/robots/sawyer/core/base.py#L742) | Implementation helper; see linked source for behavior. |
-| `SawyerGripper.completed(action, target)` | [line 774](irobot/src/robots/sawyer/core/base.py#L774) | Implementation helper; see linked source for behavior. |
-| `SawyerGripper.wait_completion(action, target)` | [line 823](irobot/src/robots/sawyer/core/base.py#L823) | Implementation helper; see linked source for behavior. |
-| `SawyerGripper.request_stop()` | [line 844](irobot/src/robots/sawyer/core/base.py#L844) | Implementation helper; see linked source for behavior. |
-| `SawyerGripper.perform(action, *, execute=False, cancel_event=None, position=None)` | [line 855](irobot/src/robots/sawyer/core/base.py#L855) | Implementation helper; see linked source for behavior. |
-
-### `irobot/src/robots/sawyer/core/control.py`
+### `core/communication/transport.py`
 
 | Signature | Source | Purpose |
 | --- | --- | --- |
-| `JointStream(node, mode, options)` | [line 32](irobot/src/robots/sawyer/core/control.py#L32) | Implementation helper; see linked source for behavior. |
-| `JointStream.torque_limits()` | [line 50](irobot/src/robots/sawyer/core/control.py#L50) | Implementation helper; see linked source for behavior. |
-| `JointStream.command(values)` | [line 61](irobot/src/robots/sawyer/core/control.py#L61) | Implementation helper; see linked source for behavior. |
-| `JointStream.check_displacement(positions)` | [line 102](irobot/src/robots/sawyer/core/control.py#L102) | Implementation helper; see linked source for behavior. |
-| `JointStream.check_health(cancel_event)` | [line 110](irobot/src/robots/sawyer/core/control.py#L110) | Implementation helper; see linked source for behavior. |
-| `JointStream.prepare(cancel_event)` | [line 128](irobot/src/robots/sawyer/core/control.py#L128) | Implementation helper; see linked source for behavior. |
-| `JointStream.run(source, duration, *, cancel_event=None, on_step=None)` | [line 154](irobot/src/robots/sawyer/core/control.py#L154) | Implementation helper; see linked source for behavior. |
-| `stream_joint_commands(driver, mode, source, duration, *, options=None, execute=False, cancel_event=None, on_step=None)` | [line 242](irobot/src/robots/sawyer/core/control.py#L242) | Preview or execute through the driver's single operation owner. |
+| `receive_exact(connection, count, deadline)` | [line 31](irobot/src/robots/sawyer/core/communication/transport.py#L31) | See source. |
+| `receive_frame(connection, deadline, limit=MAX_MESSAGE_BYTES)` | [line 47](irobot/src/robots/sawyer/core/communication/transport.py#L47) | See source. |
+| `frame(payload)` | [line 55](irobot/src/robots/sawyer/core/communication/transport.py#L55) | See source. |
+| `send_header(connection, values)` | [line 59](irobot/src/robots/sawyer/core/communication/transport.py#L59) | See source. |
+| `receive_header(connection, deadline)` | [line 69](irobot/src/robots/sawyer/core/communication/transport.py#L69) | See source. |
+| `TimeoutTransport.__init__(timeout)` | [line 95](irobot/src/robots/sawyer/core/communication/transport.py#L95) | See source. |
+| `TimeoutTransport.make_connection(host)` | [line 99](irobot/src/robots/sawyer/core/communication/transport.py#L99) | See source. |
+| `rpc(uri, method, *args, timeout)` | [line 105](irobot/src/robots/sawyer/core/communication/transport.py#L105) | See source. |
+| `Publisher.__init__(transport, kind, topic)` | [line 122](irobot/src/robots/sawyer/core/communication/transport.py#L122) | See source. |
+| `Publisher.get_subscription_count()` | [line 127](irobot/src/robots/sawyer/core/communication/transport.py#L127) | See source. |
+| `Publisher.publish(message)` | [line 131](irobot/src/robots/sawyer/core/communication/transport.py#L131) | See source. |
+| `Publisher.remove(connection)` | [line 153](irobot/src/robots/sawyer/core/communication/transport.py#L153) | See source. |
+| `Publisher.close()` | [line 158](irobot/src/robots/sawyer/core/communication/transport.py#L158) | See source. |
+| `close_socket(connection)` | [line 165](irobot/src/robots/sawyer/core/communication/transport.py#L165) | See source. |
+| `Subscription.__init__(transport, kind, topic, callback)` | [line 173](irobot/src/robots/sawyer/core/communication/transport.py#L173) | See source. |
+| `Subscription.callback(message)` | [line 180](irobot/src/robots/sawyer/core/communication/transport.py#L180) | See source. |
+| `Subscription.dispatch(callbacks, message)` | [line 184](irobot/src/robots/sawyer/core/communication/transport.py#L184) | See source. |
+| `Subscription.add_observer(callback)` | [line 189](irobot/src/robots/sawyer/core/communication/transport.py#L189) | See source. |
+| `Subscription.retain(key, message)` | [line 201](irobot/src/robots/sawyer/core/communication/transport.py#L201) | Keep feedback for late observers, preserving local receipt times. |
+| `Subscription.connected()` | [line 238](irobot/src/robots/sawyer/core/communication/transport.py#L238) | See source. |
+| `Subscription.update(publishers)` | [line 245](irobot/src/robots/sawyer/core/communication/transport.py#L245) | See source. |
+| `Subscription.receive(uri, stopped)` | [line 262](irobot/src/robots/sawyer/core/communication/transport.py#L262) | See source. |
+| `Subscription.receive_stream(uri, stopped)` | [line 284](irobot/src/robots/sawyer/core/communication/transport.py#L284) | See source. |
+| `Subscription.close()` | [line 358](irobot/src/robots/sawyer/core/communication/transport.py#L358) | See source. |
+| `ServiceClient.__init__(transport, kind, name)` | [line 363](irobot/src/robots/sawyer/core/communication/transport.py#L363) | See source. |
+| `ServiceClient.wait_for_service(timeout_sec)` | [line 366](irobot/src/robots/sawyer/core/communication/transport.py#L366) | See source. |
+| `ServiceClient.call_async(request)` | [line 374](irobot/src/robots/sawyer/core/communication/transport.py#L374) | See source. |
+| `ServiceClient.call(request)` | [line 377](irobot/src/robots/sawyer/core/communication/transport.py#L377) | See source. |
+| `DirectTransport.__init__(config)` | [line 421](irobot/src/robots/sawyer/core/communication/transport.py#L421) | See source. |
+| `DirectTransport.master(method, *args)` | [line 489](irobot/src/robots/sawyer/core/communication/transport.py#L489) | See source. |
+| `DirectTransport.start_thread(target, *args, start=True, **kwargs)` | [line 494](irobot/src/robots/sawyer/core/communication/transport.py#L494) | See source. |
+| `DirectTransport.track_socket(connection)` | [line 503](irobot/src/robots/sawyer/core/communication/transport.py#L503) | See source. |
+| `DirectTransport.untrack_socket(connection)` | [line 510](irobot/src/robots/sawyer/core/communication/transport.py#L510) | See source. |
+| `DirectTransport.create_subscription(kind, topic, callback)` | [line 514](irobot/src/robots/sawyer/core/communication/transport.py#L514) | See source. |
+| `DirectTransport.create_publisher(kind, topic)` | [line 527](irobot/src/robots/sawyer/core/communication/transport.py#L527) | See source. |
+| `DirectTransport.observe(kind, topic, callback)` | [line 537](irobot/src/robots/sawyer/core/communication/transport.py#L537) | Share one wire subscription with additional in-process consumers. |
+| `DirectTransport.enqueue(key, callback, message)` | [line 549](irobot/src/robots/sawyer/core/communication/transport.py#L549) | See source. |
+| `DirectTransport.publisher_for(kind, topic)` | [line 557](irobot/src/robots/sawyer/core/communication/transport.py#L557) | See source. |
+| `DirectTransport.remove_observer(topic, callback)` | [line 567](irobot/src/robots/sawyer/core/communication/transport.py#L567) | See source. |
+| `DirectTransport.refresh_registration()` | [line 576](irobot/src/robots/sawyer/core/communication/transport.py#L576) | Restore graph registration; never publish or replay a command. |
+| `DirectTransport.check_command_owner()` | [line 611](irobot/src/robots/sawyer/core/communication/transport.py#L611) | Best-effort graph check; ROS 1 provides no exclusive writer lease. |
+| `DirectTransport.maintain_registration()` | [line 625](irobot/src/robots/sawyer/core/communication/transport.py#L625) | See source. |
+| `DirectTransport.get_publications(_caller)` | [line 635](irobot/src/robots/sawyer/core/communication/transport.py#L635) | See source. |
+| `DirectTransport.get_subscriptions(_caller)` | [line 643](irobot/src/robots/sawyer/core/communication/transport.py#L643) | See source. |
+| `DirectTransport.get_bus_info(_caller)` | [line 654](irobot/src/robots/sawyer/core/communication/transport.py#L654) | See source. |
+| `DirectTransport.create_client(kind, name)` | [line 690](irobot/src/robots/sawyer/core/communication/transport.py#L690) | See source. |
+| `DirectTransport.destroy_client(_client)` | [line 693](irobot/src/robots/sawyer/core/communication/transport.py#L693) | See source. |
+| `DirectTransport.publisher_update(_caller, topic, publishers)` | [line 697](irobot/src/robots/sawyer/core/communication/transport.py#L697) | See source. |
+| `DirectTransport.request_topic(_caller, topic, protocols)` | [line 703](irobot/src/robots/sawyer/core/communication/transport.py#L703) | See source. |
+| `DirectTransport.remote_shutdown(_caller, _reason)` | [line 710](irobot/src/robots/sawyer/core/communication/transport.py#L710) | See source. |
+| `DirectTransport.accept()` | [line 714](irobot/src/robots/sawyer/core/communication/transport.py#L714) | See source. |
+| `DirectTransport.serve_subscriber(connection)` | [line 729](irobot/src/robots/sawyer/core/communication/transport.py#L729) | See source. |
+| `DirectTransport.spin_once(timeout_sec=0.02)` | [line 773](irobot/src/robots/sawyer/core/communication/transport.py#L773) | See source. |
+| `DirectTransport.get_logger()` | [line 785](irobot/src/robots/sawyer/core/communication/transport.py#L785) | See source. |
+| `DirectTransport.get_clock()` | [line 789](irobot/src/robots/sawyer/core/communication/transport.py#L789) | See source. |
+| `DirectTransport.destroy_node()` | [line 796](irobot/src/robots/sawyer/core/communication/transport.py#L796) | See source. |
 
-### `irobot/src/robots/sawyer/core/controller.py`
-
-| Signature | Source | Purpose |
-| --- | --- | --- |
-| `QuinticTrajectory(start, end, max_velocity, duration=None, max_acceleration=None)` | [line 60](irobot/src/robots/sawyer/core/controller.py#L60) | Implementation helper; see linked source for behavior. |
-| `QuinticTrajectory.sample(elapsed)` | [line 121](irobot/src/robots/sawyer/core/controller.py#L121) | Implementation helper; see linked source for behavior. |
-| `JointSequence(start, positions, times, velocity, acceleration)` | [line 149](irobot/src/robots/sawyer/core/controller.py#L149) | Implementation helper; see linked source for behavior. |
-| `JointSequence.sample(elapsed)` | [line 179](irobot/src/robots/sawyer/core/controller.py#L179) | Implementation helper; see linked source for behavior. |
-| `JointPIDController(size, kp, ki, kd, max_velocity, max_acceleration, integral_limit=0.25, position_lower=None, position_upper=None)` | [line 201](irobot/src/robots/sawyer/core/controller.py#L201) | Implementation helper; see linked source for behavior. |
-| `JointPIDController.reset(velocity=None)` | [line 252](irobot/src/robots/sawyer/core/controller.py#L252) | Implementation helper; see linked source for behavior. |
-| `JointPIDController.update(reference_position, measured_position, reference_velocity, measured_velocity, dt)` | [line 270](irobot/src/robots/sawyer/core/controller.py#L270) | Implementation helper; see linked source for behavior. |
-| `CartesianLine(start, offset_cm, end_orientation=None)` | [line 344](irobot/src/robots/sawyer/core/controller.py#L344) | Implementation helper; see linked source for behavior. |
-| `CartesianLine.between(start, end)` | [line 360](irobot/src/robots/sawyer/core/controller.py#L360) | Implementation helper; see linked source for behavior. |
-| `CartesianLine.sample(normalized_time)` | [line 373](irobot/src/robots/sawyer/core/controller.py#L373) | Implementation helper; see linked source for behavior. |
-| `slerp(start, end, fraction)` | [line 385](irobot/src/robots/sawyer/core/controller.py#L385) | Shortest rotation between unit quaternions, including antipodal inputs. |
-| `extrema(coefficients)` | [line 411](irobot/src/robots/sawyer/core/controller.py#L411) | Polynomial extrema over [0,1], including both endpoints. |
-| `JointPath(fractions, positions)` | [line 441](irobot/src/robots/sawyer/core/controller.py#L441) | Implementation helper; see linked source for behavior. |
-| `JointPath.sample(fraction)` | [line 529](irobot/src/robots/sawyer/core/controller.py#L529) | Implementation helper; see linked source for behavior. |
-| `JointPath.validation_fractions()` | [line 559](irobot/src/robots/sawyer/core/controller.py#L559) | Implementation helper; see linked source for behavior. |
-| `TimedJointPath(path, max_velocity, max_acceleration, duration=None)` | [line 583](irobot/src/robots/sawyer/core/controller.py#L583) | Implementation helper; see linked source for behavior. |
-| `TimedJointPath.sample(elapsed)` | [line 628](irobot/src/robots/sawyer/core/controller.py#L628) | Implementation helper; see linked source for behavior. |
-| `CartesianPlanner(inverse, forward, lower, upper, *, sample_step=CartesianMotionOptions.sample_step, path_tolerance=CartesianMotionOptions.path_tolerance, orientation_tolerance=DEFAULT_ORIENTATION_TOLERANCE, max_joint_step=CartesianMotionOptions.max_joint_step, max_samples=CartesianMotionOptions.max_samples, joint_names=None, angular_step=CartesianMotionOptions.angular_step)` | [line 667](irobot/src/robots/sawyer/core/controller.py#L667) | Implementation helper; see linked source for behavior. |
-| `CartesianPlanner.checked_joints(values, label)` | [line 717](irobot/src/robots/sawyer/core/controller.py#L717) | Implementation helper; see linked source for behavior. |
-| `CartesianPlanner.plan(start_pose, offset_cm, start_joints, max_velocity, max_acceleration, duration=None)` | [line 730](irobot/src/robots/sawyer/core/controller.py#L730) | Implementation helper; see linked source for behavior. |
-| `CartesianPlanner.plan_pose(start_pose, end_pose, start_joints, max_velocity, max_acceleration, duration=None, end_joints=None)` | [line 744](irobot/src/robots/sawyer/core/controller.py#L744) | Straight XYZ and shortest SLERP, optionally meeting a specific joint branch. A joint-constrained endpoint biases IK seeds toward that posture and is still subject to continuity, FK and position-limit checks. A branch that cannot connect continuously is rejected rather than jumped to. |
-| `CartesianPlanner.plan_line(line, start_joints, max_velocity, max_acceleration, duration=None, end_joints=None)` | [line 772](irobot/src/robots/sawyer/core/controller.py#L772) | Implementation helper; see linked source for behavior. |
-| `ParameterTransport(timeout)` | [line 933](irobot/src/robots/sawyer/core/controller.py#L933) | Implementation helper; see linked source for behavior. |
-| `ParameterTransport.make_connection(host)` | [line 937](irobot/src/robots/sawyer/core/controller.py#L937) | Implementation helper; see linked source for behavior. |
-
-### `irobot/src/robots/sawyer/core/interaction.py`
-
-| Signature | Source | Purpose |
-| --- | --- | --- |
-| `interaction_command(*, endpoint='right_hand')` | [line 44](irobot/src/robots/sawyer/core/interaction.py#L44) | SDK-compatible maximum-impedance, zero-force starting configuration. |
-| `validate_command(message, limits)` | [line 63](irobot/src/robots/sawyer/core/interaction.py#L63) | Implementation helper; see linked source for behavior. |
-| `InteractionSession(node, limits, stream_options)` | [line 116](irobot/src/robots/sawyer/core/interaction.py#L116) | Implementation helper; see linked source for behavior. |
-| `InteractionSession.on_state(message)` | [line 130](irobot/src/robots/sawyer/core/interaction.py#L130) | Implementation helper; see linked source for behavior. |
-| `InteractionSession.state_ready()` | [line 133](irobot/src/robots/sawyer/core/interaction.py#L133) | Implementation helper; see linked source for behavior. |
-| `InteractionSession.wait_ready()` | [line 139](irobot/src/robots/sawyer/core/interaction.py#L139) | Implementation helper; see linked source for behavior. |
-| `InteractionSession.deactivate()` | [line 154](irobot/src/robots/sawyer/core/interaction.py#L154) | Implementation helper; see linked source for behavior. |
-| `InteractionSession.run(message, duration, *, cancel_event=None, on_step=None)` | [line 172](irobot/src/robots/sawyer/core/interaction.py#L172) | Implementation helper; see linked source for behavior. |
-| `run_interaction(driver, message, duration, *, execute=False, limits=None, stream_options=None, cancel_event=None, on_step=None)` | [line 235](irobot/src/robots/sawyer/core/interaction.py#L235) | Implementation helper; see linked source for behavior. |
-
-### `irobot/src/robots/sawyer/core/io.py`
-
-| Signature | Source | Purpose |
-| --- | --- | --- |
-| `validate_value(value, formatting, configuration)` | [line 17](irobot/src/robots/sawyer/core/io.py#L17) | Validate scalar/vector JSON values and the device's published ranges. |
-| `IODevice(node, namespace, timeout, *, writable_inputs=())` | [line 68](irobot/src/robots/sawyer/core/io.py#L68) | Implementation helper; see linked source for behavior. |
-| `IODevice.on_config(message)` | [line 88](irobot/src/robots/sawyer/core/io.py#L88) | Implementation helper; see linked source for behavior. |
-| `IODevice.on_state(message)` | [line 91](irobot/src/robots/sawyer/core/io.py#L91) | Implementation helper; see linked source for behavior. |
-| `IODevice.wait(predicate, description, cancel_event=None)` | [line 134](irobot/src/robots/sawyer/core/io.py#L134) | Implementation helper; see linked source for behavior. |
-| `IODevice.wait_ready()` | [line 144](irobot/src/robots/sawyer/core/io.py#L144) | Implementation helper; see linked source for behavior. |
-| `IODevice.snapshot()` | [line 150](irobot/src/robots/sawyer/core/io.py#L150) | Implementation helper; see linked source for behavior. |
-| `IODevice.register_callback(name, callback)` | [line 164](irobot/src/robots/sawyer/core/io.py#L164) | Implementation helper; see linked source for behavior. |
-| `IODevice.deregister_callback(identifier)` | [line 173](irobot/src/robots/sawyer/core/io.py#L173) | Implementation helper; see linked source for behavior. |
-| `IODevice.make_command(values, category='signals')` | [line 176](irobot/src/robots/sawyer/core/io.py#L176) | Implementation helper; see linked source for behavior. |
-| `IODevice.write(values, *, category='signals', execute=False, cancel_event=None)` | [line 212](irobot/src/robots/sawyer/core/io.py#L212) | Implementation helper; see linked source for behavior. |
-
-### `irobot/src/robots/sawyer/core/lease.py`
+### `core/communication/wire.py`
 
 | Signature | Source | Purpose |
 | --- | --- | --- |
-| `CommandLease(session_id, mode, timeout, clock_ns)` | [line 17](irobot/src/robots/sawyer/core/lease.py#L17) | Implementation helper; see linked source for behavior. |
-| `CommandLease.accept(message)` | [line 27](irobot/src/robots/sawyer/core/lease.py#L27) | Implementation helper; see linked source for behavior. |
-| `CommandLease.get(_elapsed=0.0)` | [line 77](irobot/src/robots/sawyer/core/lease.py#L77) | Implementation helper; see linked source for behavior. |
+| `field_name(name)` | [line 38](irobot/src/robots/sawyer/core/communication/wire.py#L38) | Use Python field names while preserving the original wire layout. |
+| `split_type(name)` | [line 45](irobot/src/robots/sawyer/core/communication/wire.py#L45) | See source. |
+| `default_value(name)` | [line 52](irobot/src/robots/sawyer/core/communication/wire.py#L52) | See source. |
+| `message_type(name)` | [line 68](irobot/src/robots/sawyer/core/communication/wire.py#L68) | See source. |
+| `service_type(name)` | [line 102](irobot/src/robots/sawyer/core/communication/wire.py#L102) | See source. |
+| `encode_value(kind, value)` | [line 112](irobot/src/robots/sawyer/core/communication/wire.py#L112) | See source. |
+| `serialize(message)` | [line 139](irobot/src/robots/sawyer/core/communication/wire.py#L139) | See source. |
+| `Reader.__init__(payload)` | [line 148](irobot/src/robots/sawyer/core/communication/wire.py#L148) | See source. |
+| `Reader.take(count)` | [line 155](irobot/src/robots/sawyer/core/communication/wire.py#L155) | See source. |
+| `Reader.integer()` | [line 164](irobot/src/robots/sawyer/core/communication/wire.py#L164) | See source. |
+| `Reader.read(kind)` | [line 167](irobot/src/robots/sawyer/core/communication/wire.py#L167) | See source. |
+| `deserialize(kind, payload)` | [line 196](irobot/src/robots/sawyer/core/communication/wire.py#L196) | See source. |
+| `from_dict(kind, values)` | [line 205](irobot/src/robots/sawyer/core/communication/wire.py#L205) | Rebuild a typed message from an asdict/JSON-compatible mapping. |
 
-### `irobot/src/robots/sawyer/core/model.py`
-
-| Signature | Source | Purpose |
-| --- | --- | --- |
-| `urdf_joint_limits(description)` | [line 13](irobot/src/robots/sawyer/core/model.py#L13) | Implementation helper; see linked source for behavior. |
-| `effort_limits(description)` | [line 28](irobot/src/robots/sawyer/core/model.py#L28) | Implementation helper; see linked source for behavior. |
-
-### `irobot/src/robots/sawyer/core/motion.py`
-
-| Signature | Source | Purpose |
-| --- | --- | --- |
-| `check_finite(value)` | [line 16](irobot/src/robots/sawyer/core/motion.py#L16) | Implementation helper; see linked source for behavior. |
-| `validate_tracking(tracking)` | [line 28](irobot/src/robots/sawyer/core/motion.py#L28) | Implementation helper; see linked source for behavior. |
-| `validate_waypoint_options(node, options)` | [line 49](irobot/src/robots/sawyer/core/motion.py#L49) | Implementation helper; see linked source for behavior. |
-| `validate_cartesian_waypoint(node, waypoint, *, initial)` | [line 73](irobot/src/robots/sawyer/core/motion.py#L73) | Implementation helper; see linked source for behavior. |
-| `validate_trajectory(node, trajectory)` | [line 106](irobot/src/robots/sawyer/core/motion.py#L106) | Check supported joint/Cartesian native paths before any action goal. |
-| `run_trajectory(driver, trajectory, *, execute=False, plan_only=False, timeout=60.0, cancel_event=None, on_feedback=None)` | [line 155](irobot/src/robots/sawyer/core/motion.py#L155) | Implementation helper; see linked source for behavior. |
-| `joint_trajectory(node, positions, *, speed=0.05, max_acceleration=0.1)` | [line 198](irobot/src/robots/sawyer/core/motion.py#L198) | Build a joint path including the measured start, in SDK joint order. |
-| `MotionActions(node, config)` | [line 235](irobot/src/robots/sawyer/core/motion.py#L235) | Implementation helper; see linked source for behavior. |
-| `MotionActions.client(name)` | [line 239](irobot/src/robots/sawyer/core/motion.py#L239) | Implementation helper; see linked source for behavior. |
-| `MotionActions.check_health()` | [line 259](irobot/src/robots/sawyer/core/motion.py#L259) | Implementation helper; see linked source for behavior. |
-| `MotionActions.run(goal, *, name='motion', timeout=60.0, cancel_event=None, on_feedback=None)` | [line 265](irobot/src/robots/sawyer/core/motion.py#L265) | Implementation helper; see linked source for behavior. |
-| `run_joint_path(driver, positions, *, execute=False, plan_only=False, speed=0.05, max_acceleration=0.1, timeout=60.0, cancel_event=None, on_feedback=None)` | [line 286](irobot/src/robots/sawyer/core/motion.py#L286) | Preview, generate on the controller, or explicitly execute a joint path. |
-
-### `irobot/src/robots/sawyer/core/transforms.py`
+### `core/execution/interaction.py`
 
 | Signature | Source | Purpose |
 | --- | --- | --- |
-| `TransformCache(node, config)` | [line 13](irobot/src/robots/sawyer/core/transforms.py#L13) | Implementation helper; see linked source for behavior. |
-| `TransformCache.update(message, *, static)` | [line 27](irobot/src/robots/sawyer/core/transforms.py#L27) | Implementation helper; see linked source for behavior. |
-| `TransformCache.snapshot(*, static=False)` | [line 43](irobot/src/robots/sawyer/core/transforms.py#L43) | Implementation helper; see linked source for behavior. |
+| `InteractionSession.__init__(node, limits, stream_options)` | [line 20](irobot/src/robots/sawyer/core/execution/interaction.py#L20) | See source. |
+| `InteractionSession.on_state(message)` | [line 34](irobot/src/robots/sawyer/core/execution/interaction.py#L34) | See source. |
+| `InteractionSession.state_ready()` | [line 37](irobot/src/robots/sawyer/core/execution/interaction.py#L37) | See source. |
+| `InteractionSession.wait_ready()` | [line 43](irobot/src/robots/sawyer/core/execution/interaction.py#L43) | See source. |
+| `InteractionSession.deactivate()` | [line 58](irobot/src/robots/sawyer/core/execution/interaction.py#L58) | See source. |
+| `InteractionSession.run(message, duration, *, cancel_event=None, on_step=None)` | [line 76](irobot/src/robots/sawyer/core/execution/interaction.py#L76) | See source. |
 
-### `irobot/src/robots/sawyer/core/transport.py`
-
-| Signature | Source | Purpose |
-| --- | --- | --- |
-| `receive_exact(connection, count, deadline)` | [line 31](irobot/src/robots/sawyer/core/transport.py#L31) | Implementation helper; see linked source for behavior. |
-| `receive_frame(connection, deadline, limit=MAX_MESSAGE_BYTES)` | [line 47](irobot/src/robots/sawyer/core/transport.py#L47) | Implementation helper; see linked source for behavior. |
-| `frame(payload)` | [line 55](irobot/src/robots/sawyer/core/transport.py#L55) | Implementation helper; see linked source for behavior. |
-| `send_header(connection, values)` | [line 59](irobot/src/robots/sawyer/core/transport.py#L59) | Implementation helper; see linked source for behavior. |
-| `receive_header(connection, deadline)` | [line 69](irobot/src/robots/sawyer/core/transport.py#L69) | Implementation helper; see linked source for behavior. |
-| `TimeoutTransport(timeout)` | [line 95](irobot/src/robots/sawyer/core/transport.py#L95) | Implementation helper; see linked source for behavior. |
-| `TimeoutTransport.make_connection(host)` | [line 99](irobot/src/robots/sawyer/core/transport.py#L99) | Implementation helper; see linked source for behavior. |
-| `rpc(uri, method, *args, timeout)` | [line 105](irobot/src/robots/sawyer/core/transport.py#L105) | Implementation helper; see linked source for behavior. |
-| `Publisher(transport, kind, topic)` | [line 122](irobot/src/robots/sawyer/core/transport.py#L122) | Implementation helper; see linked source for behavior. |
-| `Publisher.get_subscription_count()` | [line 127](irobot/src/robots/sawyer/core/transport.py#L127) | Implementation helper; see linked source for behavior. |
-| `Publisher.publish(message)` | [line 131](irobot/src/robots/sawyer/core/transport.py#L131) | Implementation helper; see linked source for behavior. |
-| `Publisher.remove(connection)` | [line 153](irobot/src/robots/sawyer/core/transport.py#L153) | Implementation helper; see linked source for behavior. |
-| `Publisher.close()` | [line 158](irobot/src/robots/sawyer/core/transport.py#L158) | Implementation helper; see linked source for behavior. |
-| `close_socket(connection)` | [line 165](irobot/src/robots/sawyer/core/transport.py#L165) | Implementation helper; see linked source for behavior. |
-| `Subscription(transport, kind, topic, callback)` | [line 173](irobot/src/robots/sawyer/core/transport.py#L173) | Implementation helper; see linked source for behavior. |
-| `Subscription.callback(message)` | [line 180](irobot/src/robots/sawyer/core/transport.py#L180) | Implementation helper; see linked source for behavior. |
-| `Subscription.dispatch(callbacks, message)` | [line 184](irobot/src/robots/sawyer/core/transport.py#L184) | Implementation helper; see linked source for behavior. |
-| `Subscription.add_observer(callback)` | [line 189](irobot/src/robots/sawyer/core/transport.py#L189) | Implementation helper; see linked source for behavior. |
-| `Subscription.retain(key, message)` | [line 201](irobot/src/robots/sawyer/core/transport.py#L201) | Keep feedback for late observers, preserving local receipt times. |
-| `Subscription.connected()` | [line 238](irobot/src/robots/sawyer/core/transport.py#L238) | Implementation helper; see linked source for behavior. |
-| `Subscription.update(publishers)` | [line 245](irobot/src/robots/sawyer/core/transport.py#L245) | Implementation helper; see linked source for behavior. |
-| `Subscription.receive(uri, stopped)` | [line 262](irobot/src/robots/sawyer/core/transport.py#L262) | Implementation helper; see linked source for behavior. |
-| `Subscription.receive_stream(uri, stopped)` | [line 284](irobot/src/robots/sawyer/core/transport.py#L284) | Implementation helper; see linked source for behavior. |
-| `Subscription.close()` | [line 358](irobot/src/robots/sawyer/core/transport.py#L358) | Implementation helper; see linked source for behavior. |
-| `ServiceClient(transport, kind, name)` | [line 363](irobot/src/robots/sawyer/core/transport.py#L363) | Implementation helper; see linked source for behavior. |
-| `ServiceClient.wait_for_service(timeout_sec)` | [line 366](irobot/src/robots/sawyer/core/transport.py#L366) | Implementation helper; see linked source for behavior. |
-| `ServiceClient.call_async(request)` | [line 374](irobot/src/robots/sawyer/core/transport.py#L374) | Implementation helper; see linked source for behavior. |
-| `ServiceClient.call(request)` | [line 377](irobot/src/robots/sawyer/core/transport.py#L377) | Implementation helper; see linked source for behavior. |
-| `DirectTransport(config)` | [line 421](irobot/src/robots/sawyer/core/transport.py#L421) | Implementation helper; see linked source for behavior. |
-| `DirectTransport.master(method, *args)` | [line 489](irobot/src/robots/sawyer/core/transport.py#L489) | Implementation helper; see linked source for behavior. |
-| `DirectTransport.start_thread(target, *args, start=True, **kwargs)` | [line 494](irobot/src/robots/sawyer/core/transport.py#L494) | Implementation helper; see linked source for behavior. |
-| `DirectTransport.track_socket(connection)` | [line 503](irobot/src/robots/sawyer/core/transport.py#L503) | Implementation helper; see linked source for behavior. |
-| `DirectTransport.untrack_socket(connection)` | [line 510](irobot/src/robots/sawyer/core/transport.py#L510) | Implementation helper; see linked source for behavior. |
-| `DirectTransport.create_subscription(kind, topic, callback)` | [line 514](irobot/src/robots/sawyer/core/transport.py#L514) | Implementation helper; see linked source for behavior. |
-| `DirectTransport.create_publisher(kind, topic)` | [line 527](irobot/src/robots/sawyer/core/transport.py#L527) | Implementation helper; see linked source for behavior. |
-| `DirectTransport.observe(kind, topic, callback)` | [line 537](irobot/src/robots/sawyer/core/transport.py#L537) | Share one wire subscription with additional in-process consumers. |
-| `DirectTransport.enqueue(key, callback, message)` | [line 549](irobot/src/robots/sawyer/core/transport.py#L549) | Implementation helper; see linked source for behavior. |
-| `DirectTransport.publisher_for(kind, topic)` | [line 557](irobot/src/robots/sawyer/core/transport.py#L557) | Implementation helper; see linked source for behavior. |
-| `DirectTransport.remove_observer(topic, callback)` | [line 567](irobot/src/robots/sawyer/core/transport.py#L567) | Implementation helper; see linked source for behavior. |
-| `DirectTransport.refresh_registration()` | [line 576](irobot/src/robots/sawyer/core/transport.py#L576) | Restore graph registration; never publish or replay a command. |
-| `DirectTransport.check_command_owner()` | [line 611](irobot/src/robots/sawyer/core/transport.py#L611) | Best-effort graph check; ROS 1 provides no exclusive writer lease. |
-| `DirectTransport.maintain_registration()` | [line 625](irobot/src/robots/sawyer/core/transport.py#L625) | Implementation helper; see linked source for behavior. |
-| `DirectTransport.get_publications(_caller)` | [line 635](irobot/src/robots/sawyer/core/transport.py#L635) | Implementation helper; see linked source for behavior. |
-| `DirectTransport.get_subscriptions(_caller)` | [line 643](irobot/src/robots/sawyer/core/transport.py#L643) | Implementation helper; see linked source for behavior. |
-| `DirectTransport.get_bus_info(_caller)` | [line 654](irobot/src/robots/sawyer/core/transport.py#L654) | Implementation helper; see linked source for behavior. |
-| `DirectTransport.create_client(kind, name)` | [line 690](irobot/src/robots/sawyer/core/transport.py#L690) | Implementation helper; see linked source for behavior. |
-| `DirectTransport.destroy_client(_client)` | [line 693](irobot/src/robots/sawyer/core/transport.py#L693) | Implementation helper; see linked source for behavior. |
-| `DirectTransport.publisher_update(_caller, topic, publishers)` | [line 697](irobot/src/robots/sawyer/core/transport.py#L697) | Implementation helper; see linked source for behavior. |
-| `DirectTransport.request_topic(_caller, topic, protocols)` | [line 703](irobot/src/robots/sawyer/core/transport.py#L703) | Implementation helper; see linked source for behavior. |
-| `DirectTransport.remote_shutdown(_caller, _reason)` | [line 710](irobot/src/robots/sawyer/core/transport.py#L710) | Implementation helper; see linked source for behavior. |
-| `DirectTransport.accept()` | [line 714](irobot/src/robots/sawyer/core/transport.py#L714) | Implementation helper; see linked source for behavior. |
-| `DirectTransport.serve_subscriber(connection)` | [line 729](irobot/src/robots/sawyer/core/transport.py#L729) | Implementation helper; see linked source for behavior. |
-| `DirectTransport.spin_once(timeout_sec=0.02)` | [line 773](irobot/src/robots/sawyer/core/transport.py#L773) | Implementation helper; see linked source for behavior. |
-| `DirectTransport.get_logger()` | [line 785](irobot/src/robots/sawyer/core/transport.py#L785) | Implementation helper; see linked source for behavior. |
-| `DirectTransport.get_clock()` | [line 789](irobot/src/robots/sawyer/core/transport.py#L789) | Implementation helper; see linked source for behavior. |
-| `DirectTransport.destroy_node()` | [line 796](irobot/src/robots/sawyer/core/transport.py#L796) | Implementation helper; see linked source for behavior. |
-
-### `irobot/src/robots/sawyer/core/wire.py`
+### `core/execution/native.py`
 
 | Signature | Source | Purpose |
 | --- | --- | --- |
-| `field_name(name)` | [line 36](irobot/src/robots/sawyer/core/wire.py#L36) | Use Python field names while preserving the original wire layout. |
-| `split_type(name)` | [line 43](irobot/src/robots/sawyer/core/wire.py#L43) | Implementation helper; see linked source for behavior. |
-| `default_value(name)` | [line 50](irobot/src/robots/sawyer/core/wire.py#L50) | Implementation helper; see linked source for behavior. |
-| `message_type(name)` | [line 66](irobot/src/robots/sawyer/core/wire.py#L66) | Implementation helper; see linked source for behavior. |
-| `service_type(name)` | [line 100](irobot/src/robots/sawyer/core/wire.py#L100) | Implementation helper; see linked source for behavior. |
-| `encode_value(kind, value)` | [line 110](irobot/src/robots/sawyer/core/wire.py#L110) | Implementation helper; see linked source for behavior. |
-| `serialize(message)` | [line 137](irobot/src/robots/sawyer/core/wire.py#L137) | Implementation helper; see linked source for behavior. |
-| `Reader(payload)` | [line 146](irobot/src/robots/sawyer/core/wire.py#L146) | Implementation helper; see linked source for behavior. |
-| `Reader.take(count)` | [line 153](irobot/src/robots/sawyer/core/wire.py#L153) | Implementation helper; see linked source for behavior. |
-| `Reader.integer()` | [line 162](irobot/src/robots/sawyer/core/wire.py#L162) | Implementation helper; see linked source for behavior. |
-| `Reader.read(kind)` | [line 165](irobot/src/robots/sawyer/core/wire.py#L165) | Implementation helper; see linked source for behavior. |
-| `deserialize(kind, payload)` | [line 194](irobot/src/robots/sawyer/core/wire.py#L194) | Implementation helper; see linked source for behavior. |
-| `from_dict(kind, values)` | [line 203](irobot/src/robots/sawyer/core/wire.py#L203) | Rebuild a typed message from an asdict/JSON-compatible mapping. |
+| `run_trajectory(node, actions, trajectory, *, execute=False, plan_only=False, timeout=60.0, cancel_event=None, on_feedback=None)` | [line 14](irobot/src/robots/sawyer/core/execution/native.py#L14) | See source. |
+| `MotionActions.__init__(node, config)` | [line 67](irobot/src/robots/sawyer/core/execution/native.py#L67) | See source. |
+| `MotionActions.client(name)` | [line 71](irobot/src/robots/sawyer/core/execution/native.py#L71) | See source. |
+| `MotionActions.check_health()` | [line 91](irobot/src/robots/sawyer/core/execution/native.py#L91) | See source. |
+| `MotionActions.run(goal, *, name='motion', timeout=60.0, cancel_event=None, on_feedback=None)` | [line 97](irobot/src/robots/sawyer/core/execution/native.py#L97) | See source. |
+| `run_joint_path(node, actions, positions, *, execute=False, plan_only=False, speed=0.05, max_acceleration=0.1, timeout=60.0, cancel_event=None, on_feedback=None)` | [line 118](irobot/src/robots/sawyer/core/execution/native.py#L118) | Preview, generate on the controller, or explicitly execute a joint path. |
 
-### `irobot/src/robots/sawyer/ros2.py`
+### `core/execution/pid.py`
 
 | Signature | Source | Purpose |
 | --- | --- | --- |
-| `trajectory_points(trajectory)` | [line 36](irobot/src/robots/sawyer/ros2.py#L36) | Validate the accepted subset and reorder all joints canonically. |
-| `SawyerNode(driver, *, namespace='sawyer', context=None, cameras=False, interfaces=False)` | [line 91](irobot/src/robots/sawyer/ros2.py#L91) | Implementation helper; see linked source for behavior. |
-| `SawyerNode.destroy_node()` | [line 476](irobot/src/robots/sawyer/ros2.py#L476) | Implementation helper; see linked source for behavior. |
-| `main()` | [line 491](irobot/src/robots/sawyer/ros2.py#L491) | Implementation helper; see linked source for behavior. |
+| `JointPIDController.__init__(size, kp, ki, kd, max_velocity, max_acceleration, integral_limit=0.25, position_lower=None, position_upper=None)` | [line 24](irobot/src/robots/sawyer/core/execution/pid.py#L24) | See source. |
+| `JointPIDController.reset(velocity=None)` | [line 75](irobot/src/robots/sawyer/core/execution/pid.py#L75) | See source. |
+| `JointPIDController.update(reference_position, measured_position, reference_velocity, measured_velocity, dt)` | [line 93](irobot/src/robots/sawyer/core/execution/pid.py#L93) | See source. |
 
-### `irobot/src/robots/sawyer/ros2_interfaces.py`
-
-| Signature | Source | Purpose |
-| --- | --- | --- |
-| `cartesian_pose(message)` | [line 48](irobot/src/robots/sawyer/ros2_interfaces.py#L48) | Implementation helper; see linked source for behavior. |
-| `pose_message(pose)` | [line 62](irobot/src/robots/sawyer/ros2_interfaces.py#L62) | Implementation helper; see linked source for behavior. |
-| `ExtendedInterfaces(node)` | [line 78](irobot/src/robots/sawyer/ros2_interfaces.py#L78) | Implementation helper; see linked source for behavior. |
-| `ExtendedInterfaces.goal_callback(name, validate)` | [line 221](irobot/src/robots/sawyer/ros2_interfaces.py#L221) | Implementation helper; see linked source for behavior. |
-| `ExtendedInterfaces.execute_callback(kind, operation)` | [line 236](irobot/src/robots/sawyer/ros2_interfaces.py#L236) | Implementation helper; see linked source for behavior. |
-| `ExtendedInterfaces.cache_feedback(handle, message)` | [line 286](irobot/src/robots/sawyer/ros2_interfaces.py#L286) | Implementation helper; see linked source for behavior. |
-| `ExtendedInterfaces.publish()` | [line 290](irobot/src/robots/sawyer/ros2_interfaces.py#L290) | Implementation helper; see linked source for behavior. |
-| `ExtendedInterfaces.validate_stream(request)` | [line 298](irobot/src/robots/sawyer/ros2_interfaces.py#L298) | Implementation helper; see linked source for behavior. |
-| `ExtendedInterfaces.stream_options(request)` | [line 311](irobot/src/robots/sawyer/ros2_interfaces.py#L311) | Implementation helper; see linked source for behavior. |
-| `ExtendedInterfaces.receive_command(message)` | [line 319](irobot/src/robots/sawyer/ros2_interfaces.py#L319) | Implementation helper; see linked source for behavior. |
-| `ExtendedInterfaces.stream(handle, result)` | [line 324](irobot/src/robots/sawyer/ros2_interfaces.py#L324) | Implementation helper; see linked source for behavior. |
-| `ExtendedInterfaces.validate_native(request)` | [line 371](irobot/src/robots/sawyer/ros2_interfaces.py#L371) | Implementation helper; see linked source for behavior. |
-| `ExtendedInterfaces.native(handle, result)` | [line 376](irobot/src/robots/sawyer/ros2_interfaces.py#L376) | Implementation helper; see linked source for behavior. |
-| `ExtendedInterfaces.validate_calibration(request)` | [line 397](irobot/src/robots/sawyer/ros2_interfaces.py#L397) | Implementation helper; see linked source for behavior. |
-| `ExtendedInterfaces.calibration(handle, result)` | [line 404](irobot/src/robots/sawyer/ros2_interfaces.py#L404) | Implementation helper; see linked source for behavior. |
-| `ExtendedInterfaces.validate_interaction(request)` | [line 425](irobot/src/robots/sawyer/ros2_interfaces.py#L425) | Implementation helper; see linked source for behavior. |
-| `ExtendedInterfaces.interaction(handle, result)` | [line 434](irobot/src/robots/sawyer/ros2_interfaces.py#L434) | Implementation helper; see linked source for behavior. |
-| `ExtendedInterfaces.validate_cartesian(request)` | [line 460](irobot/src/robots/sawyer/ros2_interfaces.py#L460) | Implementation helper; see linked source for behavior. |
-| `ExtendedInterfaces.cartesian(handle, result)` | [line 468](irobot/src/robots/sawyer/ros2_interfaces.py#L468) | Implementation helper; see linked source for behavior. |
-| `ExtendedInterfaces.validate_gripper(request)` | [line 481](irobot/src/robots/sawyer/ros2_interfaces.py#L481) | Implementation helper; see linked source for behavior. |
-| `ExtendedInterfaces.gripper(handle, result)` | [line 494](irobot/src/robots/sawyer/ros2_interfaces.py#L494) | Implementation helper; see linked source for behavior. |
-| `ExtendedInterfaces.query(response, operation, *, error_field='detail')` | [line 511](irobot/src/robots/sawyer/ros2_interfaces.py#L511) | Implementation helper; see linked source for behavior. |
-| `ExtendedInterfaces.forward(request, response)` | [line 529](irobot/src/robots/sawyer/ros2_interfaces.py#L529) | Implementation helper; see linked source for behavior. |
-| `ExtendedInterfaces.inverse(request, response)` | [line 549](irobot/src/robots/sawyer/ros2_interfaces.py#L549) | Implementation helper; see linked source for behavior. |
-| `ExtendedInterfaces.collisions(request, response)` | [line 561](irobot/src/robots/sawyer/ros2_interfaces.py#L561) | Implementation helper; see linked source for behavior. |
-| `ExtendedInterfaces.read_parameter(request, response)` | [line 580](irobot/src/robots/sawyer/ros2_interfaces.py#L580) | Implementation helper; see linked source for behavior. |
-| `ExtendedInterfaces.inventory(_request, response)` | [line 588](irobot/src/robots/sawyer/ros2_interfaces.py#L588) | Implementation helper; see linked source for behavior. |
-| `ExtendedInterfaces.capabilities(_request, response)` | [line 594](irobot/src/robots/sawyer/ros2_interfaces.py#L594) | Implementation helper; see linked source for behavior. |
-| `ExtendedInterfaces.digital_outputs(request, response)` | [line 599](irobot/src/robots/sawyer/ros2_interfaces.py#L599) | Implementation helper; see linked source for behavior. |
-| `ExtendedInterfaces.camera_callback(camera)` | [line 631](irobot/src/robots/sawyer/ros2_interfaces.py#L631) | Implementation helper; see linked source for behavior. |
-| `ExtendedInterfaces.display(message)` | [line 642](irobot/src/robots/sawyer/ros2_interfaces.py#L642) | Implementation helper; see linked source for behavior. |
-| `ExtendedInterfaces.io_callback(namespace, *, category='signals')` | [line 656](irobot/src/robots/sawyer/ros2_interfaces.py#L656) | Implementation helper; see linked source for behavior. |
-| `ExtendedInterfaces.parameter_value(value)` | [line 709](irobot/src/robots/sawyer/ros2_interfaces.py#L709) | Implementation helper; see linked source for behavior. |
-| `ExtendedInterfaces.close()` | [line 730](irobot/src/robots/sawyer/ros2_interfaces.py#L730) | Implementation helper; see linked source for behavior. |
-
-### `irobot/src/robots/sawyer/ros2_telemetry.py`
+### `core/execution/streaming.py`
 
 | Signature | Source | Purpose |
 | --- | --- | --- |
-| `to_ros(message)` | [line 26](irobot/src/robots/sawyer/ros2_telemetry.py#L26) | Copy standard data, omitting ROS 1 Header.seq and local receipt metadata. |
-| `to_wire(message, kind)` | [line 70](irobot/src/robots/sawyer/ros2_telemetry.py#L70) | Convert a typed ROS 2 request into the driver's independent types. |
-| `SawyerTelemetry(node, driver, *, cameras=False, interfaces=False)` | [line 105](irobot/src/robots/sawyer/ros2_telemetry.py#L105) | Implementation helper; see linked source for behavior. |
-| `SawyerTelemetry.observe(source, target, kind, ros_kind)` | [line 226](irobot/src/robots/sawyer/ros2_telemetry.py#L226) | Implementation helper; see linked source for behavior. |
-| `SawyerTelemetry.receive(target, message)` | [line 248](irobot/src/robots/sawyer/ros2_telemetry.py#L248) | Implementation helper; see linked source for behavior. |
-| `SawyerTelemetry.merge_io_state(target, message)` | [line 273](irobot/src/robots/sawyer/ros2_telemetry.py#L273) | Implementation helper; see linked source for behavior. |
-| `SawyerTelemetry.receive_joints(message)` | [line 302](irobot/src/robots/sawyer/ros2_telemetry.py#L302) | Implementation helper; see linked source for behavior. |
-| `SawyerTelemetry.joint_efforts(names)` | [line 315](irobot/src/robots/sawyer/ros2_telemetry.py#L315) | Implementation helper; see linked source for behavior. |
-| `SawyerTelemetry.publish()` | [line 326](irobot/src/robots/sawyer/ros2_telemetry.py#L326) | Implementation helper; see linked source for behavior. |
-| `SawyerTelemetry.publish_io_health(events, receipts, now)` | [line 381](irobot/src/robots/sawyer/ros2_telemetry.py#L381) | Implementation helper; see linked source for behavior. |
-| `SawyerTelemetry.close()` | [line 400](irobot/src/robots/sawyer/ros2_telemetry.py#L400) | Implementation helper; see linked source for behavior. |
-| `SawyerTelemetry.publish_endpoint(message, stamp)` | [line 405](irobot/src/robots/sawyer/ros2_telemetry.py#L405) | Implementation helper; see linked source for behavior. |
+| `JointStream.__init__(node, mode, options)` | [line 31](irobot/src/robots/sawyer/core/execution/streaming.py#L31) | See source. |
+| `JointStream.torque_limits()` | [line 49](irobot/src/robots/sawyer/core/execution/streaming.py#L49) | See source. |
+| `JointStream.command(values)` | [line 60](irobot/src/robots/sawyer/core/execution/streaming.py#L60) | See source. |
+| `JointStream.check_displacement(positions)` | [line 101](irobot/src/robots/sawyer/core/execution/streaming.py#L101) | See source. |
+| `JointStream.check_health(cancel_event)` | [line 109](irobot/src/robots/sawyer/core/execution/streaming.py#L109) | See source. |
+| `JointStream.prepare(cancel_event)` | [line 127](irobot/src/robots/sawyer/core/execution/streaming.py#L127) | See source. |
+| `JointStream.run(source, duration, *, cancel_event=None, on_step=None)` | [line 153](irobot/src/robots/sawyer/core/execution/streaming.py#L153) | See source. |
+| `stream_joint_commands(node, mode, source, duration, *, options=None, execute=False, cancel_event=None, on_step=None)` | [line 241](irobot/src/robots/sawyer/core/execution/streaming.py#L241) | Preview or execute a finite stream using the owned hardware session. |
 
-### `irobot/src/robots/sawyer/ros2_images.py`
+### `core/execution/trajectory.py`
 
 | Signature | Source | Purpose |
 | --- | --- | --- |
-| `serialize_image(image, stamp)` | [line 12](irobot/src/robots/sawyer/ros2_images.py#L12) | Encode the standard XCDR1 layout without converting every pixel to Python. rclpy Publisher.publish accepts serialized bytes. Metadata stays identical to sensor_msgs/Image; cameras retain their full resolution and encoding. |
-| `deserialize_image(payload)` | [line 45](irobot/src/robots/sawyer/ros2_images.py#L45) | Read a serialized Image efficiently for rclpy raw=True consumers. |
+| `check_trajectory_limits(node, trajectory)` | [line 18](irobot/src/robots/sawyer/core/execution/trajectory.py#L18) | See source. |
+| `track(node, trajectory, controller, options, *, label='Motion', on_step=None, at_goal=None, announce=True)` | [line 59](irobot/src/robots/sawyer/core/execution/trajectory.py#L59) | See source. |
+| `execute_joint_plan(node, plan, options, velocity, acceleration, *, cancel_event=None, on_step=None)` | [line 191](irobot/src/robots/sawyer/core/execution/trajectory.py#L191) | See source. |
+| `execute_cartesian_plan(node, plan, options, tip)` | [line 260](irobot/src/robots/sawyer/core/execution/trajectory.py#L260) | Execute a planned Cartesian path using measured joint and tip state. |
+
+### `core/hardware/feedback.py`
+
+| Signature | Source | Purpose |
+| --- | --- | --- |
+| `receipt_time(message)` | [line 13](irobot/src/robots/sawyer/core/hardware/feedback.py#L13) | See source. |
+| `JointFeedback.__init__(names)` | [line 26](irobot/src/robots/sawyer/core/hardware/feedback.py#L26) | See source. |
+| `JointFeedback.update(names, positions, velocities, now, efforts=())` | [line 37](irobot/src/robots/sawyer/core/hardware/feedback.py#L37) | See source. |
+| `JointFeedback.snapshot()` | [line 76](irobot/src/robots/sawyer/core/hardware/feedback.py#L76) | See source. |
+| `JointFeedback.fresh_positions(now, timeout)` | [line 88](irobot/src/robots/sawyer/core/hardware/feedback.py#L88) | Position hold needs fresh positions even if velocity feedback expired. |
+| `JointFeedback.issues(now, timeout)` | [line 100](irobot/src/robots/sawyer/core/hardware/feedback.py#L100) | See source. |
+| `from_pose(pose, frame)` | [line 121](irobot/src/robots/sawyer/core/hardware/feedback.py#L121) | See source. |
+| `EndpointFeedback.__init__(fallback_frame, feedback_timeout, config=None)` | [line 140](irobot/src/robots/sawyer/core/hardware/feedback.py#L140) | See source. |
+| `EndpointFeedback.on_endpoint(message)` | [line 149](irobot/src/robots/sawyer/core/hardware/feedback.py#L149) | See source. |
+| `EndpointFeedback.on_tips(message)` | [line 162](irobot/src/robots/sawyer/core/hardware/feedback.py#L162) | See source. |
+| `EndpointFeedback.read(tip)` | [line 204](irobot/src/robots/sawyer/core/hardware/feedback.py#L204) | See source. |
+| `EndpointFeedback.select(requested=None)` | [line 220](irobot/src/robots/sawyer/core/hardware/feedback.py#L220) | See source. |
+
+### `core/hardware/gripper.py`
+
+| Signature | Source | Purpose |
+| --- | --- | --- |
+| `SawyerGripper.__init__(node, config)` | [line 12](irobot/src/robots/sawyer/core/hardware/gripper.py#L12) | See source. |
+| `SawyerGripper.on_state(message)` | [line 27](irobot/src/robots/sawyer/core/hardware/gripper.py#L27) | See source. |
+| `SawyerGripper.wait_for(predicate, timeout, description)` | [line 37](irobot/src/robots/sawyer/core/hardware/gripper.py#L37) | See source. |
+| `SawyerGripper.wait_for_state(timeout)` | [line 48](irobot/src/robots/sawyer/core/hardware/gripper.py#L48) | See source. |
+| `SawyerGripper.require_ready(action)` | [line 55](irobot/src/robots/sawyer/core/hardware/gripper.py#L55) | See source. |
+| `SawyerGripper.make_message(values)` | [line 89](irobot/src/robots/sawyer/core/hardware/gripper.py#L89) | See source. |
+| `SawyerGripper.send(values)` | [line 98](irobot/src/robots/sawyer/core/hardware/gripper.py#L98) | See source. |
+| `SawyerGripper.completed(action, target)` | [line 132](irobot/src/robots/sawyer/core/hardware/gripper.py#L132) | See source. |
+| `SawyerGripper.wait_completion(action, target)` | [line 181](irobot/src/robots/sawyer/core/hardware/gripper.py#L181) | See source. |
+| `SawyerGripper.request_stop()` | [line 202](irobot/src/robots/sawyer/core/hardware/gripper.py#L202) | See source. |
+| `SawyerGripper.perform(action, *, execute=False, cancel_event=None, position=None)` | [line 213](irobot/src/robots/sawyer/core/hardware/gripper.py#L213) | See source. |
+
+### `core/hardware/io.py`
+
+| Signature | Source | Purpose |
+| --- | --- | --- |
+| `read_signals(message)` | [line 24](irobot/src/robots/sawyer/core/hardware/io.py#L24) | See source. |
+| `signal_value(signals, name, kind=None)` | [line 44](irobot/src/robots/sawyer/core/hardware/io.py#L44) | See source. |
+| `command_args(signals, values)` | [line 71](irobot/src/robots/sawyer/core/hardware/io.py#L71) | See source. |
+| `time_key(stamp)` | [line 87](irobot/src/robots/sawyer/core/hardware/io.py#L87) | See source. |
+| `validate_value(value, formatting, configuration)` | [line 91](irobot/src/robots/sawyer/core/hardware/io.py#L91) | Validate scalar/vector JSON values and the device's published ranges. |
+| `IODevice.__init__(node, namespace, timeout, *, writable_inputs=())` | [line 142](irobot/src/robots/sawyer/core/hardware/io.py#L142) | See source. |
+| `IODevice.on_config(message)` | [line 162](irobot/src/robots/sawyer/core/hardware/io.py#L162) | See source. |
+| `IODevice.on_state(message)` | [line 165](irobot/src/robots/sawyer/core/hardware/io.py#L165) | See source. |
+| `IODevice.wait(predicate, description, cancel_event=None)` | [line 208](irobot/src/robots/sawyer/core/hardware/io.py#L208) | See source. |
+| `IODevice.wait_ready()` | [line 218](irobot/src/robots/sawyer/core/hardware/io.py#L218) | See source. |
+| `IODevice.snapshot()` | [line 224](irobot/src/robots/sawyer/core/hardware/io.py#L224) | See source. |
+| `IODevice.register_callback(name, callback)` | [line 238](irobot/src/robots/sawyer/core/hardware/io.py#L238) | See source. |
+| `IODevice.deregister_callback(identifier)` | [line 247](irobot/src/robots/sawyer/core/hardware/io.py#L247) | See source. |
+| `IODevice.make_command(values, category='signals')` | [line 250](irobot/src/robots/sawyer/core/hardware/io.py#L250) | See source. |
+| `IODevice.write(values, *, category='signals', execute=False, cancel_event=None)` | [line 286](irobot/src/robots/sawyer/core/hardware/io.py#L286) | See source. |
+
+### `core/hardware/kinematics.py`
+
+| Signature | Source | Purpose |
+| --- | --- | --- |
+| `InteraKinematics.__init__(node, tip, frame, request_timeout=None, planning_timeout=None, health_check=None)` | [line 17](irobot/src/robots/sawyer/core/hardware/kinematics.py#L17) | See source. |
+| `InteraKinematics.close()` | [line 43](irobot/src/robots/sawyer/core/hardware/kinematics.py#L43) | See source. |
+| `InteraKinematics.wait_ready(timeout=None)` | [line 47](irobot/src/robots/sawyer/core/hardware/kinematics.py#L47) | See source. |
+| `InteraKinematics.call(client, request, label)` | [line 71](irobot/src/robots/sawyer/core/hardware/kinematics.py#L71) | See source. |
+| `InteraKinematics.inverse(pose, seed)` | [line 96](irobot/src/robots/sawyer/core/hardware/kinematics.py#L96) | See source. |
+| `InteraKinematics.forward_results(configurations)` | [line 151](irobot/src/robots/sawyer/core/hardware/kinematics.py#L151) | See source. |
+| `InteraKinematics.forward(configurations)` | [line 198](irobot/src/robots/sawyer/core/hardware/kinematics.py#L198) | See source. |
+
+### `core/hardware/model.py`
+
+| Signature | Source | Purpose |
+| --- | --- | --- |
+| `urdf_joint_limits(description)` | [line 13](irobot/src/robots/sawyer/core/hardware/model.py#L13) | See source. |
+| `effort_limits(description)` | [line 28](irobot/src/robots/sawyer/core/hardware/model.py#L28) | See source. |
+
+### `core/hardware/peripherals.py`
+
+| Signature | Source | Purpose |
+| --- | --- | --- |
+| `SawyerDevices.__init__(driver)` | [line 33](irobot/src/robots/sawyer/core/hardware/peripherals.py#L33) | See source. |
+| `SawyerDevices.transforms(*, static=False)` | [line 42](irobot/src/robots/sawyer/core/hardware/peripherals.py#L42) | Return the known TF edges; expired dynamic transforms are omitted. |
+| `SawyerDevices.read_io(namespace)` | [line 71](irobot/src/robots/sawyer/core/hardware/peripherals.py#L71) | See source. |
+| `SawyerDevices.write_io(namespace, values, *, category='signals', execute=False, cancel_event=None)` | [line 79](irobot/src/robots/sawyer/core/hardware/peripherals.py#L79) | See source. |
+| `SawyerDevices.register_io_callback(namespace, name, callback)` | [line 103](irobot/src/robots/sawyer/core/hardware/peripherals.py#L103) | See source. |
+| `SawyerDevices.deregister_io_callback(namespace, identifier)` | [line 107](irobot/src/robots/sawyer/core/hardware/peripherals.py#L107) | See source. |
+| `SawyerDevices.io_events(namespace)` | [line 111](irobot/src/robots/sawyer/core/hardware/peripherals.py#L111) | See source. |
+| `SawyerDevices.diagnostics()` | [line 120](irobot/src/robots/sawyer/core/hardware/peripherals.py#L120) | See source. |
+| `SawyerDevices.configure_gripper(*, speed=None, dead_zone=None, object_mass=None, execute=False)` | [line 126](irobot/src/robots/sawyer/core/hardware/peripherals.py#L126) | See source. |
+| `SawyerDevices.configure_camera(camera, settings, *, execute=False)` | [line 149](irobot/src/robots/sawyer/core/hardware/peripherals.py#L149) | See source. |
+| `SawyerDevices.set_light(name, enabled, *, execute=False)` | [line 172](irobot/src/robots/sawyer/core/hardware/peripherals.py#L172) | See source. |
+| `SawyerDevices.node()` | [line 183](irobot/src/robots/sawyer/core/hardware/peripherals.py#L183) | See source. |
+| `SawyerDevices.inventory()` | [line 228](irobot/src/robots/sawyer/core/hardware/peripherals.py#L228) | See source. |
+| `SawyerDevices.robot_state()` | [line 253](irobot/src/robots/sawyer/core/hardware/peripherals.py#L253) | See source. |
+| `SawyerDevices.set_enabled(enabled, *, execute=False)` | [line 279](irobot/src/robots/sawyer/core/hardware/peripherals.py#L279) | See source. |
+| `SawyerDevices.reset_faults(*, execute=False)` | [line 361](irobot/src/robots/sawyer/core/hardware/peripherals.py#L361) | See source. |
+| `SawyerDevices.software_stop(*, execute=False)` | [line 380](irobot/src/robots/sawyer/core/hardware/peripherals.py#L380) | Latch the controller stopped state; separate from motion cancellation. |
+| `SawyerDevices.head_state()` | [line 425](irobot/src/robots/sawyer/core/hardware/peripherals.py#L425) | See source. |
+| `SawyerDevices.move_head(angle, *, speed=0.1, execute=False)` | [line 443](irobot/src/robots/sawyer/core/hardware/peripherals.py#L443) | See source. |
+| `SawyerDevices.camera_state(camera)` | [line 525](irobot/src/robots/sawyer/core/hardware/peripherals.py#L525) | See source. |
+| `SawyerDevices.register_camera_callback(camera, callback)` | [line 530](irobot/src/robots/sawyer/core/hardware/peripherals.py#L530) | Callbacks run during poll/control; keep them fast and nonblocking. |
+| `SawyerDevices.deregister_camera_callback(identifier)` | [line 546](irobot/src/robots/sawyer/core/hardware/peripherals.py#L546) | See source. |
+| `SawyerDevices.digital_state(name)` | [line 551](irobot/src/robots/sawyer/core/hardware/peripherals.py#L551) | See source. |
+| `SawyerDevices.set_digital_output(name, value, *, execute=False)` | [line 563](irobot/src/robots/sawyer/core/hardware/peripherals.py#L563) | See source. |
+| `SawyerDevices.io_state(device)` | [line 596](irobot/src/robots/sawyer/core/hardware/peripherals.py#L596) | Read raw device status, including vector and change-only signals. |
+| `SawyerDevices.set_camera_streaming(camera, enabled, *, execute=False)` | [line 607](irobot/src/robots/sawyer/core/hardware/peripherals.py#L607) | See source. |
+| `SawyerDevices.camera_frame(camera)` | [line 645](irobot/src/robots/sawyer/core/hardware/peripherals.py#L645) | Read a current frame and CameraInfo without changing streaming state. |
+| `SawyerDevices.display_image(image, *, execute=False)` | [line 692](irobot/src/robots/sawyer/core/hardware/peripherals.py#L692) | Publish an explicitly supplied rgb8/bgr8 image; no cv_bridge needed. |
+
+### `core/hardware/session.py`
+
+| Signature | Source | Purpose |
+| --- | --- | --- |
+| `ArmSession.__init__(config, transport)` | [line 14](irobot/src/robots/sawyer/core/hardware/session.py#L14) | See source. |
+| `ArmSession.spin_once(timeout_sec=0.02)` | [line 69](irobot/src/robots/sawyer/core/hardware/session.py#L69) | See source. |
+| `ArmSession.on_joints(message)` | [line 72](irobot/src/robots/sawyer/core/hardware/session.py#L72) | See source. |
+| `ArmSession.on_state(message)` | [line 90](irobot/src/robots/sawyer/core/hardware/session.py#L90) | See source. |
+| `ArmSession.on_collision(message)` | [line 93](irobot/src/robots/sawyer/core/hardware/session.py#L93) | See source. |
+| `ArmSession.on_limits(message)` | [line 99](irobot/src/robots/sawyer/core/hardware/session.py#L99) | See source. |
+| `ArmSession.input_issues(*, require_collision=True)` | [line 119](irobot/src/robots/sawyer/core/hardware/session.py#L119) | See source. |
+| `ArmSession.fresh(*, require_collision=True)` | [line 153](irobot/src/robots/sawyer/core/hardware/session.py#L153) | See source. |
+| `ArmSession.check_ready()` | [line 156](irobot/src/robots/sawyer/core/hardware/session.py#L156) | See source. |
+| `ArmSession.wait_inputs(execute, timeout=None)` | [line 188](irobot/src/robots/sawyer/core/hardware/session.py#L188) | See source. |
+| `ArmSession.wait_robot_state(timeout=None)` | [line 202](irobot/src/robots/sawyer/core/hardware/session.py#L202) | See source. |
+| `ArmSession.status_snapshot()` | [line 215](irobot/src/robots/sawyer/core/hardware/session.py#L215) | Read already-dispatched state without network access or mutation. |
+| `ArmSession.routes_connected()` | [line 240](irobot/src/robots/sawyer/core/hardware/session.py#L240) | See source. |
+| `ArmSession.publish_velocity(velocity)` | [line 246](irobot/src/robots/sawyer/core/hardware/session.py#L246) | See source. |
+| `ArmSession.spin_until(deadline)` | [line 256](irobot/src/robots/sawyer/core/hardware/session.py#L256) | Service callbacks for a real interval even when callbacks return immediately. |
+| `ArmSession.stop(*, position_only=False)` | [line 271](irobot/src/robots/sawyer/core/hardware/session.py#L271) | Request zero velocity, then measured-position hold as in SDK exit_control_mode. Delivery and physical stopping cannot be confirmed after a connection loss. The robot's command watchdog remains set to 0.2 s for velocity mode. |
+| `ArmSession.wait_pose(tip=None, timeout=None)` | [line 319](irobot/src/robots/sawyer/core/hardware/session.py#L319) | See source. |
+| `ArmSession.planning_health(start_joints, start_pose, tip)` | [line 335](irobot/src/robots/sawyer/core/hardware/session.py#L335) | See source. |
+
+### `core/hardware/transforms.py`
+
+| Signature | Source | Purpose |
+| --- | --- | --- |
+| `TransformCache.__init__(node, config)` | [line 13](irobot/src/robots/sawyer/core/hardware/transforms.py#L13) | See source. |
+| `TransformCache.update(message, *, static)` | [line 27](irobot/src/robots/sawyer/core/hardware/transforms.py#L27) | See source. |
+| `TransformCache.snapshot(*, static=False)` | [line 43](irobot/src/robots/sawyer/core/hardware/transforms.py#L43) | See source. |
+
+### `core/planning/cartesian.py`
+
+| Signature | Source | Purpose |
+| --- | --- | --- |
+| `CartesianLine.__init__(start, offset_cm, end_orientation=None)` | [line 28](irobot/src/robots/sawyer/core/planning/cartesian.py#L28) | See source. |
+| `CartesianLine.between(start, end)` | [line 44](irobot/src/robots/sawyer/core/planning/cartesian.py#L44) | See source. |
+| `CartesianLine.sample(normalized_time)` | [line 57](irobot/src/robots/sawyer/core/planning/cartesian.py#L57) | See source. |
+| `slerp(start, end, fraction)` | [line 69](irobot/src/robots/sawyer/core/planning/cartesian.py#L69) | Shortest rotation between unit quaternions, including antipodal inputs. |
+| `CartesianPlanner.__init__(inverse, forward, lower, upper, *, sample_step=CartesianMotionOptions.sample_step, path_tolerance=CartesianMotionOptions.path_tolerance, orientation_tolerance=DEFAULT_ORIENTATION_TOLERANCE, max_joint_step=CartesianMotionOptions.max_joint_step, max_samples=CartesianMotionOptions.max_samples, joint_names=None, angular_step=CartesianMotionOptions.angular_step)` | [line 109](irobot/src/robots/sawyer/core/planning/cartesian.py#L109) | See source. |
+| `CartesianPlanner.checked_joints(values, label)` | [line 159](irobot/src/robots/sawyer/core/planning/cartesian.py#L159) | See source. |
+| `CartesianPlanner.plan(start_pose, offset_cm, start_joints, max_velocity, max_acceleration, duration=None)` | [line 172](irobot/src/robots/sawyer/core/planning/cartesian.py#L172) | See source. |
+| `CartesianPlanner.plan_pose(start_pose, end_pose, start_joints, max_velocity, max_acceleration, duration=None, end_joints=None)` | [line 186](irobot/src/robots/sawyer/core/planning/cartesian.py#L186) | Straight XYZ and shortest SLERP, optionally meeting a specific joint branch. A joint-constrained endpoint biases IK seeds toward that posture and is still subject to continuity, FK and position-limit checks. A branch that cannot connect continuously is rejected rather than jumped to. |
+| `CartesianPlanner.plan_line(line, start_joints, max_velocity, max_acceleration, duration=None, end_joints=None)` | [line 214](irobot/src/robots/sawyer/core/planning/cartesian.py#L214) | See source. |
+
+### `core/planning/joint.py`
+
+| Signature | Source | Purpose |
+| --- | --- | --- |
+| `QuinticTrajectory.__init__(start, end, max_velocity, duration=None, max_acceleration=None)` | [line 29](irobot/src/robots/sawyer/core/planning/joint.py#L29) | See source. |
+| `QuinticTrajectory.sample(elapsed)` | [line 90](irobot/src/robots/sawyer/core/planning/joint.py#L90) | See source. |
+| `JointSequence.__init__(start, positions, times, velocity, acceleration)` | [line 118](irobot/src/robots/sawyer/core/planning/joint.py#L118) | See source. |
+| `JointSequence.sample(elapsed)` | [line 148](irobot/src/robots/sawyer/core/planning/joint.py#L148) | See source. |
+| `extrema(coefficients)` | [line 156](irobot/src/robots/sawyer/core/planning/joint.py#L156) | Polynomial extrema over [0,1], including both endpoints. |
+| `JointPath.__init__(fractions, positions)` | [line 186](irobot/src/robots/sawyer/core/planning/joint.py#L186) | See source. |
+| `JointPath.sample(fraction)` | [line 274](irobot/src/robots/sawyer/core/planning/joint.py#L274) | See source. |
+| `JointPath.validation_fractions()` | [line 304](irobot/src/robots/sawyer/core/planning/joint.py#L304) | See source. |
+
+### `core/planning/native.py`
+
+| Signature | Source | Purpose |
+| --- | --- | --- |
+| `check_finite(value)` | [line 15](irobot/src/robots/sawyer/core/planning/native.py#L15) | See source. |
+| `validate_tracking(tracking)` | [line 27](irobot/src/robots/sawyer/core/planning/native.py#L27) | See source. |
+| `validate_waypoint_options(options, limits)` | [line 48](irobot/src/robots/sawyer/core/planning/native.py#L48) | See source. |
+| `validate_cartesian_waypoint(waypoint, *, initial, frame, current_pose, position_tolerance, orientation_tolerance)` | [line 70](irobot/src/robots/sawyer/core/planning/native.py#L70) | See source. |
+| `validate_trajectory(trajectory, *, limits, joints, frame, current_pose, position_tolerance, orientation_tolerance, joint_tolerance)` | [line 108](irobot/src/robots/sawyer/core/planning/native.py#L108) | Check supported joint/Cartesian native paths before any action goal. |
+| `joint_trajectory(positions, *, start, limits, tip, speed=0.05, max_acceleration=0.1)` | [line 171](irobot/src/robots/sawyer/core/planning/native.py#L171) | Build a joint path including the measured start, in SDK joint order. |
+| `interaction_command(*, endpoint='right_hand')` | [line 213](irobot/src/robots/sawyer/core/planning/native.py#L213) | SDK-compatible maximum-impedance, zero-force starting configuration. |
+| `validate_command(message, limits)` | [line 232](irobot/src/robots/sawyer/core/planning/native.py#L232) | See source. |
+
+### `core/planning/timing.py`
+
+| Signature | Source | Purpose |
+| --- | --- | --- |
+| `TimedJointPath.__init__(path, max_velocity, max_acceleration, duration=None)` | [line 20](irobot/src/robots/sawyer/core/planning/timing.py#L20) | See source. |
+| `TimedJointPath.sample(elapsed)` | [line 65](irobot/src/robots/sawyer/core/planning/timing.py#L65) | See source. |

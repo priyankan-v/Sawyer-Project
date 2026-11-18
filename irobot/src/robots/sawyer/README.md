@@ -1,6 +1,6 @@
 # Sawyer direct Python driver
 
-Branch `sawyer_py`: plain Python and ROS 2 Humble applications share the irobot
+Branch `sawyer_api`: plain Python and ROS 2 Humble applications share the irobot
 Sawyer driver. The workstation requires no ROS 1 installation, `rospy`, separate
 bridge process, embedded message bridge, or robot-side application agent.
 Sawyer's existing Intera controller continues to run its native software.
@@ -22,6 +22,23 @@ request. Recorded hardware results and fault reports are not retained;
 implementation availability is not a hardware qualification claim.
 See the [plan](DIRECT_DRIVER_PLAN.md), [capability map](CAPABILITIES.md) and
 [validation guidance](VALIDATION.md).
+
+## Code layout
+
+| Location | Responsibility |
+| --- | --- |
+| `core/base.py` | Public connection and state API |
+| `core/controller.py` | Public commands and operation coordination |
+| `core/types.py`, `config.py` | Shared values, settings, and operation options |
+| `core/planning/` | Cartesian/joint paths, timing, native trajectory construction |
+| `core/execution/` | PID tracking, streaming, interaction, native actions |
+| `core/hardware/` | Session, feedback, kinematics, gripper, devices |
+| `core/communication/` | XML-RPC/TCPROS, wire messages, native action protocol |
+| `ros2*.py`, `ros_sugar_component.py` | Optional adapters using the same driver |
+
+Older `core` module paths remain available as compatibility exports. Imports
+and driver construction are offline; connect explicitly or use the context
+manager shown below.
 
 ## Install plain Python
 

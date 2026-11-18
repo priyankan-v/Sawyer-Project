@@ -24,6 +24,28 @@ def positive(name, value):
         raise ValueError(msg)
 
 
+def vector(values, size, name, *, positive=False, nonnegative=False):
+    items = (
+        (values,) * size if isinstance(values, int | float) else tuple(values)
+    )
+    if any(isinstance(value, bool) for value in items):
+        msg = f'{name} requires numeric values rather than booleans'
+        raise ValueError(msg)
+    result = tuple(float(value) for value in items)
+    if len(result) != size or not all(
+        math.isfinite(value) for value in result
+    ):
+        msg = f'{name} must contain {size} finite values'
+        raise ValueError(msg)
+    if positive and any(value <= 0 for value in result):
+        msg = f'{name} must be positive'
+        raise ValueError(msg)
+    if nonnegative and any(value < 0 for value in result):
+        msg = f'{name} must be nonnegative'
+        raise ValueError(msg)
+    return result
+
+
 @dataclass(frozen=True)
 class MotionOptions:
     execute: bool = False
@@ -180,7 +202,9 @@ class SawyerConfig:
     enable_topic: str = '/robot/set_super_enable'
     reset_topic: str = '/robot/set_super_reset'
     software_stop_topic: str = '/robot/set_super_stop'
-    version_parameter: str = '/manifest/robot_software/version/HLR_VERSION_STRING'
+    version_parameter: str = (
+        '/manifest/robot_software/version/HLR_VERSION_STRING'
+    )
     robot_description_parameter: str = '/robot_description'
     head_state_topic: str = '/robot/head/head_state'
     head_command_topic: str = '/robot/head/command_head_pan'
@@ -195,8 +219,12 @@ class SawyerConfig:
     joint_command_topic: str = '/robot/limb/right/joint_command'
     command_timeout_topic: str = '/robot/limb/right/joint_command_timeout'
     speed_ratio_topic: str = '/robot/limb/right/set_speed_ratio'
-    interaction_command_topic: str = '/robot/limb/right/interaction_control_command'
-    interaction_state_topic: str = '/robot/limb/right/interaction_controller/state'
+    interaction_command_topic: str = (
+        '/robot/limb/right/interaction_control_command'
+    )
+    interaction_state_topic: str = (
+        '/robot/limb/right/interaction_controller/state'
+    )
     diagnostics_topic: str = '/diagnostics'
     tf_topic: str = '/tf'
     tf_static_topic: str = '/tf_static'
@@ -292,3 +320,30 @@ class SawyerConfig:
             if parsed.scheme != 'http' or not parsed.hostname:
                 msg = 'ros_master_uri must be an http:// ROS 1 master URL'
                 raise ValueError(msg)
+
+
+@dataclass(frozen=True)
+class InteractionLimits:
+    """Application bounds, not manufacturer-certified Cartesian limits."""
+
+    stiffness: tuple = (1300.0, 1300.0, 1300.0, 30.0, 30.0, 30.0)
+    damping: tuple = (100.0,) * 6
+    nullspace_stiffness: tuple = (10.0,) * 7
+    wrench: tuple = (5.0, 5.0, 5.0, 1.0, 1.0, 1.0)
+    translation: float = 0.01
+    rotation: float = 0.1
+
+    def __post_init__(self):
+        for name, length in (
+            ('stiffness', 6),
+            ('damping', 6),
+            ('nullspace_stiffness', 7),
+            ('wrench', 6),
+        ):
+            object.__setattr__(
+                self,
+                name,
+                vector(getattr(self, name), length, name, positive=True),
+            )
+        positive('translation', self.translation)
+        positive('rotation', self.rotation)

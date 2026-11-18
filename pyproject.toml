@@ -7,7 +7,7 @@ authors = [
 ]
 readme = "README.md"
 license = "MIT"
-keywords = ["robotics", "ros2", "stl", "crazyflie", "ihuman"]
+keywords = ["robotics", "ros2", "stl", "ihuman"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
@@ -27,7 +27,6 @@ include = [
 # ros_sugar, numpy, scipy, attrs are system-installed alongside ROS2.
 [tool.poetry.dependencies]
 python = "^3.11"
-cflib = ">=0.1"
 numpy = {version = ">=2,<3", optional = true}
 
 [tool.poetry.extras]
